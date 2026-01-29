@@ -561,3 +561,4 @@ function switchActivityMode(mode) {
     document.getElementById("view-act-history").classList.toggle("hidden", mode !== 'history');
     document.getElementById("view-act-requests").classList.toggle("hidden", mode !== 'requests');
 }
+
