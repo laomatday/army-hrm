@@ -619,36 +619,45 @@ window.checkNewNotifications = async function () {
   }
 };
 
-// --- Logic Từ chối ---
 window.openRejectModal = function (reqId) {
+  // Lưu ID vào biến toàn cục để dùng khi bấm nút Xác nhận
   currentRejectId = reqId;
-  document.getElementById("input-reject-reason").value = "";
-  document.getElementById("modal-reject-reason").classList.remove("hidden");
+  
+  // Reset ô nhập lý do
+  var input = document.getElementById("input-reject-reason");
+  if(input) input.value = "";
+  
+  // Hiện Modal
+  var modal = document.getElementById("modal-reject-reason");
+  if(modal) modal.classList.remove("hidden");
 };
 
 window.closeRejectModal = function () {
   currentRejectId = null;
-  document.getElementById("modal-reject-reason").classList.add("hidden");
+  var modal = document.getElementById("modal-reject-reason");
+  if(modal) modal.classList.add("hidden");
 };
 
+// Hàm này được gọi khi bấm nút "Xác nhận" trong Modal màu đỏ
 window.handleConfirmReject = function() {
-  var reason = document.getElementById("input-reject-reason").value.trim();
+  var reasonEl = document.getElementById("input-reject-reason");
+  var reason = reasonEl ? reasonEl.value.trim() : "";
+  
   if (!reason) {
     showToast("error", "Vui lòng nhập lý do từ chối!");
     return;
   }
 
   if (currentRejectId) {
-    // QUAN TRỌNG: Lưu ID vào biến tạm trước khi đóng Modal
-    var idToProcess = currentRejectId;
+    // Gọi hàm xử lý chính
+    processRequestMobile(currentRejectId, "Rejected", reason);
     
-    // Đóng modal (Hàm này sẽ reset currentRejectId về null)
-    closeRejectModal(); 
-    
-    // Gửi đi biến tạm idToProcess (vẫn giữ giá trị ID đúng)
-    processRequestMobile(idToProcess, "Rejected", reason);
+    // Đóng modal sau khi gửi
+    closeRejectModal();
+  } else {
+    showToast("error", "Không tìm thấy ID đơn!");
   }
-}
+};
 
 window.processRequestMobile = async function (reqId, status, rejectReason) {
   showLoading(true);
@@ -1356,3 +1365,4 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
