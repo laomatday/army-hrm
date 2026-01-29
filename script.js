@@ -2,7 +2,7 @@
 // 1. CẤU HÌNH & BIẾN TOÀN CỤC
 // ==========================================
 // URL Web App từ Google Apps Script (Đã cấu hình doPost)
-const API_URL = "https://script.google.com/macros/s/AKfycbxrpjTCpEqpdymF3w9YxiweMWSJSpRf3fRVC7Vms-JhFGR_6p8yikj_eheh7Afxr6lGpA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbw7sAYlX51tTO7uHC0-gq1DWW5B3uyVQKgloUY6dPPZ2vcxtkdnrI-od7C5g9AiaT5wEg/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -10,7 +10,6 @@ var allHistoryData = [];
 var cachedContacts = [];
 var cachedLocations = [];
 var cachedMyRequests = null;
-var cachedNotificationsData = null;
 
 // Cấu hình phân trang & thiết bị
 var myDeviceId = getDeviceId();
@@ -326,6 +325,10 @@ function toggleHomeState(state) {
   else if (state === "working") show(workEl, "z-20");
   else show(idleEl, "z-20");
 }
+
+// ==========================================
+// 4. LOGIC LỊCH SỬ & CHECK-IN
+// ==========================================
 async function loadHistoryFull() {
   if (!currentUser) return;
 
@@ -333,31 +336,29 @@ async function loadHistoryFull() {
   var currentMonth = d.getMonth() + 1;
   var currentYear = d.getFullYear();
   var timeLabel = "Tháng " + currentMonth + "/" + currentYear;
-  
-  // --- TẠO CHUỖI THÁNG (FIX LỖI) ---
-  // Định dạng thành "01/2026" để gửi lên server
-  var monthStr = ("0" + currentMonth).slice(-2) + "/" + currentYear; 
 
   setText("current-month-badge", timeLabel);
   setText("hist-month-badge", timeLabel);
   setText("home-stat-month-label", timeLabel);
   setText("stat-year-label", "Năm " + currentYear);
 
+  // Skeleton Loading
   var daysStat = document.getElementById("home-stat-days");
   var leaveStat = document.getElementById("home-stat-leave");
   if (daysStat) daysStat.innerHTML = '<span class="animate-pulse opacity-50">--</span>';
   if (leaveStat) leaveStat.innerHTML = '<span class="animate-pulse opacity-50">--</span>';
 
-  // --- SỬA DÒNG GỌI BACKEND ---
-  // Truyền thêm monthStr vào tham số thứ 2
-  const res = await callBackend("getHistory", [currentUser.Employee_ID, monthStr]);
+  // Thay google.script.run.getHistory
+  const res = await callBackend("getHistory", [currentUser.Employee_ID]);
   
-  // ... (phần code xử lý bên dưới giữ nguyên) ...
   if (res) {
       allHistoryData = res.history || [];
+      // Lấy summary từ Backend
       var stats = res.summary || { workDays: 0, lateMins: 0, errorCount: 0, remainingLeave: 12, leaveDays: 0 };
       
       currentHistoryPage = 0;
+
+      // 1. NGÀY CÔNG (Giữ nguyên logic tính toán Client-side để update UI)
       var daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
       var standardDays = 0;
       for (var i = 1; i <= daysInMonth; i++) {
@@ -374,23 +375,32 @@ async function loadHistoryFull() {
       var workBar = document.getElementById("work-progress-bar");
       if (workBar) workBar.style.width = percent + "%";
 
+
+      // 2. PHÉP NĂM (LOGIC TRỰC TIẾP TỪ SHEET)
+      // A. SỐ TO: ĐÃ DÙNG (Lấy thẳng từ cột Leave_Days - Cột H)
       var used = stats.leaveDays !== undefined ? stats.leaveDays : 0;
       setText("home-stat-leave", used);
 
+      // B. SỐ NHỎ: CÒN LẠI (Lấy thẳng từ cột Remaining_Leave - Cột I)
       var remaining = stats.remainingLeave !== undefined ? stats.remainingLeave : 12;
       var labelEl = document.getElementById("leave-stat-label");
       if (labelEl) labelEl.innerText = remaining + " phép còn lại";
 
+      // C. THANH BAR (Hiển thị % Còn lại cho đẹp mắt)
+      // Vì ta không tính toán Max từ profile nữa, nên ta ước lượng Max = Used + Remaining
       var estimatedMax = used + remaining; 
-      if (estimatedMax === 0) estimatedMax = 12;
+      if (estimatedMax === 0) estimatedMax = 12; // Tránh chia cho 0
 
       var leavePercent = (remaining / estimatedMax) * 100;
+      
       if(leavePercent < 0) leavePercent = 0;
       if(leavePercent > 100) leavePercent = 100;
       
       var leaveBar = document.getElementById("leave-progress-bar");
       if (leaveBar) leaveBar.style.width = leavePercent + "%";
 
+
+      // 3. CÁC PHẦN KHÁC
       setText("hist-total-days", stats.workDays);
       setText("hist-late-mins", stats.lateMins);
       setText("hist-errors", stats.errorCount);
@@ -409,8 +419,8 @@ async function loadHistoryFull() {
         renderActivityHistory();
       }
   } else {
-        console.error("Lỗi tải lịch sử");
-        showToast("error", "Lỗi dữ liệu hệ thống.");
+       console.error("Lỗi tải lịch sử");
+       showToast("error", "Lỗi dữ liệu hệ thống.");
   }
 }
 
@@ -488,52 +498,35 @@ window.triggerCheckOut = function () {
 // 5. THÔNG BÁO & DUYỆT ĐƠN
 // ==========================================
 
-window.openNotifications = async function (mode, forceReload = false) {
+window.openNotifications = async function (mode) {
   var modal = document.getElementById("modal-notifications");
   var content = document.getElementById("noti-content-area");
   var titleEl = document.getElementById("modal-noti-title");
   if (!modal || !content) return;
 
-  // Cập nhật tiêu đề & hiển thị modal
   titleEl.innerText = (mode === "approve") ? "Duyệt đơn từ" : "Thông báo";
+
   document.querySelectorAll('[id^="noti-dot"], [id^="profile-noti-dot"]').forEach(d => d.classList.add("hidden"));
   modal.classList.remove("hidden");
+  content.innerHTML = SKELETON_REQUEST;
 
-  // 1. TỐI ƯU: Hiển thị cache NGAY LẬP TỨC (nếu có)
-  if (cachedNotificationsData && !forceReload) {
-      renderNotificationsHTML(content, cachedNotificationsData, mode);
-  } else {
-      content.innerHTML = SKELETON_REQUEST;
-  }
-
-  // 2. Gọi Server âm thầm lấy data mới nhất
+  // Thay google.script.run.getMobileNotifications
   const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
 
-  // 3. Cập nhật giao diện khi có hàng về
-  if (res.success) {
-      cachedNotificationsData = res.data;
-      renderNotificationsHTML(content, cachedNotificationsData, mode);
-  } else if (!cachedNotificationsData) {
-      content.innerHTML = '<div class="text-center py-20 opacity-50"><p>Lỗi tải dữ liệu</p></div>';
-  }
-};
-function renderNotificationsHTML(container, data, mode) {
-  var approvals = data.approvals || [];
-  var myRequests = data.myRequests || [];
-  var hasApprovals = approvals.length > 0;
-  var hasMyRequests = myRequests.length > 0;
+  var hasApprovals = res.data && res.data.approvals && res.data.approvals.length > 0;
+  var hasMyRequests = res.data && res.data.myRequests && res.data.myRequests.length > 0;
 
-  if (!hasApprovals && !hasMyRequests) {
-    container.innerHTML = '<div class="text-center py-24 opacity-50"><i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i><p class="text-xs text-slate-400 font-bold uppercase">Không có dữ liệu</p></div>';
+  if (!res.success || (!hasApprovals && !hasMyRequests)) {
+    content.innerHTML = '<div class="text-center py-24 opacity-50"><i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i><p class="text-xs text-slate-400 font-bold uppercase">Không có dữ liệu</p></div>';
     return;
   }
 
   var html = "";
 
-  // PHẦN 1: DUYỆT ĐƠN
   if (hasApprovals) {
-    html += `<div class="mb-6"><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Cần duyệt (${approvals.length})</h3><div class="space-y-4">`;
-    approvals.forEach(function (req) {
+    html += `<div class="mb-6"><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Cần duyệt (${res.data.approvals.length})</h3><div class="space-y-4">`;
+    
+    res.data.approvals.forEach(function (req) {
       var isLeave = (req.Type || "").toLowerCase().includes("nghỉ");
       var badgeClass = isLeave ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-purple-50 text-purple-600 border-purple-100";
       var avatarHtml = getAvatarHtml(req.Name, req.Avatar, "w-10 h-10", "text-xs");
@@ -543,17 +536,25 @@ function renderNotificationsHTML(container, data, mode) {
               <div class="flex justify-between items-start mb-3">
                   <div class="flex items-center gap-3">
                       ${avatarHtml}
-                      <div><h4 class="font-bold text-slate-800 text-sm leading-tight">${req.Name}</h4><p class="text-[10px] font-bold text-slate-400 mt-0.5">${req.Position || "NV"} • ${req.Center_Name || "CN"}</p></div>
+                      <div>
+                          <h4 class="font-bold text-slate-800 text-sm leading-tight">${req.Name}</h4>
+                          <p class="text-[10px] font-bold text-slate-400 mt-0.5">${req.Position || "NV"} • ${req.Center_Name || "CN"}</p>
+                      </div>
                   </div>
                   <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold border ${badgeClass} uppercase tracking-wide">${req.Type}</span>
               </div>
               <div class="bg-slate-50/80 rounded-2xl p-3 mb-4 border border-slate-100">
-                   <div class="flex items-center gap-2 text-xs font-bold text-slate-700 mb-1"><i class="fa-regular fa-calendar text-emerald-500"></i> ${req.Dates}</div>
+                   <div class="flex items-center gap-2 text-xs font-bold text-slate-700 mb-1">
+                      <i class="fa-regular fa-calendar text-emerald-500"></i> ${req.Dates}
+                   </div>
                    <p class="text-xs text-slate-500 italic line-clamp-2 pl-6 border-l-2 border-slate-200">"${req.Reason}"</p>
               </div>
               <div class="grid grid-cols-2 gap-3">
                   <button onclick="openRejectModal('${req.Request_ID}')" class="py-2.5 rounded-xl bg-white border border-red-100 text-red-500 text-xs font-bold active:scale-95 transition-all shadow-sm">Từ chối</button>
-                  <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold active:scale-95 transition-all shadow-md">Duyệt đơn</button>
+                  <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" 
+                      class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold active:scale-95 transition-all shadow-md">
+                      Duyệt đơn
+                  </button>
               </div>
           </div>`;
     });
@@ -562,10 +563,9 @@ function renderNotificationsHTML(container, data, mode) {
     html += '<div class="text-center py-20 opacity-50"><i class="fa-solid fa-check-circle text-4xl mb-3 text-emerald-200"></i><p class="text-xs text-slate-400 font-bold uppercase">Đã duyệt hết các đơn!</p></div>';
   }
 
-  // PHẦN 2: ĐƠN CỦA TÔI
   if (mode !== "approve" && hasMyRequests) {
     html += '<div><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-regular fa-bell"></i> Đơn của tôi</h3><div class="space-y-3">';
-    myRequests.forEach(function (req) {
+    res.data.myRequests.forEach(function (req) {
       var isAppr = req.Status === "Approved";
       var isRej = req.Status === "Rejected";
       var statusIcon = isAppr ? "fa-check" : isRej ? "fa-xmark" : "fa-hourglass-half";
@@ -574,9 +574,14 @@ function renderNotificationsHTML(container, data, mode) {
 
       html += `
           <div class="bg-white p-4 rounded-3xl shadow-sm border ${cardBg} flex items-center gap-4 animate-slide-up">
-              <div class="w-10 h-10 rounded-2xl ${statusColor} flex items-center justify-center text-lg shadow-sm shrink-0"><i class="fa-solid ${statusIcon}"></i></div>
+              <div class="w-10 h-10 rounded-2xl ${statusColor} flex items-center justify-center text-lg shadow-sm shrink-0">
+                  <i class="fa-solid ${statusIcon}"></i>
+              </div>
               <div class="flex-1 min-w-0">
-                  <div class="flex justify-between items-center"><h4 class="text-sm font-bold text-slate-800">${req.Type}</h4><span class="text-[9px] font-extrabold px-2 py-0.5 rounded ${statusColor} border border-current opacity-80">${req.Status}</span></div>
+                  <div class="flex justify-between items-center">
+                       <h4 class="text-sm font-bold text-slate-800">${req.Type}</h4>
+                       <span class="text-[9px] font-extrabold px-2 py-0.5 rounded ${statusColor} border border-current opacity-80">${req.Status}</span>
+                  </div>
                   <p class="text-[10px] text-slate-400 font-bold mt-0.5">${req.Dates}</p>
                   ${req.Note ? `<p class="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded mt-1.5 italic line-clamp-1"><i class="fa-solid fa-reply mr-1"></i>${req.Note}</p>` : ""}
               </div>
@@ -584,8 +589,8 @@ function renderNotificationsHTML(container, data, mode) {
     });
     html += "</div></div>";
   }
-  container.innerHTML = html;
-}
+  content.innerHTML = html;
+};
 
 window.closeNotifications = function () {
   var modal = document.getElementById("modal-notifications");
@@ -859,7 +864,7 @@ window.previewAvatarInModal = function (input) {
     reader.onload = function (e) {
       document.getElementById("edit-avatar-preview").src = e.target.result;
       tempAvatarBase64 = e.target.result;
-        };
+    };
     reader.readAsDataURL(input.files[0]);
   }
 };
@@ -967,6 +972,17 @@ function convertDateToISO(dateStr) {
   var parts = dateStr.split("/");
   if (parts.length === 3) return parts[2] + "-" + parts[1] + "-" + parts[0];
   return "";
+}
+
+// --- CONTACTS ---
+async function loadContacts() {
+  var list = document.getElementById("contacts-list");
+  if (!list) return;
+  list.innerHTML = SKELETON_CONTACT;
+  // Thay google.script.run.getContacts
+  const data = await callBackend("getContacts", [currentUser.Role, currentUser.Center_ID]);
+  cachedContacts = data;
+  renderContactList(data);
 }
 
 function renderContactList(data) {
@@ -1080,19 +1096,18 @@ async function loadMyRequests(forceReload = false) {
   var container = document.getElementById("request-list-container");
   if (!container) return;
 
-  // BƯỚC 1: Hiển thị Cache NGAY LẬP TỨC (nếu có)
+  // 1. KIỂM TRA CACHE: Nếu có cache và không bị ép tải lại -> Hiển thị ngay
   if (cachedMyRequests && !forceReload) {
-      renderMyRequestsHTML(container, cachedMyRequests);
-      // KHÔNG RETURN -> Để code chạy tiếp xuống dưới tải data mới
-  } else {
-      // Chỉ hiện Skeleton nếu chưa có dữ liệu nào để hiển thị
-      container.innerHTML = SKELETON_REQUEST;
+      renderMyRequestsHTML(container, cachedMyRequests); // Gọi hàm render tách riêng
+      return; 
   }
+  
+  // 2. Nếu chưa có cache -> Hiện Skeleton và gọi Server
+  container.innerHTML = SKELETON_REQUEST;
 
-  // BƯỚC 2: Gọi Server âm thầm (Người dùng vẫn đang xem data cũ)
   const res = await callBackend("getMyRequests", [currentUser.Employee_ID]);
 
-  // Xử lý dữ liệu an toàn
+  // Xử lý dữ liệu trả về an toàn
   let data = [];
   if (res && Array.isArray(res)) {
       data = res;
@@ -1100,12 +1115,14 @@ async function loadMyRequests(forceReload = false) {
       data = res.data;
   }
 
-  // BƯỚC 3: Cập nhật lại Cache và Giao diện bằng dữ liệu mới nhất
+  // 3. LƯU VÀO CACHE
   cachedMyRequests = data; 
+
+  // 4. Render dữ liệu
   renderMyRequestsHTML(container, data);
 }
 
-// Hàm Render HTML riêng biệt (Giữ nguyên UI/UX đẹp)
+// --- HÀM RENDER TÁCH RIÊNG (Để tái sử dụng code) ---
 function renderMyRequestsHTML(container, data) {
   if (!data || data.length === 0) {
     container.innerHTML = `<div class="text-center py-12 opacity-60"><div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm border border-slate-100"><i class="fa-solid fa-clipboard-check text-2xl text-slate-300"></i></div><p class="text-xs font-bold text-slate-400">Chưa có đề xuất nào</p></div>`;
@@ -1117,24 +1134,18 @@ function renderMyRequestsHTML(container, data) {
     var typeRaw = req["Type"] || "Khác";
     var fDate = req["From Date"] || req["From_Date"] || "";
     var tDate = req["To Date"] || req["To_Date"] || "";
-    
-    // Logic hiển thị ngày
     var dateDisplay = (fDate === tDate && fDate) ? fDate : (fDate + " - " + tDate);
     if (!fDate) dateDisplay = "Đang cập nhật";
-    
     var reason = req["Reason"] || "Không có lý do";
     var status = req["Status"] || "Pending";
     
-    // Logic màu sắc trạng thái (Badge)
     var badgeClass = "";
-    var statusText = "Chờ duyệt";
-    if (status === "Approved") { badgeClass = "bg-emerald-50 text-emerald-600 border-emerald-100"; statusText = "Đã duyệt"; }
-    else if (status === "Rejected") { badgeClass = "bg-red-50 text-red-600 border-red-100"; statusText = "Từ chối"; }
-    else { badgeClass = "bg-orange-50 text-orange-600 border-orange-100"; }
+    if (status === "Approved") badgeClass = "bg-emerald-50 text-emerald-600 border-emerald-100";
+    else if (status === "Rejected") badgeClass = "bg-red-50 text-red-600 border-red-100";
+    else badgeClass = "bg-orange-50 text-orange-600 border-orange-100";
     
-    var statusBadge = `<span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold border ${badgeClass}">${statusText}</span>`;
+    var statusBadge = `<span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold border ${badgeClass}">${status === "Approved" ? "Đã duyệt" : status === "Rejected" ? "Từ chối" : "Chờ duyệt"}</span>`;
 
-    // Logic Icon theo loại đơn
     var icon = "fa-file-lines";
     var colorBg = "bg-slate-50 text-slate-500";
     var typeLower = String(typeRaw).toLowerCase();
@@ -1143,7 +1154,6 @@ function renderMyRequestsHTML(container, data) {
     else if (typeLower.includes("nghỉ")) { icon = "fa-umbrella-beach"; colorBg = "bg-blue-50 text-blue-600"; }
     else if (typeLower.includes("công tác")) { icon = "fa-plane-departure"; colorBg = "bg-purple-50 text-purple-600"; }
 
-    // HTML Card
     html += `
       <div class="bg-white p-5 rounded-[24px] shadow-sm border border-white animate-slide-up mb-4 relative overflow-hidden group hover:shadow-md transition-all">
          <div class="flex justify-between items-start mb-4 relative z-10">
@@ -1157,168 +1167,6 @@ function renderMyRequestsHTML(container, data) {
       </div>`;
   });
   container.innerHTML = html;
-}
-
-async function loadContacts(forceReload = false) {
-  var list = document.getElementById("contacts-list");
-  if (!list) return;
-
-  // SỬA: Dùng cachedContacts thay vì cachedContactsList
-  if (cachedContacts && cachedContacts.length > 0 && !forceReload) {
-      renderContactsHTML(list, cachedContacts);
-  } else {
-      list.innerHTML = SKELETON_CONTACT;
-  }
-  
-  const data = await callBackend("getContacts", [currentUser.Role, currentUser.Center_ID]);
-  
-  if (data && data.length > 0) {
-      cachedContacts = data; // SỬA: Lưu vào biến cachedContacts
-      renderContactsHTML(list, data);
-  } else if (!cachedContacts || cachedContacts.length === 0) {
-      list.innerHTML = '<div class="text-center text-slate-400 py-10">Không tìm thấy nhân sự.</div>';
-  }
-}
-
-function renderContactsHTML(container, data) {
-  var html = "";
-  data.forEach(function (e, i) {
-    // Helper tạo Avatar (giả định bạn đã có hàm getAvatarHtml, nếu chưa thì giữ nguyên hàm cũ)
-    var avatarHtml = window.getAvatarHtml ? getAvatarHtml(e.Name, e.Avatar, "w-12 h-12", "text-sm") : `<div class="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-500">${e.Name.charAt(0)}</div>`;
-    
-    var centerTag = e.Center_Name ? `<span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">${e.Center_Name}</span>` : "";
-    var phoneBtn = e.Phone ? `<a href="tel:${e.Phone}" class="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 active:scale-90 transition-all"><i class="fa-solid fa-phone"></i></a>` : "";
-
-    html += `
-      <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-3 active:scale-[0.98] transition-transform cursor-pointer mb-3" onclick="openContactByIndex(${i})">
-          <div class="relative flex-none">${avatarHtml}</div>
-          <div class="flex-1 min-w-0">
-              <p class="font-bold text-slate-800 truncate text-base">${e.Name}</p>
-              <div class="flex flex-wrap items-center gap-2 mt-1">
-                  <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">${e.Position}</span>
-                  ${centerTag}
-              </div>
-          </div>
-          <div class="flex items-center gap-3 flex-none" onclick="event.stopPropagation()">${phoneBtn}</div>
-      </div>`;
-  });
-  container.innerHTML = html;
-}
-
-async function openNotifications(mode, forceReload = false) {
-  var modal = document.getElementById("modal-notifications");
-  var content = document.getElementById("noti-content-area");
-  var titleEl = document.getElementById("modal-noti-title");
-  if (!modal || !content) return;
-
-  // Cập nhật tiêu đề & hiển thị modal
-  titleEl.innerText = (mode === "approve") ? "Duyệt đơn từ" : "Thông báo";
-  document.querySelectorAll('[id^="noti-dot"], [id^="profile-noti-dot"]').forEach(d => d.classList.add("hidden"));
-  modal.classList.remove("hidden");
-
-  // 1. Hiển thị cache ngay lập tức
-  if (cachedNotificationsData && !forceReload) {
-      renderNotificationsHTML(content, cachedNotificationsData, mode);
-  } else {
-      content.innerHTML = SKELETON_REQUEST;
-  }
-
-  // 2. Gọi Server lấy data mới nhất
-  const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
-
-  // 3. Cập nhật giao diện khi có hàng về
-  if (res.success) {
-      cachedNotificationsData = res.data;
-      renderNotificationsHTML(content, cachedNotificationsData, mode);
-  } else if (!cachedNotificationsData) {
-      content.innerHTML = '<div class="text-center py-20 opacity-50"><p>Lỗi tải dữ liệu</p></div>';
-  }
-}
-
-function renderNotificationsHTML(container, data, mode) {
-  var approvals = data.approvals || [];
-  var myRequests = data.myRequests || [];
-  var hasApprovals = approvals.length > 0;
-  var hasMyRequests = myRequests.length > 0;
-
-  if (!hasApprovals && !hasMyRequests) {
-    container.innerHTML = '<div class="text-center py-24 opacity-50"><i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i><p class="text-xs text-slate-400 font-bold uppercase">Không có dữ liệu</p></div>';
-    return;
-  }
-
-  var html = "";
-
-  // --- PHẦN 1: DANH SÁCH CẦN DUYỆT (Chỉ hiện khi mode=approve) ---
-  if (hasApprovals) {
-    html += `<div class="mb-6"><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Cần duyệt (${approvals.length})</h3><div class="space-y-4">`;
-    
-    approvals.forEach(function (req) {
-      var isLeave = (req.Type || "").toLowerCase().includes("nghỉ");
-      // UI: Đổi màu badge tùy loại đơn
-      var badgeClass = isLeave ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-purple-50 text-purple-600 border-purple-100";
-      var avatarHtml = window.getAvatarHtml ? getAvatarHtml(req.Name, req.Avatar, "w-10 h-10", "text-xs") : `<div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs">${req.Name.charAt(0)}</div>`;
-
-      html += `
-          <div class="bg-white p-5 rounded-[24px] shadow-sm border border-slate-50 animate-slide-up relative overflow-hidden group">
-              <div class="flex justify-between items-start mb-3">
-                  <div class="flex items-center gap-3">
-                      ${avatarHtml}
-                      <div>
-                          <h4 class="font-bold text-slate-800 text-sm leading-tight">${req.Name}</h4>
-                          <p class="text-[10px] font-bold text-slate-400 mt-0.5">${req.Position || "NV"} • ${req.Center_Name || "CN"}</p>
-                      </div>
-                  </div>
-                  <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold border ${badgeClass} uppercase tracking-wide">${req.Type}</span>
-              </div>
-              <div class="bg-slate-50/80 rounded-2xl p-3 mb-4 border border-slate-100">
-                   <div class="flex items-center gap-2 text-xs font-bold text-slate-700 mb-1">
-                      <i class="fa-regular fa-calendar text-emerald-500"></i> ${req.Dates}
-                   </div>
-                   <p class="text-xs text-slate-500 italic line-clamp-2 pl-6 border-l-2 border-slate-200">"${req.Reason}"</p>
-              </div>
-              <div class="grid grid-cols-2 gap-3">
-                  <button onclick="openRejectModal('${req.Request_ID}')" class="py-2.5 rounded-xl bg-white border border-red-100 text-red-500 text-xs font-bold active:scale-95 transition-all shadow-sm">Từ chối</button>
-                  <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" 
-                      class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold active:scale-95 transition-all shadow-md">
-                      Duyệt đơn
-                  </button>
-              </div>
-          </div>`;
-    });
-    html += "</div></div>";
-  } else if (mode === "approve") {
-    html += '<div class="text-center py-20 opacity-50"><i class="fa-solid fa-check-circle text-4xl mb-3 text-emerald-200"></i><p class="text-xs text-slate-400 font-bold uppercase">Tuyệt vời! Đã duyệt hết.</p></div>';
-  }
-
-  // --- PHẦN 2: THÔNG BÁO CỦA TÔI (Chỉ hiện khi mode != approve) ---
-  if (mode !== "approve" && hasMyRequests) {
-    html += '<div><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-regular fa-bell"></i> Đơn của tôi</h3><div class="space-y-3">';
-    myRequests.forEach(function (req) {
-      // Logic UI cho từng trạng thái
-      var isAppr = req.Status === "Approved";
-      var isRej = req.Status === "Rejected";
-      var statusIcon = isAppr ? "fa-check" : isRej ? "fa-xmark" : "fa-hourglass-half";
-      var statusColor = isAppr ? "text-emerald-500 bg-emerald-50" : isRej ? "text-red-500 bg-red-50" : "text-orange-500 bg-orange-50";
-      var cardBg = isAppr ? "border-emerald-100" : isRej ? "border-red-100" : "border-orange-100";
-
-      html += `
-          <div class="bg-white p-4 rounded-3xl shadow-sm border ${cardBg} flex items-center gap-4 animate-slide-up">
-              <div class="w-10 h-10 rounded-2xl ${statusColor} flex items-center justify-center text-lg shadow-sm shrink-0">
-                  <i class="fa-solid ${statusIcon}"></i>
-              </div>
-              <div class="flex-1 min-w-0">
-                  <div class="flex justify-between items-center">
-                       <h4 class="text-sm font-bold text-slate-800">${req.Type}</h4>
-                       <span class="text-[9px] font-extrabold px-2 py-0.5 rounded ${statusColor} border border-current opacity-80">${req.Status}</span>
-                  </div>
-                  <p class="text-[10px] text-slate-400 font-bold mt-0.5">${req.Dates}</p>
-                  ${req.Note ? `<p class="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded mt-1.5 italic line-clamp-1"><i class="fa-solid fa-reply mr-1"></i>${req.Note}</p>` : ""}
-              </div>
-          </div>`;
-    });
-    html += "</div></div>";
-  }
-  content.innerHTML = html;
 }
 
 window.switchActivityMode = function (mode) {
@@ -1548,60 +1396,3 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
-document.addEventListener("DOMContentLoaded", function() {
-    // Tìm input mật khẩu
-    var passInput = document.getElementById("login-pass");
-    if(passInput) {
-        passInput.addEventListener("keypress", function(event) {
-            // Nếu phím bấm là Enter (KeyCode 13)
-            if (event.key === "Enter") {
-                event.preventDefault(); // Chặn hành vi xuống dòng mặc định
-                document.getElementById("login-pass").blur(); // Ẩn bàn phím ảo
-                handleLogin(); // Gọi hàm đăng nhập
-            }
-        });
-    }
-});
-window.addEventListener('popstate', function(event) {
-    // Khi người dùng vuốt Back hoặc bấm nút Back cứng
-    // Ta kiểm tra xem state cũ là gì để đóng modal tương ứng
-    
-    // Đóng Modal Đề xuất
-    if (!document.getElementById("modal-request").classList.contains("hidden")) {
-        closeRequestModal(true); // true = Đóng do vuốt back, không cần gọi history.back() nữa
-        return;
-    }
-    
-    // Đóng Modal Thông báo
-    if (!document.getElementById("modal-notifications").classList.contains("hidden")) {
-        closeNotifications(true);
-        return;
-    }
-    
-    // Đóng Modal Profile
-    if (!document.getElementById("modal-profile").classList.contains("hidden")) {
-        closeProfileModal(true);
-        return;
-    }
-
-    // Đóng Modal Chi tiết danh bạ
-    if (!document.getElementById("modal-contact-detail").classList.contains("hidden")) {
-        closeContactDetail(true);
-        return;
-    }
-
-    // Đóng Modal Search Danh bạ
-    if (!document.getElementById("modal-search-contact").classList.contains("hidden")) {
-        closeContactSearch(true);
-        return;
-    }
-    
-    // Đóng Modal Camera
-    if (!document.getElementById("modal-camera").classList.contains("hidden")) {
-        closeCamera(true);
-        return;
-    }
-});
-
-
-
