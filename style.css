@@ -1,0 +1,303 @@
+/* =========================================
+   1. CẤU HÌNH BIẾN (CSS VARIABLES)
+   ========================================= */
+:root {
+    --c-primary: #10b981;
+    --c-primary-dark: #047857;
+    --c-secondary: #1e293b;
+    --c-bg: #f8fafc;
+    --c-white: #ffffff;
+    --c-text-main: #1e293b;
+    --c-text-muted: #94a3b8;
+    --c-danger: #ef4444;
+    --c-danger-bg: #fef2f2;
+    --c-success-bg: #ecfdf5;
+    
+    --radius-xl: 24px;
+    --radius-lg: 16px;
+    --radius-full: 9999px;      
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-glow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+    
+    --font-main: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* =========================================
+   2. RESET & GLOBAL STYLES
+   ========================================= */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+    margin: 0; padding: 0;
+    font-family: var(--font-main);
+    background-color: var(--c-bg);
+    color: var(--c-text-main);
+    height: 100vh; width: 100vw;
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.bg-mesh {
+    background-color: var(--c-bg);
+    background-image: 
+        radial-gradient(at 10% 10%, rgba(16,185,129,0.12) 0px, transparent 45%),
+        radial-gradient(at 90% 15%, rgba(56,189,248,0.12) 0px, transparent 45%),
+        radial-gradient(at 85% 85%, rgba(20,184,166,0.10) 0px, transparent 50%),
+        radial-gradient(at 15% 90%, rgba(59,130,246,0.10) 0px, transparent 50%);
+    background-attachment: fixed;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.hidden { display: none !important; }
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.text-center { text-align: center; }
+.font-bold { font-weight: 700; }
+.uppercase { text-transform: uppercase; }
+
+/* =========================================
+   3. COMPONENTS: BUTTONS
+   ========================================= */
+.btn, .btn-primary, .btn-success, .btn-white, .btn-danger-soft {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    font-weight: 700;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s, background-color 0.2s;
+    border-radius: var(--radius-lg);
+    font-size: 14px;
+    user-select: none;
+    width: 100%;
+}
+
+.btn:active, .btn-primary:active, .btn-success:active { 
+    transform: scale(0.96); opacity: 0.9; 
+}
+
+.btn-primary {
+    background-color: var(--c-secondary);
+    color: var(--c-white);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-success {
+    background-color: var(--c-primary);
+    color: var(--c-white);
+    box-shadow: var(--shadow-glow);
+}
+
+.btn-white {
+    background-color: var(--c-white);
+    color: var(--c-text-main);
+    border: 1px solid #f1f5f9;
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-xl);
+}
+
+.btn-danger-soft {
+    background-color: var(--c-danger-bg);
+    color: var(--c-danger);
+    border: 1px solid #fee2e2;
+}
+
+.btn-icon {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    color: var(--c-text-main);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+/* =========================================
+   4. COMPONENTS: INPUTS & FORMS
+   ========================================= */
+.input-group {
+    position: relative;
+    display: flex; align-items: center;
+    width: 100%;
+}
+.input-group-icon {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 48px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--c-text-muted);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.form-input {
+    width: 100%;
+    padding: 16px 16px 16px 48px;
+    background-color: #f8fafc;
+    border: 2px solid transparent;
+    border-radius: var(--radius-lg);
+    color: var(--c-text-main);
+    font-weight: 700;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.form-input:focus {
+    background-color: #ffffff;
+    border-color: var(--c-primary);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+.input-clean {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-weight: 600;
+    color: var(--c-text-main);
+    padding: 0;
+    font-size: 14px;
+}
+
+/* =========================================
+   5. COMPONENTS: CARDS
+   ========================================= */
+.card {
+    background-color: var(--c-white);
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid #ffffff;
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.card-dark {
+    background: linear-gradient(160deg, #0f172a 0%, #1e293b 100%);
+    color: white;
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+/* =========================================
+   6. NAVIGATION BAR
+   ========================================= */
+.nav-bar {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 24px;
+    width: 100%;
+}
+
+.nav-item {
+    width: 48px; height: 48px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    position: relative;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+}
+
+.nav-item-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--c-text-muted);
+    transition: all 0.3s;
+    font-size: 20px;
+}
+
+.nav-item.active .nav-item-icon {
+    background-color: var(--c-primary);
+    color: white;
+    transform: translateY(-8px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.nav-indicator {
+    position: absolute; bottom: -4px;
+    width: 6px; height: 6px;
+    background-color: var(--c-primary);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.nav-item.active .nav-indicator { opacity: 1; }
+
+/* =========================================
+   7. BADGES
+   ========================================= */
+.badge {
+    display: inline-flex;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+.badge-success { background: #ecfdf5; color: #059669; border-color: #d1fae5; }
+.badge-info    { background: #eff6ff; color: #2563eb; border-color: #dbeafe; }
+
+/* =========================================
+   8. ANIMATIONS
+   ========================================= */
+@keyframes slideUp { 
+    from { opacity: 0; transform: translateY(20px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+.animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+.animate-float { animation: float 4s ease-in-out infinite; }
+
+#toast {
+    position: fixed; top: 24px; left: 50%;
+    transform: translate(-50%, -200%);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 12px 24px;
+    border-radius: 99px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(255,255,255,0.5);
+    font-weight: 700; color: var(--c-text-main);
+    display: flex; align-items: center; gap: 12px;
+    z-index: 9999;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0; pointer-events: none;
+}
