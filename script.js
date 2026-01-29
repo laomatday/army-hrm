@@ -1,7 +1,6 @@
 // ==========================================
 // 1. CẤU HÌNH & BIẾN TOÀN CỤC
 // ==========================================
-// QUAN TRỌNG: Thay URL Web App Google Apps Script của bạn vào đây
 const API_URL = "https://script.google.com/macros/s/AKfycbxbuZVUPQ3W8QB-qrOxz0Y2GRMYbhJyrTtALToLn3fnz_HUDtDv5k-XZyKgjJj1qmhuKA/exec"; 
 
 var currentUser = null;
@@ -24,16 +23,20 @@ async function callBackend(functionName, params = []) {
   try {
     const response = await fetch(API_URL, {
       method: "POST",
-      mode: "no-cors", // Hoặc bỏ nếu Apps Script đã hỗ trợ CORS qua Redirect
+      // Lưu ý: Không dùng mode: "no-cors" vì sẽ không đọc được JSON trả về
       body: JSON.stringify({
         action: functionName,
         params: params
       })
     });
     
-    // Lưu ý: Apps Script trả về 302 Redirect. Fetch API tự xử lý.
-    // Nếu gặp lỗi CORS "no-cors", bạn cần thiết lập Web App Apps Script chuẩn.
-    return await response.json();
+    const text = await response.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.error("Lỗi parse JSON:", text);
+      return { success: false, message: "Dữ liệu trả về không đúng định dạng." };
+    }
   } catch (error) {
     console.error("Lỗi Backend:", error);
     return { success: false, message: "Không thể kết nối máy chủ!" };
@@ -136,7 +139,6 @@ function showMainApp() {
 // ==========================================
 // 3. UI HELPERS & NAVIGATION
 // ==========================================
-// (Phần này giữ nguyên logic hiển thị từ code cũ của bạn)
 window.changeHistoryPage = function (direction) {
   if(!allHistoryData || allHistoryData.length === 0) return;
   var maxPage = Math.ceil(allHistoryData.length / HISTORY_PAGE_SIZE) - 1;
@@ -178,46 +180,52 @@ function renderUserInfo() {
   if (!currentUser) return;
   setText("user-name", getShortNameClient(currentUser.Name));
   setText("p-id", currentUser.Employee_ID);
-  setText("p-email", currentUser.Email);
-  setText("p-phone", currentUser.Phone || "Chưa cập nhật");
-  setText("p-dept", currentUser.Department || "Chưa cập nhật");
-  setText("leave-balance", currentUser.Annual_Leave_Balance !== undefined ? currentUser.Annual_Leave_Balance : 12);
-  ["req-user-name", "profile-user-name", "contact-user-name"].forEach(id => setText(id, currentUser.Name));
+  setText("p-email-display", currentUser.Email);
+  setText("edit-phone", currentUser.Phone || "");
+  setText("p-dept-display", currentUser.Department || "Chưa cập nhật");
+  
   const displayTitle = currentUser.Position || "Staff";
   const displayLocation = currentUser.Location_Name || "Chưa cập nhật";
+
   ["user", "req", "profile", "contact"].forEach((prefix) => {
-    setText(prefix + "-position-badge", displayTitle);
-    setText(prefix + "-location-badge", displayLocation);
+    var posBadge = document.getElementById(prefix + "-position-badge");
+    if(posBadge) posBadge.innerText = displayTitle;
+    var locBadge = document.getElementById(prefix + "-location-badge");
+    if(locBadge) locBadge.innerText = displayLocation;
   });
+
   const adminRoles = ["Admin", "Manager", "HR"];
   const btnApproval = document.getElementById("btn-profile-approval");
   if (btnApproval) btnApproval.classList.toggle("hidden", !adminRoles.includes(currentUser.Role));
+
   const avatarUrl = (currentUser.Avatar && currentUser.Avatar.startsWith("http")) 
       ? currentUser.Avatar 
       : "https://ui-avatars.com/api/?name=" + encodeURIComponent(currentUser.Name) + "&background=059669&color=fff";
-  document.querySelectorAll("#user-avatar, #profile-user-avatar, #req-user-avatar, #contact-user-avatar").forEach(img => {
+  
+  document.querySelectorAll("#user-avatar, #profile-user-avatar, #edit-avatar-preview").forEach(img => {
       img.src = avatarUrl;
-      img.style.objectFit = "cover";
   });
 }
 
 window.switchTab = function (tabName) {
-  ["modal-notifications", "modal-request", "modal-profile", "modal-contact-detail", "view-approvals"].forEach(id => {
+  ["modal-notifications", "modal-request", "modal-profile", "modal-contact-detail", "modal-search-contact"].forEach(id => {
       var el = document.getElementById(id);
       if(el) el.classList.add("hidden");
   });
   toggleGlobalNav(true);
   ["home", "requests", "contacts", "profile"].forEach(t => {
-    document.getElementById("tab-" + t).classList.add("hidden");
+    var el = document.getElementById("tab-" + t);
+    if(el) el.classList.add("hidden");
   });
   var target = document.getElementById("tab-" + tabName);
   if (target) target.classList.remove("hidden");
+
   var navItems = document.querySelectorAll(".nav-item");
   var idxMap = { home: 0, requests: 1, contacts: 2, profile: 3 };
   navItems.forEach((item, index) => {
-    var isActive = index === idxMap[tabName];
-    item.classList.toggle("active", isActive);
+    item.classList.toggle("active", index === idxMap[tabName]);
   });
+
   if (tabName === "contacts" && (!cachedContacts || cachedContacts.length === 0)) loadContacts();
   else if (tabName === "requests") switchActivityMode('history');
 };
@@ -237,7 +245,7 @@ function toggleHomeState(state) {
 }
 
 // ==========================================
-// 4. LOGIC LỊCH SỬ & CHECK-IN (ASYNC UPDATED)
+// 4. LOGIC LỊCH SỬ & CHECK-IN
 // ==========================================
 window.loadHistoryFull = async function() {
   if (!currentUser) return;
@@ -245,12 +253,12 @@ window.loadHistoryFull = async function() {
   var currentMonth = d.getMonth() + 1;
   var currentYear = d.getFullYear();
   setText("current-month-badge", "Tháng " + currentMonth + "/" + currentYear);
+  setText("hist-month-badge", "Tháng " + currentMonth + "/" + currentYear);
   
   const res = await callBackend("getHistory", [currentUser.Employee_ID]);
   allHistoryData = res.history || [];
   var stats = res.summary || { workDays: 0, lateMins: 0, errorCount: 0, remainingLeave: 12, leaveDays: 0 };
   
-  // Logic tính toán hiển thị (giữ nguyên từ bản cũ)
   setText("home-stat-days", stats.workDays);
   setText("home-stat-leave", stats.leaveDays || 0);
   setText("leave-stat-label", (stats.remainingLeave || 12) + " phép còn lại");
@@ -258,10 +266,36 @@ window.loadHistoryFull = async function() {
   setText("hist-late-mins", stats.lateMins);
   setText("hist-errors", stats.errorCount);
 
+  // Update Progress Bars
+  var workBar = document.getElementById("work-progress-bar");
+  if(workBar) workBar.style.width = Math.min(100, (stats.workDays / 26) * 100) + "%";
+  var leaveBar = document.getElementById("leave-progress-bar");
+  if(leaveBar) leaveBar.style.width = Math.min(100, (stats.remainingLeave / 12) * 100) + "%";
+
   var vnDate = ("0" + d.getDate()).slice(-2) + "/" + ("0" + (d.getMonth() + 1)).slice(-2) + "/" + d.getFullYear();
-  var isCurrentlyCheckedIn = allHistoryData.some(r => r.Date === vnDate && r.Time_List.some(t => t.out === "..."));
+  var isCurrentlyCheckedIn = allHistoryData.some(r => r.Date === vnDate && r.Time_List && r.Time_List.some(t => t.out === "..."));
   toggleHomeState(isCurrentlyCheckedIn ? "working" : "idle");
   if (!document.getElementById("view-act-history").classList.contains("hidden")) renderActivityHistory();
+};
+
+window.triggerCheckIn = function () {
+    document.getElementById("modal-camera").classList.remove("hidden");
+    toggleGlobalNav(false);
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+      .then(function (s) {
+        videoStream = s;
+        document.getElementById("video").srcObject = s;
+      })
+      .catch(function () {
+        showToast("error", "Không thể truy cập Camera!");
+        closeCamera();
+      });
+};
+
+window.closeCamera = function () {
+    if (videoStream) videoStream.getTracks().forEach(t => t.stop());
+    document.getElementById("modal-camera").classList.add("hidden");
+    toggleGlobalNav(true);
 };
 
 window.takePicture = async function () {
@@ -299,7 +333,7 @@ window.triggerCheckOut = function () {
 };
 
 // ==========================================
-// 5. THÔNG BÁO & DUYỆT ĐƠN (ASYNC UPDATED)
+// 5. THÔNG BÁO & DUYỆT ĐƠN
 // ==========================================
 window.openNotifications = async function (mode) {
   var modal = document.getElementById("modal-notifications");
@@ -309,10 +343,50 @@ window.openNotifications = async function (mode) {
   content.innerHTML = `<div class="text-center py-10"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500"></i></div>`;
 
   const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
-  // (Logic render HTML cho thông báo giữ nguyên như bản cũ của bạn)
-  // Lưu ý: Thay res.data.approvals... tùy theo cấu trúc trả về
   renderNotificationUI(res, mode); 
 };
+
+function renderNotificationUI(res, mode) {
+    var content = document.getElementById("noti-content-area");
+    if (!res.success) {
+        content.innerHTML = `<p class="text-center text-slate-400 py-10">${res.message}</p>`;
+        return;
+    }
+    var html = "";
+    if (res.data.approvals && res.data.approvals.length > 0) {
+        html += `<h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Cần duyệt</h3>`;
+        res.data.approvals.forEach(req => {
+            html += `
+            <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 mb-3">
+                <div class="flex items-center gap-3 mb-3">
+                    ${getAvatarHtml(req.Name, req.Avatar, "w-10 h-10", "text-xs")}
+                    <div class="flex-1">
+                        <p class="font-bold text-sm text-slate-800">${req.Name}</p>
+                        <p class="text-[9px] text-slate-400">${req.Position} • ${req.Center_Name}</p>
+                    </div>
+                    <span class="badge badge-info">${req.Type}</span>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-2xl mb-3"><p class="text-xs text-slate-600 italic">"${req.Reason}"</p></div>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="openRejectModal('${req.Request_ID}')" class="btn-danger-soft py-2 rounded-xl text-xs">Từ chối</button>
+                    <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" class="btn-success py-2 rounded-xl text-xs">Duyệt</button>
+                </div>
+            </div>`;
+        });
+    }
+    if (mode !== "approve" && res.data.myRequests && res.data.myRequests.length > 0) {
+        html += `<h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-6 mb-3">Đơn của tôi</h3>`;
+        res.data.myRequests.forEach(req => {
+            var statusClass = req.Status === "Approved" ? "badge-success" : "badge-info";
+            html += `
+            <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 mb-2 flex justify-between items-center">
+                <div><p class="text-sm font-bold text-slate-800">${req.Type}</p><p class="text-[9px] text-slate-400">${req.Dates}</p></div>
+                <span class="badge ${statusClass}">${req.Status}</span>
+            </div>`;
+        });
+    }
+    content.innerHTML = html || `<p class="text-center text-slate-400 py-20">Không có thông báo mới</p>`;
+}
 
 window.processRequestMobile = async function (reqId, status, rejectReason) {
   showLoading(true);
@@ -324,7 +398,7 @@ window.processRequestMobile = async function (reqId, status, rejectReason) {
 };
 
 // ==========================================
-// 6. TẠO ĐỀ XUẤT & PROFILE (ASYNC UPDATED)
+// 6. TẠO ĐỀ XUẤT & PROFILE
 // ==========================================
 window.submitRequest = async function () {
   var reason = document.getElementById("req-reason").value;
@@ -362,48 +436,128 @@ window.submitProfileUpdate = async function () {
 };
 
 // ==========================================
-// 7. UTILS & OTHERS (Giữ nguyên)
+// 7. LỊCH SỬ & DANH BẠ RENDER
 // ==========================================
-// (Các hàm loadContacts, loadMyRequests, loadLocations, updateClock... 
-// chỉ cần thay google.script.run bằng await callBackend tương ứng)
+function renderActivityHistory() {
+    var container = document.getElementById("activity-history-list");
+    if (!container || !allHistoryData.length) return;
+    var start = currentHistoryPage * HISTORY_PAGE_SIZE;
+    var data = allHistoryData.slice(start, start + HISTORY_PAGE_SIZE);
+    var html = "";
+    data.forEach(item => {
+        var hours = parseFloat(item.Total_Work_Hours || 0).toFixed(1);
+        html += `
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 mb-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-slate-50 flex flex-col items-center justify-center">
+                    <span class="text-[10px] font-bold text-slate-400">${item.Date.split('/')[0]}</span>
+                    <span class="text-[8px] text-slate-300">THG ${item.Date.split('/')[1]}</span>
+                </div>
+                <div><p class="text-sm font-bold text-slate-800">${hours} giờ công</p><p class="text-[9px] text-slate-400">${item.Status_List.join(', ')}</p></div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-slate-200 text-xs"></i>
+        </div>`;
+    });
+    container.innerHTML = html;
+}
 
+function renderContactList(data) {
+    var list = document.getElementById("contacts-list");
+    if(!list) return;
+    var html = "";
+    data.forEach((e, idx) => {
+        html += `
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-3 mb-2" onclick="openContactByIndex(${idx})">
+            ${getAvatarHtml(e.Name, e.Avatar, "w-11 h-11", "text-sm")}
+            <div class="flex-1"><p class="font-bold text-slate-800 text-sm">${e.Name}</p><p class="text-[10px] text-slate-400">${e.Position}</p></div>
+            <a href="tel:${e.Phone}" class="w-9 h-9 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center"><i class="fa-solid fa-phone text-xs"></i></a>
+        </div>`;
+    });
+    list.innerHTML = html;
+}
+
+// ==========================================
+// 8. UTILS & MODALS
+// ==========================================
 async function loadContacts() {
-  const data = await callBackend("getContacts", [currentUser.Role, currentUser.Center_ID]);
-  cachedContacts = data;
-  renderContactList(data);
+    const data = await callBackend("getContacts", [currentUser.Role, currentUser.Center_ID]);
+    cachedContacts = data;
+    renderContactList(data);
 }
 
 async function loadLocations() {
-  const data = await callBackend("getLocations");
-  cachedLocations = data || [];
-  renderLocationList();
+    const data = await callBackend("getLocations");
+    cachedLocations = data || [];
+    renderLocationList();
 }
 
-function setText(id, t) {
-  var e = document.getElementById(id);
-  if (e) e.innerText = t;
+function renderLocationList() {
+    var list = document.getElementById("profile-location-list");
+    if (!list) return;
+    list.innerHTML = cachedLocations.map(loc => `
+        <div onclick="selectProfileLocation('${loc.id}', '${loc.name}')" class="px-4 py-3 rounded-xl hover:bg-slate-50 cursor-pointer text-sm font-medium text-slate-700">${loc.name}</div>
+    `).join('');
 }
 
-function updateClock() {
-  var d = new Date();
-  var timeStr = d.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", hour12: false });
-  setText("clock-display", timeStr);
-  setText("date-display", d.toLocaleDateString("vi-VN", { weekday: 'long', day: 'numeric', month: 'numeric' }));
+function selectProfileLocation(id, name) {
+    currentProfileLocation = id;
+    setText("profile-location-label", name);
+    document.getElementById("profile-location-menu").classList.add("hidden");
 }
 
-function showLoading(s) {
-  document.getElementById("loader").classList.toggle("hidden", !s);
+function toggleLocationDropdown() {
+    document.getElementById("profile-location-menu").classList.toggle("hidden");
 }
 
+window.openContactByIndex = function(idx) {
+    var e = cachedContacts[idx];
+    document.getElementById("modal-contact-detail").classList.remove("hidden");
+    document.getElementById("contact-detail-avatar").src = e.Avatar || "";
+    setText("contact-detail-name", e.Name);
+    setText("contact-detail-phone", e.Phone);
+    setText("contact-detail-email", e.Email);
+}
+
+window.handleConfirmReject = function() {
+    var reason = document.getElementById("input-reject-reason").value;
+    if(!reason) return showToast("error", "Vui lòng nhập lý do");
+    processRequestMobile(currentRejectId, "Rejected", reason);
+    document.getElementById("modal-reject-reason").classList.add("hidden");
+}
+
+window.openRejectModal = (id) => { currentRejectId = id; document.getElementById("modal-reject-reason").classList.remove("hidden"); };
+window.closeRequestModal = () => document.getElementById("modal-request").classList.add("hidden");
+window.closeProfileModal = () => document.getElementById("modal-profile").classList.add("hidden");
+
+function showDialog(type, title, msg, okCallback) {
+    var dialog = document.getElementById("custom-dialog");
+    setText("dialog-title", title);
+    setText("dialog-msg", msg);
+    dialog.classList.remove("hidden");
+    document.getElementById("btn-dialog-ok").onclick = () => { dialog.classList.add("hidden"); if(okCallback) okCallback(); };
+    document.getElementById("btn-dialog-cancel").onclick = () => dialog.classList.add("hidden");
+}
+
+function setText(id, t) { var e = document.getElementById(id); if (e) e.innerText = t; }
+function showLoading(s) { document.getElementById("loader").classList.toggle("hidden", !s); }
 function showToast(type, m) {
   var x = document.getElementById("toast");
-  document.getElementById("toast-msg").innerText = m;
+  setText("toast-msg", m);
   x.style.opacity = "1"; x.style.transform = "translate(-50%, 0)";
   setTimeout(() => { x.style.opacity = "0"; x.style.transform = "translate(-50%, -20px)"; }, 3000);
 }
-
-function toVNDate(d) {
-  if (!d || !d.includes("-")) return d;
-  var p = d.split("-"); return p[2] + "/" + p[1] + "/" + p[0];
-
+function toVNDate(d) { if (!d || !d.includes("-")) return d; var p = d.split("-"); return p[2] + "/" + p[1] + "/" + p[0]; }
+function updateClock() {
+  var d = new Date();
+  setText("clock-display", d.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", hour12: false }));
+  setText("date-display", d.toLocaleDateString("vi-VN", { weekday: 'long', day: 'numeric', month: 'numeric' }));
+}
+async function checkNewNotifications() {
+    const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
+    var dot = document.getElementById("noti-dot");
+    if(dot) dot.classList.toggle("hidden", !(res.success && res.data.approvals.length > 0));
+}
+function switchActivityMode(mode) {
+    document.getElementById("view-act-history").classList.toggle("hidden", mode !== 'history');
+    document.getElementById("view-act-requests").classList.toggle("hidden", mode !== 'requests');
 }
