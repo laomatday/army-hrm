@@ -1159,21 +1159,19 @@ async function loadContacts(forceReload = false) {
   var list = document.getElementById("contacts-list");
   if (!list) return;
 
-  // 1. Hiển thị ngay nếu có cache
-  if (cachedContactsList && cachedContactsList.length > 0 && !forceReload) {
-      renderContactsHTML(list, cachedContactsList);
+  // SỬA: Dùng cachedContacts thay vì cachedContactsList
+  if (cachedContacts && cachedContacts.length > 0 && !forceReload) {
+      renderContactsHTML(list, cachedContacts);
   } else {
       list.innerHTML = SKELETON_CONTACT;
   }
   
-  // 2. Tải ngầm dữ liệu mới nhất
   const data = await callBackend("getContacts", [currentUser.Role, currentUser.Center_ID]);
   
-  // 3. Cập nhật lại giao diện
   if (data && data.length > 0) {
-      cachedContactsList = data;
+      cachedContacts = data; // SỬA: Lưu vào biến cachedContacts
       renderContactsHTML(list, data);
-  } else if (!cachedContactsList) {
+  } else if (!cachedContacts || cachedContacts.length === 0) {
       list.innerHTML = '<div class="text-center text-slate-400 py-10">Không tìm thấy nhân sự.</div>';
   }
 }
@@ -1600,4 +1598,5 @@ window.addEventListener('popstate', function(event) {
         return;
     }
 });
+
 
