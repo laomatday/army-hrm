@@ -1370,3 +1370,41 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+// [FIXED] Hàm tải đề xuất (Đã thêm kiểm tra Array.isArray để tránh lỗi crash)
+window.loadMyRequests = async function(forceReload = false) {
+  var container = document.getElementById("request-list-container");
+  if (!container) return;
+
+  // 1. Nếu đã có Cache hợp lệ -> Dùng luôn (SIÊU NHANH)
+  if (!forceReload && cachedMyRequests !== null && Array.isArray(cachedMyRequests)) {
+      renderMyRequestsHTML(cachedMyRequests);
+      return;
+  }
+
+  // 2. Hiện Skeleton khi đang tải
+  container.innerHTML = SKELETON_REQUEST;
+  
+  // 3. Gọi Server
+  const data = await callBackend("getMyRequests", [currentUser.Employee_ID]);
+  
+  // 4. [QUAN TRỌNG] Kiểm tra xem data có phải là Mảng không trước khi forEach
+  if (Array.isArray(data)) {
+      cachedMyRequests = data;
+      renderMyRequestsHTML(cachedMyRequests);
+  } else {
+      // Nếu Server trả về lỗi (Object) thay vì danh sách -> Hiện thông báo lỗi thay vì crash
+      console.error("Lỗi API getMyRequests:", data);
+      
+      container.innerHTML = `
+        <div class="text-center py-12 opacity-60">
+            <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm border border-red-100">
+                <i class="fa-solid fa-wifi text-2xl text-red-400"></i>
+            </div>
+            <p class="text-xs font-bold text-slate-400">Lỗi tải dữ liệu</p>
+            <button onclick="loadMyRequests(true)" class="mt-3 px-4 py-2 bg-white border border-slate-200 rounded-full text-[10px] font-bold shadow-sm active:scale-95 text-slate-600">Tải lại</button>
+        </div>`;
+        
+      // Nếu server có trả về message lỗi cụ thể thì hiển thị Toast
+      if (data && data.message) showToast("error", data.message);
+  }
+};
