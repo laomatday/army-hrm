@@ -421,8 +421,8 @@ async function loadHistoryFull() {
         renderActivityHistory();
       }
   } else {
-       console.error("Lỗi tải lịch sử");
-       showToast("error", "Lỗi dữ liệu hệ thống.");
+        console.error("Lỗi tải lịch sử");
+        showToast("error", "Lỗi dữ liệu hệ thống.");
   }
 }
 
@@ -866,7 +866,7 @@ window.previewAvatarInModal = function (input) {
     reader.onload = function (e) {
       document.getElementById("edit-avatar-preview").src = e.target.result;
       tempAvatarBase64 = e.target.result;
-    };
+        };
     reader.readAsDataURL(input.files[0]);
   }
 };
@@ -1327,7 +1327,7 @@ function renderNotificationsHTML(container, data, mode) {
     });
     html += "</div></div>";
   }
-  container.innerHTML = html;
+  content.innerHTML = html;
 }
 
 window.switchActivityMode = function (mode) {
@@ -1557,9 +1557,57 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+document.addEventListener("DOMContentLoaded", function() {
+    // Tìm input mật khẩu
+    var passInput = document.getElementById("login-pass");
+    if(passInput) {
+        passInput.addEventListener("keypress", function(event) {
+            // Nếu phím bấm là Enter (KeyCode 13)
+            if (event.key === "Enter") {
+                event.preventDefault(); // Chặn hành vi xuống dòng mặc định
+                document.getElementById("login-pass").blur(); // Ẩn bàn phím ảo
+                handleLogin(); // Gọi hàm đăng nhập
+            }
+        });
+    }
+});
+window.addEventListener('popstate', function(event) {
+    // Khi người dùng vuốt Back hoặc bấm nút Back cứng
+    // Ta kiểm tra xem state cũ là gì để đóng modal tương ứng
+    
+    // Đóng Modal Đề xuất
+    if (!document.getElementById("modal-request").classList.contains("hidden")) {
+        closeRequestModal(true); // true = Đóng do vuốt back, không cần gọi history.back() nữa
+        return;
+    }
+    
+    // Đóng Modal Thông báo
+    if (!document.getElementById("modal-notifications").classList.contains("hidden")) {
+        closeNotifications(true);
+        return;
+    }
+    
+    // Đóng Modal Profile
+    if (!document.getElementById("modal-profile").classList.contains("hidden")) {
+        closeProfileModal(true);
+        return;
+    }
 
+    // Đóng Modal Chi tiết danh bạ
+    if (!document.getElementById("modal-contact-detail").classList.contains("hidden")) {
+        closeContactDetail(true);
+        return;
+    }
 
-
-
-
-
+    // Đóng Modal Search Danh bạ
+    if (!document.getElementById("modal-search-contact").classList.contains("hidden")) {
+        closeContactSearch(true);
+        return;
+    }
+    
+    // Đóng Modal Camera
+    if (!document.getElementById("modal-camera").classList.contains("hidden")) {
+        closeCamera(true);
+        return;
+    }
+});
