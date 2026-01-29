@@ -2,7 +2,7 @@
 // 1. CẤU HÌNH & BIẾN TOÀN CỤC
 // ==========================================
 // URL Web App từ Google Apps Script
-const API_URL = "https://script.google.com/macros/s/AKfycbxrpjTCpEqpdymF3w9YxiweMWSJSpRf3fRVC7Vms-JhFGR_6p8yikj_eheh7Afxr6lGpA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyB7dif81BmxpHSXetSvQukgBDuJaKiCYu9TiU9DVv63JKosnQVPwM6GcY9Zo0DIvM8wg/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -1413,3 +1413,4 @@ window.addEventListener('popstate', function(event) {
         return;
     }
 });
+
