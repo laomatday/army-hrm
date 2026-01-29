@@ -9,6 +9,7 @@ var videoStream = null;
 var allHistoryData = [];
 var cachedContacts = [];
 var cachedLocations = [];
+var cachedMyRequests = null;
 
 // Cấu hình phân trang & thiết bị
 var myDeviceId = getDeviceId();
@@ -1408,3 +1409,4 @@ window.loadMyRequests = async function(forceReload = false) {
       if (data && data.message) showToast("error", data.message);
   }
 };
+
