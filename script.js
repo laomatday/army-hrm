@@ -327,10 +327,6 @@ function toggleHomeState(state) {
   else if (state === "working") show(workEl, "z-20");
   else show(idleEl, "z-20");
 }
-
-// ==========================================
-// 4. LOGIC LỊCH SỬ & CHECK-IN
-// ==========================================
 async function loadHistoryFull() {
   if (!currentUser) return;
 
@@ -338,29 +334,31 @@ async function loadHistoryFull() {
   var currentMonth = d.getMonth() + 1;
   var currentYear = d.getFullYear();
   var timeLabel = "Tháng " + currentMonth + "/" + currentYear;
+  
+  // --- TẠO CHUỖI THÁNG (FIX LỖI) ---
+  // Định dạng thành "01/2026" để gửi lên server
+  var monthStr = ("0" + currentMonth).slice(-2) + "/" + currentYear; 
 
   setText("current-month-badge", timeLabel);
   setText("hist-month-badge", timeLabel);
   setText("home-stat-month-label", timeLabel);
   setText("stat-year-label", "Năm " + currentYear);
 
-  // Skeleton Loading
   var daysStat = document.getElementById("home-stat-days");
   var leaveStat = document.getElementById("home-stat-leave");
   if (daysStat) daysStat.innerHTML = '<span class="animate-pulse opacity-50">--</span>';
   if (leaveStat) leaveStat.innerHTML = '<span class="animate-pulse opacity-50">--</span>';
 
-  // Thay google.script.run.getHistory
-  const res = await callBackend("getHistory", [currentUser.Employee_ID]);
+  // --- SỬA DÒNG GỌI BACKEND ---
+  // Truyền thêm monthStr vào tham số thứ 2
+  const res = await callBackend("getHistory", [currentUser.Employee_ID, monthStr]);
   
+  // ... (phần code xử lý bên dưới giữ nguyên) ...
   if (res) {
       allHistoryData = res.history || [];
-      // Lấy summary từ Backend
       var stats = res.summary || { workDays: 0, lateMins: 0, errorCount: 0, remainingLeave: 12, leaveDays: 0 };
       
       currentHistoryPage = 0;
-
-      // 1. NGÀY CÔNG (Giữ nguyên logic tính toán Client-side để update UI)
       var daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
       var standardDays = 0;
       for (var i = 1; i <= daysInMonth; i++) {
@@ -377,32 +375,23 @@ async function loadHistoryFull() {
       var workBar = document.getElementById("work-progress-bar");
       if (workBar) workBar.style.width = percent + "%";
 
-
-      // 2. PHÉP NĂM (LOGIC TRỰC TIẾP TỪ SHEET)
-      // A. SỐ TO: ĐÃ DÙNG (Lấy thẳng từ cột Leave_Days - Cột H)
       var used = stats.leaveDays !== undefined ? stats.leaveDays : 0;
       setText("home-stat-leave", used);
 
-      // B. SỐ NHỎ: CÒN LẠI (Lấy thẳng từ cột Remaining_Leave - Cột I)
       var remaining = stats.remainingLeave !== undefined ? stats.remainingLeave : 12;
       var labelEl = document.getElementById("leave-stat-label");
       if (labelEl) labelEl.innerText = remaining + " phép còn lại";
 
-      // C. THANH BAR (Hiển thị % Còn lại cho đẹp mắt)
-      // Vì ta không tính toán Max từ profile nữa, nên ta ước lượng Max = Used + Remaining
       var estimatedMax = used + remaining; 
-      if (estimatedMax === 0) estimatedMax = 12; // Tránh chia cho 0
+      if (estimatedMax === 0) estimatedMax = 12;
 
       var leavePercent = (remaining / estimatedMax) * 100;
-      
       if(leavePercent < 0) leavePercent = 0;
       if(leavePercent > 100) leavePercent = 100;
       
       var leaveBar = document.getElementById("leave-progress-bar");
       if (leaveBar) leaveBar.style.width = leavePercent + "%";
 
-
-      // 3. CÁC PHẦN KHÁC
       setText("hist-total-days", stats.workDays);
       setText("hist-late-mins", stats.lateMins);
       setText("hist-errors", stats.errorCount);
@@ -1611,3 +1600,4 @@ window.addEventListener('popstate', function(event) {
         return;
     }
 });
+
