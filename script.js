@@ -2,7 +2,7 @@
 // 1. CẤU HÌNH & BIẾN TOÀN CỤC
 // ==========================================
 // URL Web App từ Google Apps Script (Đã cấu hình doPost)
-const API_URL = "https://script.google.com/macros/s/AKfycbwISZ4w-R-0SE-q2PmxmxL2d0uoLVioAGfTN9pJ877xbVVEpIV_eezSZ3JsFk6XqXJ2aQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbw7sAYlX51tTO7uHC0-gq1DWW5B3uyVQKgloUY6dPPZ2vcxtkdnrI-od7C5g9AiaT5wEg/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -1396,6 +1396,7 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
 
 
