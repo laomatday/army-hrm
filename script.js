@@ -2,7 +2,7 @@
 // 1. CẤU HÌNH & BIẾN TOÀN CỤC
 // ==========================================
 // QUAN TRỌNG: Thay URL Web App Google Apps Script của bạn vào đây
-const API_URL = "https://script.google.com/macros/s/AKfycbzM9tsmiyevj4_WbXMYZ_Pf2avOHLlm1AsyX09h-7V4/dev"; 
+const API_URL = "https://script.google.com/macros/s/AKfycbxbuZVUPQ3W8QB-qrOxz0Y2GRMYbhJyrTtALToLn3fnz_HUDtDv5k-XZyKgjJj1qmhuKA/exec"; 
 
 var currentUser = null;
 var videoStream = null;
@@ -405,4 +405,5 @@ function showToast(type, m) {
 function toVNDate(d) {
   if (!d || !d.includes("-")) return d;
   var p = d.split("-"); return p[2] + "/" + p[1] + "/" + p[0];
+
 }
