@@ -9,6 +9,7 @@ var videoStream = null;
 var allHistoryData = [];
 var cachedContacts = [];
 var cachedLocations = [];
+var cachedMyRequests = null;
 
 // Cấu hình phân trang & thiết bị
 var myDeviceId = getDeviceId();
@@ -756,6 +757,7 @@ window.submitRequest = async function () {
   showToast(r.success ? "success" : "error", r.message);
   if (r.success) {
     closeRequestModal();
+    cachedMyRequests = null;
     loadMyRequests();
     if (typeVal === "Giải trình công") loadHistoryFull();
   }
@@ -1090,36 +1092,44 @@ window.filterContactsPopup = function () {
   list.innerHTML = html;
 };
 
-async function loadMyRequests() {
+async function loadMyRequests(forceReload = false) {
   var container = document.getElementById("request-list-container");
   if (!container) return;
+
+  // 1. KIỂM TRA CACHE: Nếu có cache và không bị ép tải lại -> Hiển thị ngay
+  if (cachedMyRequests && !forceReload) {
+      renderMyRequestsHTML(container, cachedMyRequests); // Gọi hàm render tách riêng
+      return; 
+  }
   
-  // Hiển thị hiệu ứng loading (Skeleton)
+  // 2. Nếu chưa có cache -> Hiện Skeleton và gọi Server
   container.innerHTML = SKELETON_REQUEST;
 
-  // Gọi Backend lấy dữ liệu
   const res = await callBackend("getMyRequests", [currentUser.Employee_ID]);
 
-  // --- [FIX LỖI] Xử lý dữ liệu an toàn ---
-  // Kiểm tra xem res là Array hay là Object {success: true, data: []}
+  // Xử lý dữ liệu trả về an toàn
   let data = [];
   if (res && Array.isArray(res)) {
-      data = res; // Trường hợp server trả về mảng trực tiếp
+      data = res;
   } else if (res && res.success && Array.isArray(res.data)) {
-      data = res.data; // Trường hợp server trả về object chuẩn
-  } else {
-      console.warn("Dữ liệu đề xuất không đúng định dạng:", res);
-      // Nếu lỗi, data vẫn là [] để không crash ứng dụng
+      data = res.data;
   }
 
-  // Kiểm tra nếu danh sách trống
+  // 3. LƯU VÀO CACHE
+  cachedMyRequests = data; 
+
+  // 4. Render dữ liệu
+  renderMyRequestsHTML(container, data);
+}
+
+// --- HÀM RENDER TÁCH RIÊNG (Để tái sử dụng code) ---
+function renderMyRequestsHTML(container, data) {
   if (!data || data.length === 0) {
     container.innerHTML = `<div class="text-center py-12 opacity-60"><div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm border border-slate-100"><i class="fa-solid fa-clipboard-check text-2xl text-slate-300"></i></div><p class="text-xs font-bold text-slate-400">Chưa có đề xuất nào</p></div>`;
     return;
   }
 
   var html = "";
-  // Duyệt qua mảng data đã được xử lý an toàn
   data.forEach(function (req) {
     var typeRaw = req["Type"] || "Khác";
     var fDate = req["From Date"] || req["From_Date"] || "";
@@ -1386,5 +1396,6 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
 
