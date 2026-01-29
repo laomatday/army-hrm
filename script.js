@@ -2,7 +2,7 @@
 // 1. CẤU HÌNH & BIẾN TOÀN CỤC
 // ==========================================
 // URL Web App từ Google Apps Script (Đã cấu hình doPost)
-const API_URL = "https://script.google.com/macros/s/AKfycbxoJMK84REKqWB5ZMNWfX9Ut_UBLHsnVYQ2a14zeXW750NMmk7zvPkMhiCtRTsqAXgvew/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwISZ4w-R-0SE-q2PmxmxL2d0uoLVioAGfTN9pJ877xbVVEpIV_eezSZ3JsFk6XqXJ2aQ/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -1090,55 +1090,30 @@ window.filterContactsPopup = function () {
   list.innerHTML = html;
 };
 
-// --- REQUESTS & HISTORY ---
 async function loadMyRequests() {
   var container = document.getElementById("request-list-container");
   if (!container) return;
   container.innerHTML = SKELETON_REQUEST;
 
-  // Thay google.script.run.getMyRequests
-  const data = await callBackend("getMyRequests", [currentUser.Employee_ID]);
+  const res = await callBackend("getMyRequests", [currentUser.Employee_ID]);
 
-  if (!data || data.length === 0) {
-    container.innerHTML = `<div class="text-center py-12 opacity-60"><div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm border border-slate-100"><i class="fa-solid fa-clipboard-check text-2xl text-slate-300"></i></div><p class="text-xs font-bold text-slate-400">Chưa có đề xuất nào</p></div>`;
+  // Kiểm tra res.success và res.data có phải mảng không
+  if (!res.success || !Array.isArray(res.data)) {
+    container.innerHTML = `<div class="text-center py-12 opacity-60">
+        <p class="text-xs font-bold text-slate-400">Không thể tải dữ liệu hoặc chưa có đề xuất</p>
+    </div>`;
     return;
   }
+
+  const requests = res.data; // Lấy mảng từ res.data
+  if (requests.length === 0) {
+    container.innerHTML = `... (HTML khi trống) ...`;
+    return;
+  }
+
   var html = "";
-  data.forEach(function (req) {
-    var typeRaw = req["Type"] || "Khác";
-    var fDate = req["From Date"] || req["From_Date"] || "";
-    var tDate = req["To Date"] || req["To_Date"] || "";
-    var dateDisplay = (fDate === tDate && fDate) ? fDate : (fDate + " - " + tDate);
-    if (!fDate) dateDisplay = "Đang cập nhật";
-    var reason = req["Reason"] || "Không có lý do";
-    var status = req["Status"] || "Pending";
-    
-    var badgeClass = "";
-    if (status === "Approved") badgeClass = "bg-emerald-50 text-emerald-600 border-emerald-100";
-    else if (status === "Rejected") badgeClass = "bg-red-50 text-red-600 border-red-100";
-    else badgeClass = "bg-orange-50 text-orange-600 border-orange-100";
-    
-    var statusBadge = `<span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold border ${badgeClass}">${status === "Approved" ? "Đã duyệt" : status === "Rejected" ? "Từ chối" : "Chờ duyệt"}</span>`;
-
-    var icon = "fa-file-lines";
-    var colorBg = "bg-slate-50 text-slate-500";
-    var typeLower = String(typeRaw).toLowerCase();
-    
-    if (typeLower.includes("giải trình")) { icon = "fa-file-pen"; colorBg = "bg-orange-50 text-orange-600"; }
-    else if (typeLower.includes("nghỉ")) { icon = "fa-umbrella-beach"; colorBg = "bg-blue-50 text-blue-600"; }
-    else if (typeLower.includes("công tác")) { icon = "fa-plane-departure"; colorBg = "bg-purple-50 text-purple-600"; }
-
-    html += `
-      <div class="bg-white p-5 rounded-[24px] shadow-sm border border-white animate-slide-up mb-4 relative overflow-hidden group hover:shadow-md transition-all">
-         <div class="flex justify-between items-start mb-4 relative z-10">
-            <div class="flex gap-4">
-                <div class="w-11 h-11 rounded-2xl ${colorBg} flex items-center justify-center text-lg shadow-inner border border-white"><i class="fa-solid ${icon}"></i></div>
-                <div><h4 class="font-black text-slate-800 text-sm leading-tight mb-1">${typeRaw}</h4><p class="text-[10px] font-bold text-slate-400 flex items-center gap-1">${dateDisplay}</p></div>
-            </div>
-            ${statusBadge}
-         </div>
-         <div class="bg-slate-50/80 p-3.5 rounded-2xl border border-slate-100 relative"><p class="text-xs font-medium text-slate-600 line-clamp-2 italic">"${reason}"</p></div>
-      </div>`;
+  requests.forEach(function (req) { // Giờ đây requests chắc chắn là mảng
+    // ... code render cũ của bạn ...
   });
   container.innerHTML = html;
 }
@@ -1370,3 +1345,4 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
