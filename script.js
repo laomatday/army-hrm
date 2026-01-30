@@ -3,7 +3,7 @@
 // ==========================================
 
 // [QUAN TRỌNG] Đảm bảo URL này đúng
-const API_URL = "https://script.google.com/macros/s/AKfycbxoAN3QL-p_8EfcKzParXAEJO_JaX6aW82YyT_4FArQpu61uWD5kPStYEAcS4zl-_xqNA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzmB4gRhWonHuAR2Fh4-6S2GNjfayGsbb6rCdvVuIn3af0gDGf_mu098px3uSMIMy0syQ/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -441,31 +441,21 @@ window.openNotifications = async function (mode) {
     return;
   }
 
+  // Backend đã lọc kỹ, Frontend chỉ việc hiển thị
   const approvals = res.data.approvals || [];
   const allMyRequests = res.data.myRequests || [];
   
-  // 1. XÁC ĐỊNH QUYỀN QUẢN LÝ (Chặt chẽ)
-  // Chỉ cho phép các Role sau được coi là Manager
-  const MANAGER_ROLES = ["Admin", "Manager", "HR", "Accountant", "Board"];
-  // Kiểm tra Role hiện tại có nằm trong list trên không (Khớp chính xác từng chữ cái)
-  const isClientRoleManager = MANAGER_ROLES.some(r => r === currentUser.Role); 
-  
-  // Điều kiện cuối: Server xác nhận là Manager VÀ Role client hợp lệ
-  const showApprovalSection = (res.isManager === true) && isClientRoleManager;
-
-  // 2. LỌC ĐƠN CỦA TÔI (Logic mới)
-  // Thay vì "Khác Pending", ta dùng "Là Approved hoặc Rejected" để chính xác tuyệt đối
-  // Dùng toLowerCase() để tránh lỗi hoa thường
+  // Lọc đơn kết quả của bản thân (Ẩn Pending đi cho đỡ rối)
   const myResultNotifications = allMyRequests.filter(req => {
-      const s = String(req.Status || "").trim().toLowerCase();
-      return s === "approved" || s === "rejected";
+      const s = String(req.Status || "").toLowerCase();
+      return s !== "pending"; 
   });
 
   let html = "";
   let hasData = false;
 
-  // --- KHỐI 1: CẦN DUYỆT (Chỉ hiện nếu là Manager xịn) ---
-  if (showApprovalSection && approvals.length > 0) {
+  // --- 1. PHẦN DUYỆT ĐƠN (Chỉ hiện nếu Backend trả về có dữ liệu) ---
+  if (approvals.length > 0) {
       html += `<div class="mb-6"><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-solid fa-layer-group text-emerald-500"></i> Cần duyệt (${approvals.length})</h3><div class="space-y-4">`;
       
       approvals.forEach(req => {
@@ -505,7 +495,7 @@ window.openNotifications = async function (mode) {
       return; 
   }
 
-  // --- KHỐI 2: KẾT QUẢ CỦA TÔI (Cho tất cả mọi người) ---
+  // --- 2. PHẦN KẾT QUẢ CỦA TÔI (Ẩn khi đang ở mode chuyên duyệt) ---
   if (mode !== "approve" && myResultNotifications.length > 0) {
       if (hasData) html += `<div class="h-px bg-slate-100 my-6 mx-4"></div>`;
 
@@ -1220,6 +1210,7 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
 
 
