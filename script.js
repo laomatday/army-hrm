@@ -2,8 +2,8 @@
 // 1. CẤU HÌNH & BIẾN TOÀN CỤC
 // ==========================================
 
-// [QUAN TRỌNG] Đảm bảo URL này đúng
-const API_URL = "https://script.google.com/macros/s/AKfycbwmXM4eKbkbFdO9a3f3hYWWBzmW31u5NB_pWdd7R6pyo8SqhNn0bNOu5x5iT3x4mfA35g/exec";
+// [QUAN TRỌNG] Thay URL này bằng URL Web App của bạn (kết thúc bằng /exec)
+const API_URL = "https://script.google.com/macros/s/AKfycbxtn7rJeJscJcrMaEaQRwnpMdEEL907IDLdmD8j7uLPOgot89SujRbIY9IY5ZlsDRHySA/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -47,24 +47,19 @@ const SKELETON_REQUEST = `
      <div class="h-10 w-full bg-slate-200 rounded-2xl"></div>
   </div>`.repeat(3);
 
+// --- HÀM GỌI BACKEND (THAY THẾ GOOGLE.SCRIPT.RUN) ---
 async function callBackend(functionName, params = []) {
   try {
     const response = await fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" }, // Header này OK
+      headers: { "Content-Type": "text/plain;charset=utf-8" }, // Text/plain để tránh CORS preflight
       body: JSON.stringify({ action: functionName, params: params }) 
     });
-    
     const text = await response.text();
-    try {
-      return JSON.parse(text); // Thử Parse JSON
-    } catch (e) {
-      console.error("Lỗi từ Server (Không phải JSON):", text.slice(0, 200)); 
-      throw new Error("Dữ liệu trả về từ máy chủ không hợp lệ.");
-    }
+    return JSON.parse(text);
   } catch (error) {
-    console.error("Lỗi kết nối:", error);
-    return { success: false, message: "Lỗi kết nối: " + error.message };
+    console.error("Lỗi Backend:", error);
+    return { success: false, message: "Lỗi kết nối server: " + error.message };
   }
 }
 
@@ -102,7 +97,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-// [ĐÃ SỬA] Dùng callBackend thay google.script.run
 window.handleLogin = async function () {
   var emailEl = document.getElementById("login-user");
   var passEl = document.getElementById("login-pass");
@@ -114,6 +108,7 @@ window.handleLogin = async function () {
   }
   
   showLoading(true);
+  // Backend doLogin(username, password, deviceId)
   const res = await callBackend("doLogin", [emailEl.value.trim(), passEl.value.trim(), myDeviceId]);
   showLoading(false);
 
@@ -226,14 +221,17 @@ function renderUserInfo() {
     setText(prefix + "-position-badge", displayTitle);
     setText(prefix + "-location-badge", displayLocation);
   });
-  const adminRoles = ["Admin", "Manager", "HR"];
+  
+  const adminRoles = ["Admin", "Manager", "HR", "Board"];
   const btnApproval = document.getElementById("btn-profile-approval");
   if (btnApproval) {
       btnApproval.classList.toggle("hidden", adminRoles.indexOf(currentUser.Role) === -1);
   }
+  
   const avatarUrl = (currentUser.Avatar && currentUser.Avatar.startsWith("http")) 
       ? currentUser.Avatar 
       : "https://ui-avatars.com/api/?name=" + encodeURIComponent(currentUser.Name) + "&background=059669&color=fff";
+  
   document.querySelectorAll("#user-avatar, #profile-user-avatar, #req-user-avatar, #contact-user-avatar, #edit-avatar-preview").forEach(img => {
       img.src = avatarUrl;
       img.style.objectFit = "cover";
@@ -252,14 +250,17 @@ window.switchTab = function (tabName) {
   });
   var target = document.getElementById("tab-" + tabName);
   if (target) target.classList.remove("hidden");
+  
   var navItems = document.querySelectorAll(".nav-item");
   var idxMap = { home: 0, requests: 1, contacts: 2, profile: 3 };
   navItems.forEach((item, index) => {
     var isActive = index === idxMap[tabName];
     item.classList.toggle("active", isActive);
+    
     var ind = item.querySelector(".nav-indicator");
     if(ind) ind.style.opacity = isActive ? "1" : "0";
   });
+  
   if (tabName === "contacts" && (!cachedContacts || cachedContacts.length === 0)) {
     loadContacts();
   } else if (tabName === "requests") {
@@ -290,7 +291,6 @@ function toggleHomeState(state) {
 // 4. LOGIC LỊCH SỬ & CHECK-IN
 // ==========================================
 
-// [ĐÃ SỬA] Dùng callBackend
 async function loadHistoryFull() {
   if (!currentUser) return;
   var d = new Date();
@@ -306,18 +306,22 @@ async function loadHistoryFull() {
   if (daysStat) daysStat.innerHTML = '<span class="animate-pulse opacity-50">--</span>';
   if (leaveStat) leaveStat.innerHTML = '<span class="animate-pulse opacity-50">--</span>';
 
+  // Backend: getHistory(employeeId)
   const res = await callBackend("getHistory", [currentUser.Employee_ID]);
   
   if (res) {
       allHistoryData = res.history || [];
       var stats = res.summary || { workDays: 0, lateMins: 0, errorCount: 0, remainingLeave: 12, leaveDays: 0 };
       currentHistoryPage = 0;
+      
+      // Tính ngày công chuẩn
       var daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
       var standardDays = 0;
       for (var i = 1; i <= daysInMonth; i++) {
         var tempDate = new Date(currentYear, currentMonth - 1, i);
         if (tempDate.getDay() !== 0) standardDays++; 
       }
+      
       setText("home-stat-days", stats.workDays);
       setText("home-stat-label", "Công chuẩn: " + standardDays);
       var percent = standardDays > 0 ? Math.round((stats.workDays / standardDays) * 100) : 0;
@@ -325,21 +329,26 @@ async function loadHistoryFull() {
       setText("work-percentage", percent + "%");
       var workBar = document.getElementById("work-progress-bar");
       if (workBar) workBar.style.width = percent + "%";
+      
       var used = stats.leaveDays !== undefined ? stats.leaveDays : 0;
       setText("home-stat-leave", used);
       var remaining = stats.remainingLeave !== undefined ? stats.remainingLeave : 12;
       var labelEl = document.getElementById("leave-stat-label");
       if (labelEl) labelEl.innerText = remaining + " phép còn lại";
+      
       var estimatedMax = used + remaining; 
       if (estimatedMax === 0) estimatedMax = 12; 
       var leavePercent = (remaining / estimatedMax) * 100;
       if(leavePercent < 0) leavePercent = 0;
       if(leavePercent > 100) leavePercent = 100;
+      
       var leaveBar = document.getElementById("leave-progress-bar");
       if (leaveBar) leaveBar.style.width = leavePercent + "%";
+      
       setText("hist-total-days", stats.workDays);
       setText("hist-late-mins", stats.lateMins);
       setText("hist-errors", stats.errorCount);
+      
       var vnDate = ("0" + d.getDate()).slice(-2) + "/" + ("0" + (d.getMonth() + 1)).slice(-2) + "/" + d.getFullYear();
       var isCurrentlyCheckedIn = false;
       if (allHistoryData.length > 0) {
@@ -349,6 +358,7 @@ async function loadHistoryFull() {
           }
       }
       toggleHomeState(isCurrentlyCheckedIn ? "working" : "idle");
+      
       if (!document.getElementById("view-act-history").classList.contains("hidden")) {
         renderActivityHistory();
       }
@@ -376,7 +386,6 @@ window.closeCamera = function () {
   toggleGlobalNav(true);
 };
 
-// [ĐÃ SỬA] Dùng callBackend
 window.takePicture = async function () {
   var v = document.getElementById("video");
   var c = document.createElement("canvas");
@@ -389,6 +398,7 @@ window.takePicture = async function () {
   
   navigator.geolocation.getCurrentPosition(
     async function (p) {
+      // Backend: doCheckIn(dataObject) -> Params mảng [{...}]
       const r = await callBackend("doCheckIn", [{
           employeeId: currentUser.Employee_ID,
           lat: p.coords.latitude,
@@ -412,16 +422,20 @@ window.takePicture = async function () {
   );
 };
 
-// [ĐÃ SỬA] Dùng callBackend
 window.triggerCheckOut = function () {
   showDialog("confirm", "Check-out", "Bạn muốn kết thúc ca làm việc?", async function () {
     showLoading(true);
+    // Backend: doCheckOut({employeeId}) -> Params mảng [{...}]
     const r = await callBackend("doCheckOut", [{ employeeId: currentUser.Employee_ID }]);
     showLoading(false);
     showToast(r.success ? "success" : "error", r.message);
     if (r.success) loadHistoryFull();
   });
 };
+
+// ==========================================
+// 5. THÔNG BÁO & DUYỆT ĐƠN (HYBRID LOGIC)
+// ==========================================
 
 window.openNotifications = async function (mode) {
   var modal = document.getElementById("modal-notifications");
@@ -430,48 +444,67 @@ window.openNotifications = async function (mode) {
   if (!modal || !content) return;
 
   titleEl.innerText = (mode === "approve") ? "Duyệt đơn từ" : "Thông báo";
+  
+  // Ẩn dot
+  document.querySelectorAll('[id^="noti-dot"], [id^="profile-noti-dot"]').forEach(d => d.classList.add("hidden"));
   modal.classList.remove("hidden");
   content.innerHTML = SKELETON_REQUEST;
 
+  // Backend: getMobileNotifications(employeeId)
   const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
-  if (!res.success) { content.innerHTML = "Lỗi tải dữ liệu"; return; }
 
+  if (!res.success) {
+    content.innerHTML = '<div class="text-center py-20 text-slate-400">Lỗi tải dữ liệu</div>';
+    return;
+  }
+
+  // Lấy dữ liệu từ cấu trúc mới { approvals, myHistory }
+  const { approvals, myHistory } = res.data;
+  const isManager = res.isManager;
+
+  // ĐIỀU PHỐI HIỂN THỊ
   if (mode === "approve") {
-    // Chế độ 3: Chỉ hiện đơn cần duyệt
-    renderManagerApprovalView(res.data.approvals);
+      // 1. TRANG DUYỆT ĐƠN (Dành cho Sếp)
+      renderManagerApprovalView(approvals);
   } else {
-    // Chế độ 2: Staff & Manager (Kết quả tháng + Đơn cần duyệt nếu có)
-    renderGeneralNotificationView(res.data, res.isManager);
+      // 2. TRANG THÔNG BÁO CHUNG (Dành cho mọi người)
+      renderGeneralNotificationView(approvals, myHistory, isManager);
   }
 };
 
-// VIEW 1: Dành cho mọi nhân sự (Staff & Sếp)
-function renderGeneralNotificationView(data, isManager) {
+// VIEW 1: Thông báo chung
+function renderGeneralNotificationView(approvals, myHistory, isManager) {
   const content = document.getElementById("noti-content-area");
   let html = "";
+  let hasData = false;
 
-  // 1. Hiện đơn cần duyệt lên đầu (Nếu là Sếp)
-  if (isManager && data.approvals && data.approvals.length > 0) {
-    html += `<div class="mb-6"><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-layer-group text-emerald-500"></i> Cần bạn duyệt (${data.approvals.length})</h3>`;
-    data.approvals.forEach(req => html += buildApprovalCard(req));
+  // A. Đơn cần duyệt (Chỉ hiện nếu là Sếp và có đơn)
+  if (isManager && approvals && approvals.length > 0) {
+    html += `<div class="mb-6"><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-solid fa-layer-group text-emerald-500"></i> Cần bạn duyệt (${approvals.length})</h3>`;
+    approvals.forEach(req => html += buildApprovalCard(req));
     html += `</div><div class="h-px bg-slate-100 my-4 mx-4"></div>`;
+    hasData = true;
   }
 
-  // 2. Hiện kết quả đơn của chính mình trong tháng
-  if (data.myHistory && data.myHistory.length > 0) {
-    html += `<div><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-regular fa-bell text-orange-500"></i> Đã duyệt trong tháng</h3><div class="space-y-3">`;
-    data.myHistory.forEach(req => html += buildResultCard(req));
+  // B. Kết quả đơn của tôi (Trong tháng)
+  if (myHistory && myHistory.length > 0) {
+    html += `<div><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-regular fa-bell text-orange-500"></i> Đã duyệt trong tháng</h3><div class="space-y-3">`;
+    myHistory.forEach(req => html += buildResultCard(req));
     html += `</div></div>`;
+    hasData = true;
   }
 
-  content.innerHTML = html || '<div class="text-center py-24 opacity-50 text-xs font-bold uppercase">Không có thông báo mới</div>';
+  if (!hasData) {
+    html = '<div class="text-center py-24 opacity-50"><i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i><p class="text-xs text-slate-400 font-bold uppercase">Không có thông báo mới</p></div>';
+  }
+  content.innerHTML = html;
 }
 
-// VIEW 2: Chỉ dành cho trang Duyệt đơn từ
+// VIEW 2: Chuyên duyệt đơn
 function renderManagerApprovalView(approvals) {
   const content = document.getElementById("noti-content-area");
   if (!approvals || approvals.length === 0) {
-    content.innerHTML = '<div class="text-center py-24 opacity-50 text-xs font-bold uppercase">Đã duyệt hết đơn cần làm</div>';
+    content.innerHTML = '<div class="text-center py-24 opacity-50"><i class="fa-solid fa-check-circle text-4xl mb-3 text-emerald-200"></i><p class="text-xs text-slate-400 font-bold uppercase">Đã duyệt hết đơn cần làm</p></div>';
     return;
   }
   let html = '<div class="space-y-4">';
@@ -480,37 +513,60 @@ function renderManagerApprovalView(approvals) {
   content.innerHTML = html;
 }
 
-// HELPER: Thẻ chờ duyệt (Có nút bấm)
+// HELPER: Card duyệt (Có nút)
 function buildApprovalCard(req) {
-  return `<div class="bg-white p-5 rounded-[24px] shadow-sm border border-slate-50 mb-3 animate-slide-up">
-    <div class="flex justify-between items-start mb-3">
-        <div class="font-bold text-sm text-slate-800">${req.Name || req.Employee_ID}</div>
-        <span class="text-[9px] px-2 py-1 bg-blue-50 text-blue-600 rounded-lg font-black uppercase">${req.Type}</span>
-    </div>
-    <div class="text-[11px] text-slate-500 mb-4 line-clamp-2 italic">"${req.Reason}"</div>
-    <div class="grid grid-cols-2 gap-3">
-        <button onclick="openRejectModal('${req.Request_ID}')" class="py-2.5 bg-slate-50 text-red-500 rounded-xl text-xs font-bold active:scale-95 transition-all">Từ chối</button>
-        <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" class="py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold active:scale-95 transition-all shadow-md shadow-emerald-100">Duyệt đơn</button>
-    </div>
-  </div>`;
+  var isLeave = (req.Type || "").toLowerCase().includes("nghỉ");
+  var badgeClass = isLeave ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-purple-50 text-purple-600 border-purple-100";
+  var avatarHtml = getAvatarHtml(req.Name, req.Avatar, "w-10 h-10", "text-xs");
+
+  return `
+    <div class="bg-white p-5 rounded-[24px] shadow-sm border border-slate-50 animate-slide-up relative overflow-hidden group">
+        <div class="flex justify-between items-start mb-3">
+            <div class="flex items-center gap-3">
+                ${avatarHtml}
+                <div>
+                    <h4 class="font-bold text-slate-800 text-sm leading-tight">${req.Name}</h4>
+                    <p class="text-[10px] font-bold text-slate-400 mt-0.5">${req.Position} • ${req.Center_Name}</p>
+                </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold border ${badgeClass} uppercase tracking-wide">${req.Type}</span>
+        </div>
+        <div class="bg-slate-50/80 rounded-2xl p-3 mb-4 border border-slate-100">
+             <div class="flex items-center gap-2 text-xs font-bold text-slate-700 mb-1">
+                <i class="fa-regular fa-calendar text-emerald-500"></i> ${req.Dates}
+             </div>
+             <p class="text-xs text-slate-500 italic line-clamp-2 pl-6 border-l-2 border-slate-200">"${req.Reason}"</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="openRejectModal('${req.Request_ID}')" class="py-2.5 rounded-xl bg-white border border-red-100 text-red-500 text-xs font-bold active:scale-95 transition-all shadow-sm">Từ chối</button>
+            <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold active:scale-95 transition-all shadow-md">Duyệt đơn</button>
+        </div>
+    </div>`;
 }
 
-// HELPER: Thẻ kết quả (Chỉ xem)
+// HELPER: Card kết quả (Chỉ xem)
 function buildResultCard(req) {
-  const isAppr = String(req.Status).toLowerCase() === 'approved';
-  const color = isAppr ? 'emerald' : 'red';
-  return `<div class="bg-white p-4 rounded-3xl shadow-sm border border-${color}-50 flex items-center gap-4 animate-slide-up">
-    <div class="w-10 h-10 rounded-2xl bg-${color}-50 text-${color}-600 flex items-center justify-center shadow-sm shrink-0">
-        <i class="fa-solid ${isAppr ? 'fa-check' : 'fa-xmark'}"></i>
-    </div>
-    <div class="flex-1">
-        <div class="flex justify-between items-center">
-            <h4 class="text-xs font-bold text-slate-800">${req.Type}</h4>
-            <span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-${color}-100 text-${color}-700 uppercase">${isAppr ? 'Đã duyệt' : 'Từ chối'}</span>
+  var s = String(req.Status).toLowerCase();
+  var isAppr = s === "approved";
+  var statusText = isAppr ? "Đã duyệt" : "Từ chối";
+  var statusIcon = isAppr ? "fa-check" : "fa-xmark";
+  var statusColor = isAppr ? "text-emerald-500 bg-emerald-50" : "text-red-500 bg-red-50";
+  var cardBg = isAppr ? "border-emerald-100" : "border-red-100";
+
+  return `
+    <div class="bg-white p-4 rounded-3xl shadow-sm border ${cardBg} flex items-center gap-4 animate-slide-up">
+        <div class="w-10 h-10 rounded-2xl ${statusColor} flex items-center justify-center text-lg shadow-sm shrink-0">
+            <i class="fa-solid ${statusIcon}"></i>
         </div>
-        <p class="text-[9px] text-slate-400 font-bold mt-0.5">${req.From_Date || req["From Date"]}</p>
-    </div>
-  </div>`;
+        <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-center">
+                 <h4 class="text-sm font-bold text-slate-800">${req.Type}</h4>
+                 <span class="text-[9px] font-extrabold px-2 py-0.5 rounded ${statusColor} border border-current opacity-80">${statusText}</span>
+            </div>
+            <p class="text-[10px] text-slate-400 font-bold mt-0.5">${req.Dates}</p>
+            ${req.Note ? `<p class="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded mt-1.5 italic line-clamp-1"><i class="fa-solid fa-reply mr-1"></i>${req.Note}</p>` : ""}
+        </div>
+    </div>`;
 }
 
 window.closeNotifications = function () {
@@ -524,10 +580,12 @@ window.checkNewNotifications = async function () {
   const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
   var notiDot = document.getElementById("noti-dot");
   var profileDot = document.getElementById("profile-noti-dot");
+  
   if (notiDot) notiDot.classList.add("hidden");
   if (profileDot) profileDot.classList.add("hidden");
-  if (res.success) {
-    var count = res.data.approvals ? res.data.approvals.length : 0;
+  
+  if (res.success && res.data.approvals) {
+    var count = res.data.approvals.length;
     if (count > 0) {
       if (notiDot) notiDot.classList.remove("hidden");
       if (profileDot) profileDot.classList.remove("hidden");
@@ -565,11 +623,13 @@ window.handleConfirmReject = function() {
 window.processRequestMobile = async function (reqId, status, rejectReason) {
   showLoading(true);
   var note = status === "Approved" ? "Đã duyệt" : rejectReason || "";
+  // Backend: processRequestAdmin(reqId, status, note, managerName, managerId)
   const res = await callBackend("processRequestAdmin", [reqId, status, note, currentUser.Name, currentUser.Employee_ID]);
   showLoading(false);
   showToast(res.success ? "success" : "error", res.message);
   if (res.success) {
     var titleEl = document.getElementById("modal-noti-title");
+    // Nếu đang ở trang duyệt thì reload trang duyệt, ngược lại reload thông báo chung
     var currentMode = (titleEl && titleEl.innerText.includes("Duyệt")) ? "approve" : "all";
     openNotifications(currentMode);
     checkNewNotifications();
@@ -628,6 +688,7 @@ window.submitRequest = async function () {
   var typeVal = currentReqType;
   if (typeVal === "Giải trình" || typeVal === "Explanation") typeVal = "Giải trình công";
   if (!reason) return showToast("error", "Vui lòng nhập nội dung chi tiết!");
+  
   var payload = {
     employeeId: currentUser.Employee_ID,
     name: currentUser.Name,
@@ -636,15 +697,19 @@ window.submitRequest = async function () {
     toDate: finalTo,
     reason: reason,
   };
+  
   showLoading(true);
   const r = await callBackend("submitRequest", [payload]);
   showLoading(false);
-  showToast(r.success ? "success" : "error", r.message);
+  
   if (r.success) {
+    showToast("success", r.message);
     closeRequestModal();
     cachedMyRequests = null; 
     loadMyRequests();
     if (typeVal === "Giải trình công") loadHistoryFull();
+  } else {
+    showToast("error", r.message);
   }
 };
 
@@ -1187,18 +1252,3 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
