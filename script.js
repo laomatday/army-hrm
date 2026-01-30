@@ -129,6 +129,18 @@ window.handleLogin = async function () {
   } else {
     showDialog("error", "Đăng nhập thất bại", res.message);
   }
+  var inputUser = document.getElementById("login-user");
+  var inputPass = document.getElementById("login-pass");
+
+  function triggerLoginOnEnter(event) {
+    if (event.key === "Enter") {
+      event.preventDefault(); // Ngăn reload trang nếu có thẻ form
+      handleLogin(); // Gọi hàm đăng nhập
+    }
+  }
+
+  if (inputUser) inputUser.addEventListener("keydown", triggerLoginOnEnter);
+  if (inputPass) inputPass.addEventListener("keydown", triggerLoginOnEnter);
 };
 
 window.logout = function () {
@@ -1369,6 +1381,7 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
 
 
