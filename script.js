@@ -1,5 +1,5 @@
 
-const API_URL = "https://script.google.com/macros/s/AKfycbz1xi6NFKFnaNWJLYU5jnoVITxJbpb7ZMXNkDlW9FfpD0hh0GalG3dUnC-66WjvJTPttw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzJcBcHFJ9ZL1esLN9xf0bsmcLhJxK87NTCBIS5PwzjS1QYhFY2E-lauKGjuX9PYouIqw/exec";
 
 // ==========================================
 // 1. CẤU HÌNH & BIẾN TOÀN CỤC
@@ -1369,5 +1369,6 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
 
