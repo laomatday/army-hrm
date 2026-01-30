@@ -478,26 +478,26 @@
             >THỜI GIAN ÁP DỤNG</label
           >
           <div class="flex items-center gap-3">
-            <div
-              class="flex-1 bg-slate-50 rounded-2xl px-3 py-3 flex items-center gap-2 border border-transparent focus-within:bg-white focus-within:shadow-sm transition-all"
-              onclick="document.getElementById('req-date-start').showPicker()"
-            >
-              <i class="fa-regular fa-calendar text-slate-400 text-sm ml-1"></i>
+            <div class="flex-1 bg-slate-50 rounded-2xl px-3 py-3 flex items-center gap-2 border border-transparent focus-within:bg-white focus-within:shadow-sm transition-all relative">
+              <i class="fa-regular fa-calendar text-slate-400 text-sm ml-1 z-10 pointer-events-none"></i>
               <input
                 type="date"
                 id="req-date-start"
-                class="input-clean"
-                onchange="autoFillEndDate()"
-                onclick="this.showPicker()"
+                class="absolute inset-0 w-full h-full opacity-0 z-20 cursor-pointer"
+                onchange="updateDateDisplay('start'); autoFillEndDate()"
               />
+              <span id="display-date-start" class="text-sm font-bold text-slate-700 z-10 pointer-events-none">Chọn ngày</span>
             </div>
-            <div
-              class="flex-1 bg-slate-50 rounded-2xl px-3 py-3 flex items-center gap-2 border border-transparent focus-within:bg-white focus-within:shadow-sm transition-all"
-              id="req-date-end-container"
-              onclick="document.getElementById('req-date-end').showPicker()"
-            >
-              <i class="fa-regular fa-calendar-check text-slate-400 text-sm ml-1"></i>
-              <input type="date" id="req-date-end" class="input-clean" onclick="this.showPicker()" />
+          
+            <div class="flex-1 bg-slate-50 rounded-2xl px-3 py-3 flex items-center gap-2 border border-transparent focus-within:bg-white focus-within:shadow-sm transition-all relative">
+              <i class="fa-regular fa-calendar-check text-slate-400 text-sm ml-1 z-10 pointer-events-none"></i>
+              <input
+                type="date"
+                id="req-date-end"
+                class="absolute inset-0 w-full h-full opacity-0 z-20 cursor-pointer"
+                onchange="updateDateDisplay('end')"
+              />
+              <span id="display-date-end" class="text-sm font-bold text-slate-700 z-10 pointer-events-none">Chọn ngày</span>
             </div>
           </div>
         </div>
