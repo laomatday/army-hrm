@@ -490,15 +490,16 @@ window.openNotifications = async function (mode) {
   var titleEl = document.getElementById("modal-noti-title");
   if (!modal || !content) return;
 
-  // mode = 'approve': Bấm từ nút "Duyệt giải trình" (Profile) -> Chỉ hiện đơn Cần duyệt
-  // mode = 'all': Bấm từ cái Chuông (Home) -> Hiện Cần duyệt + Đơn của tôi
+  // mode = 'approve': Vào từ Profile -> Chỉ hiện đơn cần duyệt
+  // mode = 'all': Vào từ Chuông -> Hiện tất cả
   titleEl.innerText = (mode === "approve") ? "Duyệt đơn từ" : "Thông báo";
 
+  // Ẩn các chấm đỏ khi đã mở
   document.querySelectorAll('[id^="noti-dot"], [id^="profile-noti-dot"]').forEach(d => d.classList.add("hidden"));
   modal.classList.remove("hidden");
-  content.innerHTML = SKELETON_REQUEST;
+  content.innerHTML = SKELETON_REQUEST; // Hiệu ứng loading
 
-  // Gọi Backend
+  // Gọi Backend để lấy dữ liệu mới nhất
   const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
 
   if (!res.success) {
@@ -508,14 +509,15 @@ window.openNotifications = async function (mode) {
 
   const approvals = res.data.approvals || [];
   const myRequests = res.data.myRequests || [];
-  const isManager = res.isManager || (currentUser.Role !== "Staff"); // Check quyền từ server
+  
+  // [QUAN TRỌNG] Lấy quyền quản lý chính xác từ Backend trả về
+  // Backend đã kiểm tra: Admin/HR/Board HOẶC có nhân viên cấp dưới (Direct_Manager_ID)
+  const isManager = res.isManager === true; 
 
   let html = "";
   let hasData = false;
 
-  // --- PHẦN 1: DUYỆT ĐƠN (Chỉ hiện cho Quản lý/Admin) ---
-  // Yêu cầu: "Duyệt đơn chỉ hiện các đơn cần duyệt" (mode='approve')
-  // Yêu cầu: "Riêng admin, quản lý... thì thêm các đơn cần duyệt" (mode='all')
+  // --- PHẦN 1: DANH SÁCH CẦN DUYỆT (Dành cho Quản lý) ---
   if (isManager && approvals.length > 0) {
       html += `<div class="mb-6"><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Cần duyệt (${approvals.length})</h3><div class="space-y-4">`;
       
@@ -551,16 +553,14 @@ window.openNotifications = async function (mode) {
       html += "</div></div>";
       hasData = true;
   } else if (mode === "approve") {
-      // Nếu bấm nút "Duyệt đơn" (Profile) mà không còn đơn nào
+      // Nếu vào chế độ duyệt mà không có đơn nào
       html += '<div class="text-center py-24 opacity-50"><i class="fa-solid fa-check-circle text-4xl mb-3 text-emerald-200"></i><p class="text-xs text-slate-400 font-bold uppercase">Đã duyệt hết các đơn!</p></div>';
       content.innerHTML = html;
-      return;
+      return; // Dừng lại, không hiện phần "Đơn của tôi" bên dưới
   }
 
-  // --- PHẦN 2: ĐƠN CỦA TÔI (Cho Staff và cả Manager) ---
-  // Yêu cầu: "Đối với staff thì thông báo chỉ hiện các đơn... (của mình)"
-  // Yêu cầu: "Đề xuất thì hiện các đơn" -> Đã có ở tab Requests, nhưng modal này cũng hiển thị lịch sử cho tiện
-  // Lưu ý: Nếu đang ở mode 'approve' (chuyên duyệt đơn), ta KHÔNG hiện phần này để tập trung duyệt.
+  // --- PHẦN 2: ĐƠN CỦA TÔI (Dành cho tất cả) ---
+  // Chỉ hiện khi KHÔNG PHẢI chế độ duyệt đơn tập trung (mode !== 'approve')
   if (mode !== "approve" && myRequests.length > 0) {
       html += '<div><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-regular fa-bell"></i> Đơn của tôi</h3><div class="space-y-3">';
       
@@ -590,6 +590,7 @@ window.openNotifications = async function (mode) {
       hasData = true;
   }
 
+  // Trường hợp trống trơn
   if (!hasData && mode !== "approve") {
       html = '<div class="text-center py-24 opacity-50"><i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i><p class="text-xs text-slate-400 font-bold uppercase">Không có thông báo mới</p></div>';
   }
@@ -658,26 +659,26 @@ window.processRequestMobile = async function (reqId, status, rejectReason) {
   showLoading(true);
   var note = status === "Approved" ? "Đã duyệt" : rejectReason || "";
 
-  // [QUAN TRỌNG] Thêm currentUser.Employee_ID vào tham số thứ 5
-  // Để Backend biết ai đang duyệt -> Rebuild cache cho người đó -> Danh sách cập nhật ngay
+  // [QUAN TRỌNG] Tham số thứ 5: currentUser.Employee_ID
+  // Giúp backend biết ai đang duyệt để cập nhật lại Cache của người đó ngay lập tức
   const res = await callBackend("processRequestAdmin", [
       reqId, 
       status, 
       note, 
       currentUser.Name, 
-      currentUser.Employee_ID // <--- Cần cái này để fix lỗi đơn biến mất
+      currentUser.Employee_ID 
   ]);
 
   showLoading(false);
   showToast(res.success ? "success" : "error", res.message);
   
   if (res.success) {
-    // Refresh lại UI ngay lập tức
+    // Tự động tải lại giao diện
     var titleEl = document.getElementById("modal-noti-title");
     var currentMode = (titleEl && titleEl.innerText.includes("Duyệt")) ? "approve" : "all";
     
-    openNotifications(currentMode);
-    checkNewNotifications(); // Cập nhật lại chấm đỏ
+    openNotifications(currentMode); // Vẽ lại danh sách (đã loại bỏ đơn vừa duyệt)
+    checkNewNotifications(); // Cập nhật lại số chấm đỏ
   }
 };
 
@@ -1374,6 +1375,7 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
 
 
