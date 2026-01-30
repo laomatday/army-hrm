@@ -3,7 +3,7 @@
 // ==========================================
 
 // [QUAN TRỌNG] Thay URL này bằng Web App URL của bạn (kết thúc bằng /exec)
-const API_URL = "https://script.google.com/macros/s/AKfycbzTrt99dOR3V6HbZkvLPPiuEauYsXXu8Wr85axoKLmfIKN_Nn9uHxhbkEtDaZ-dtyXSZA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzrgCU3ojPT4HKue4n_tCdi31uUxsFDK4WEXbb3XBQIHZ7iN1jkLlsgBGFn73noZDv38g/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -643,13 +643,21 @@ window.processRequestMobile = async function (reqId, status, rejectReason) {
   showLoading(true);
   var note = status === "Approved" ? "Đã duyệt" : rejectReason || "";
 
-  // API Call
-  const res = await callBackend("processRequestAdmin", [reqId, status, note, currentUser.Name]);
+  // [CẬP NHẬT] Thêm currentUser.Employee_ID vào tham số thứ 5
+  // Để Backend biết ai đang duyệt mà rebuild cache cho người đó
+  const res = await callBackend("processRequestAdmin", [
+      reqId, 
+      status, 
+      note, 
+      currentUser.Name, 
+      currentUser.Employee_ID // <--- QUAN TRỌNG: Thêm cái này
+  ]);
 
   showLoading(false);
   showToast(res.success ? "success" : "error", res.message);
   if (res.success) {
-    openNotifications("approve");
+    // Tự động cập nhật lại số liệu trên giao diện mà không cần gọi server lại
+    openNotifications("approve"); 
     checkNewNotifications();
   }
 };
@@ -1347,4 +1355,5 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
