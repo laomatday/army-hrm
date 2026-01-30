@@ -3,7 +3,7 @@
 // ==========================================
 
 // [QUAN TRỌNG] Thay URL này bằng Web App URL của bạn (kết thúc bằng /exec)
-const API_URL = "https://script.google.com/macros/s/AKfycbxl-7C5j6pH6NzYeGAKikUyztKI37zMYSOEaEJNYsRSXSxzOw1-2rqpvJnH8UC0ZzsHGg/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbz6oegNbTLUXqCMtIqpRrWI81H4pj_hmNe4p3wYEJdTUgjjyMSEOzvhyeGqYNiwSb0ocQ/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -484,87 +484,83 @@ window.triggerCheckOut = function () {
   });
 };
 
-window.openNotifications = async function (mode) {
+window.openNotifications = function (mode) {
   var modal = document.getElementById("modal-notifications");
   var content = document.getElementById("noti-content-area");
   var titleEl = document.getElementById("modal-noti-title");
   if (!modal || !content) return;
 
-  // mode = 'approve': Vào từ Profile -> Chỉ hiện đơn cần duyệt
-  // mode = 'all': Vào từ Chuông -> Hiện tất cả
   titleEl.innerText = (mode === "approve") ? "Duyệt đơn từ" : "Thông báo";
 
-  // Ẩn các chấm đỏ khi đã mở
   document.querySelectorAll('[id^="noti-dot"], [id^="profile-noti-dot"]').forEach(d => d.classList.add("hidden"));
   modal.classList.remove("hidden");
-  content.innerHTML = SKELETON_REQUEST; // Hiệu ứng loading
+  content.innerHTML = SKELETON_REQUEST;
 
-  // Gọi Backend để lấy dữ liệu mới nhất
-  const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
+  google.script.run
+    .withSuccessHandler(function (res) {
+      if (!res.success) {
+         content.innerHTML = '<div class="text-center py-20 text-slate-400">Lỗi tải dữ liệu</div>';
+         return;
+      }
 
-  if (!res.success) {
-    content.innerHTML = '<div class="text-center py-20 text-slate-400">Lỗi tải dữ liệu</div>';
-    return;
-  }
-
-  const approvals = res.data.approvals || [];
-  const myRequests = res.data.myRequests || [];
-  
-  // [QUAN TRỌNG] Lấy quyền quản lý chính xác từ Backend trả về
-  // Backend đã kiểm tra: Admin/HR/Board HOẶC có nhân viên cấp dưới (Direct_Manager_ID)
-  const isManager = res.isManager === true; 
-
-  let html = "";
-  let hasData = false;
-
-  // --- PHẦN 1: DANH SÁCH CẦN DUYỆT (Dành cho Quản lý) ---
-  if (isManager && approvals.length > 0) {
-      html += `<div class="mb-6"><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Cần duyệt (${approvals.length})</h3><div class="space-y-4">`;
+      var approvals = res.data.approvals || [];
+      var myRequests = res.data.myRequests || [];
       
-      approvals.forEach(req => {
+      // [QUAN TRỌNG] Lấy quyền quản lý từ Server
+      var isManager = res.isManager === true; 
+
+      var html = "";
+      var hasData = false;
+
+      // --- 1. PHẦN DUYỆT ĐƠN (Chỉ hiện nếu là Manager VÀ có đơn) ---
+      if (isManager && approvals.length > 0) {
+        html += `<div class="mb-6"><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Cần duyệt (${approvals.length})</h3><div class="space-y-4">`;
+        
+        approvals.forEach(function (req) {
           var isLeave = (req.Type || "").toLowerCase().includes("nghỉ");
           var badgeClass = isLeave ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-purple-50 text-purple-600 border-purple-100";
           var avatarHtml = getAvatarHtml(req.Name, req.Avatar, "w-10 h-10", "text-xs");
 
           html += `
-            <div class="bg-white p-5 rounded-[24px] shadow-sm border border-slate-50 animate-slide-up relative overflow-hidden group">
-                <div class="flex justify-between items-start mb-3">
-                    <div class="flex items-center gap-3">
-                        ${avatarHtml}
-                        <div>
-                            <h4 class="font-bold text-slate-800 text-sm leading-tight">${req.Name}</h4>
-                            <p class="text-[10px] font-bold text-slate-400 mt-0.5">${req.Position} • ${req.Center_Name}</p>
-                        </div>
-                    </div>
-                    <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold border ${badgeClass} uppercase tracking-wide">${req.Type}</span>
-                </div>
-                <div class="bg-slate-50/80 rounded-2xl p-3 mb-4 border border-slate-100">
-                     <div class="flex items-center gap-2 text-xs font-bold text-slate-700 mb-1">
-                        <i class="fa-regular fa-calendar text-emerald-500"></i> ${req.Dates}
-                     </div>
-                     <p class="text-xs text-slate-500 italic line-clamp-2 pl-6 border-l-2 border-slate-200">"${req.Reason}"</p>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="openRejectModal('${req.Request_ID}')" class="py-2.5 rounded-xl bg-white border border-red-100 text-red-500 text-xs font-bold active:scale-95 transition-all shadow-sm">Từ chối</button>
-                    <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold active:scale-95 transition-all shadow-md">Duyệt đơn</button>
-                </div>
-            </div>`;
-      });
-      html += "</div></div>";
-      hasData = true;
-  } else if (mode === "approve") {
-      // Nếu vào chế độ duyệt mà không có đơn nào
-      html += '<div class="text-center py-24 opacity-50"><i class="fa-solid fa-check-circle text-4xl mb-3 text-emerald-200"></i><p class="text-xs text-slate-400 font-bold uppercase">Đã duyệt hết các đơn!</p></div>';
-      content.innerHTML = html;
-      return; // Dừng lại, không hiện phần "Đơn của tôi" bên dưới
-  }
+              <div class="bg-white p-5 rounded-[24px] shadow-sm border border-slate-50 animate-slide-up relative overflow-hidden group">
+                  <div class="flex justify-between items-start mb-3">
+                      <div class="flex items-center gap-3">
+                          ${avatarHtml}
+                          <div>
+                              <h4 class="font-bold text-slate-800 text-sm leading-tight">${req.Name}</h4>
+                              <p class="text-[10px] font-bold text-slate-400 mt-0.5">${req.Position || "NV"} • ${req.Center_Name || "CN"}</p>
+                          </div>
+                      </div>
+                      <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold border ${badgeClass} uppercase tracking-wide">${req.Type}</span>
+                  </div>
+                  <div class="bg-slate-50/80 rounded-2xl p-3 mb-4 border border-slate-100">
+                       <div class="flex items-center gap-2 text-xs font-bold text-slate-700 mb-1">
+                          <i class="fa-regular fa-calendar text-emerald-500"></i> ${req.Dates}
+                       </div>
+                       <p class="text-xs text-slate-500 italic line-clamp-2 pl-6 border-l-2 border-slate-200">"${req.Reason}"</p>
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                      <button onclick="openRejectModal('${req.Request_ID}')" class="py-2.5 rounded-xl bg-white border border-red-100 text-red-500 text-xs font-bold active:scale-95 transition-all shadow-sm">Từ chối</button>
+                      <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" 
+                          class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold active:scale-95 transition-all shadow-md">
+                          Duyệt đơn
+                      </button>
+                  </div>
+              </div>`;
+        });
+        html += "</div></div>";
+        hasData = true;
+      } else if (mode === "approve") {
+        // Nếu mode là approve mà không có đơn -> Hiện thông báo đã duyệt hết
+        html += '<div class="text-center py-20 opacity-50"><i class="fa-solid fa-check-circle text-4xl mb-3 text-emerald-200"></i><p class="text-xs text-slate-400 font-bold uppercase">Đã duyệt hết các đơn!</p></div>';
+        content.innerHTML = html;
+        return;
+      }
 
-  // --- PHẦN 2: ĐƠN CỦA TÔI (Dành cho tất cả) ---
-  // Chỉ hiện khi KHÔNG PHẢI chế độ duyệt đơn tập trung (mode !== 'approve')
-  if (mode !== "approve" && myRequests.length > 0) {
-      html += '<div><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-regular fa-bell"></i> Đơn của tôi</h3><div class="space-y-3">';
-      
-      myRequests.forEach(req => {
+      // --- 2. PHẦN ĐƠN CỦA TÔI (Ẩn khi đang ở mode 'approve') ---
+      if (mode !== "approve" && myRequests.length > 0) {
+        html += '<div><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-regular fa-bell"></i> Đơn của tôi</h3><div class="space-y-3">';
+        myRequests.forEach(function (req) {
           var isAppr = req.Status === "Approved";
           var isRej = req.Status === "Rejected";
           var statusIcon = isAppr ? "fa-check" : isRej ? "fa-xmark" : "fa-hourglass-half";
@@ -572,30 +568,31 @@ window.openNotifications = async function (mode) {
           var cardBg = isAppr ? "border-emerald-100" : isRej ? "border-red-100" : "border-orange-100";
 
           html += `
-            <div class="bg-white p-4 rounded-3xl shadow-sm border ${cardBg} flex items-center gap-4 animate-slide-up">
-                <div class="w-10 h-10 rounded-2xl ${statusColor} flex items-center justify-center text-lg shadow-sm shrink-0">
-                    <i class="fa-solid ${statusIcon}"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex justify-between items-center">
-                         <h4 class="text-sm font-bold text-slate-800">${req.Type}</h4>
-                         <span class="text-[9px] font-extrabold px-2 py-0.5 rounded ${statusColor} border border-current opacity-80">${req.Status}</span>
-                    </div>
-                    <p class="text-[10px] text-slate-400 font-bold mt-0.5">${req.Dates}</p>
-                    ${req.Note ? `<p class="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded mt-1.5 italic line-clamp-1"><i class="fa-solid fa-reply mr-1"></i>${req.Note}</p>` : ""}
-                </div>
-            </div>`;
-      });
-      html += "</div></div>";
-      hasData = true;
-  }
+              <div class="bg-white p-4 rounded-3xl shadow-sm border ${cardBg} flex items-center gap-4 animate-slide-up">
+                  <div class="w-10 h-10 rounded-2xl ${statusColor} flex items-center justify-center text-lg shadow-sm shrink-0">
+                      <i class="fa-solid ${statusIcon}"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                      <div class="flex justify-between items-center">
+                           <h4 class="text-sm font-bold text-slate-800">${req.Type}</h4>
+                           <span class="text-[9px] font-extrabold px-2 py-0.5 rounded ${statusColor} border border-current opacity-80">${req.Status}</span>
+                      </div>
+                      <p class="text-[10px] text-slate-400 font-bold mt-0.5">${req.Dates}</p>
+                      ${req.Note ? `<p class="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded mt-1.5 italic line-clamp-1"><i class="fa-solid fa-reply mr-1"></i>${req.Note}</p>` : ""}
+                  </div>
+              </div>`;
+        });
+        html += "</div></div>";
+        hasData = true;
+      }
 
-  // Trường hợp trống trơn
-  if (!hasData && mode !== "approve") {
-      html = '<div class="text-center py-24 opacity-50"><i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i><p class="text-xs text-slate-400 font-bold uppercase">Không có thông báo mới</p></div>';
-  }
+      if (!hasData && mode !== "approve") {
+        html = '<div class="text-center py-24 opacity-50"><i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i><p class="text-xs text-slate-400 font-bold uppercase">Không có thông báo mới</p></div>';
+      }
 
-  content.innerHTML = html;
+      content.innerHTML = html;
+    })
+    .getMobileNotifications(currentUser.Employee_ID);
 };
 
 window.closeNotifications = function () {
@@ -1375,6 +1372,7 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
 
 
