@@ -3,7 +3,7 @@
 // ==========================================
 
 // [QUAN TRỌNG] Thay URL này bằng Web App URL của bạn (kết thúc bằng /exec)
-const API_URL = "https://script.google.com/macros/s/AKfycbz9w40ym12GMNH2un_KdGKWIXyQZ0JHVcRdOpoExN2HcDGYBCQCpKhm77QgdXVSUSYWig/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbypVpXFT81mAVK0SBimYqRVhSM14XlYlecMwO0lQhijQ-Zq9DxGnEK06OW3-uEgYTR1bg/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -490,8 +490,8 @@ window.openNotifications = async function (mode) {
   var titleEl = document.getElementById("modal-noti-title");
   if (!modal || !content) return;
 
-  // mode = 'approve': Bấm từ nút "Duyệt đơn" (Profile)
-  // mode = 'all': Bấm từ cái Chuông (Home)
+  // mode = 'approve': Bấm từ nút "Duyệt giải trình" (Profile) -> Chỉ hiện đơn Cần duyệt
+  // mode = 'all': Bấm từ cái Chuông (Home) -> Hiện Cần duyệt + Đơn của tôi
   titleEl.innerText = (mode === "approve") ? "Duyệt đơn từ" : "Thông báo";
 
   document.querySelectorAll('[id^="noti-dot"], [id^="profile-noti-dot"]').forEach(d => d.classList.add("hidden"));
@@ -508,15 +508,15 @@ window.openNotifications = async function (mode) {
 
   const approvals = res.data.approvals || [];
   const myRequests = res.data.myRequests || [];
-  const isManager = res.isManager || (currentUser.Role !== "Staff"); // Check quyền
+  const isManager = res.isManager || (currentUser.Role !== "Staff"); // Check quyền từ server
 
   let html = "";
   let hasData = false;
 
   // --- PHẦN 1: DUYỆT ĐƠN (Chỉ hiện cho Quản lý/Admin) ---
-  // Yêu cầu: "Duyệt đơn chỉ hiện các đơn cần duyệt"
+  // Yêu cầu: "Duyệt đơn chỉ hiện các đơn cần duyệt" (mode='approve')
+  // Yêu cầu: "Riêng admin, quản lý... thì thêm các đơn cần duyệt" (mode='all')
   if (isManager && approvals.length > 0) {
-      // Nếu mode là 'approve' (nút Duyệt) HOẶC 'all' (Chuông) thì đều hiện
       html += `<div class="mb-6"><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Cần duyệt (${approvals.length})</h3><div class="space-y-4">`;
       
       approvals.forEach(req => {
@@ -551,7 +551,7 @@ window.openNotifications = async function (mode) {
       html += "</div></div>";
       hasData = true;
   } else if (mode === "approve") {
-      // Nếu bấm nút Duyệt đơn mà hết đơn rồi
+      // Nếu bấm nút "Duyệt đơn" (Profile) mà không còn đơn nào
       html += '<div class="text-center py-24 opacity-50"><i class="fa-solid fa-check-circle text-4xl mb-3 text-emerald-200"></i><p class="text-xs text-slate-400 font-bold uppercase">Đã duyệt hết các đơn!</p></div>';
       content.innerHTML = html;
       return;
@@ -559,12 +559,12 @@ window.openNotifications = async function (mode) {
 
   // --- PHẦN 2: ĐƠN CỦA TÔI (Cho Staff và cả Manager) ---
   // Yêu cầu: "Đối với staff thì thông báo chỉ hiện các đơn... (của mình)"
-  // Yêu cầu: "Đề xuất thì hiện các đơn" -> Phần này nằm ở tab Requests rồi, nhưng ở đây cũng hiện như thông báo
+  // Yêu cầu: "Đề xuất thì hiện các đơn" -> Đã có ở tab Requests, nhưng modal này cũng hiển thị lịch sử cho tiện
+  // Lưu ý: Nếu đang ở mode 'approve' (chuyên duyệt đơn), ta KHÔNG hiện phần này để tập trung duyệt.
   if (mode !== "approve" && myRequests.length > 0) {
       html += '<div><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-regular fa-bell"></i> Đơn của tôi</h3><div class="space-y-3">';
       
       myRequests.forEach(req => {
-          // Status: Pending, Approved, Rejected
           var isAppr = req.Status === "Approved";
           var isRej = req.Status === "Rejected";
           var statusIcon = isAppr ? "fa-check" : isRej ? "fa-xmark" : "fa-hourglass-half";
@@ -658,7 +658,8 @@ window.processRequestMobile = async function (reqId, status, rejectReason) {
   showLoading(true);
   var note = status === "Approved" ? "Đã duyệt" : rejectReason || "";
 
-  // [QUAN TRỌNG] Thêm currentUser.Employee_ID vào cuối
+  // [QUAN TRỌNG] Thêm currentUser.Employee_ID vào tham số thứ 5
+  // Để Backend biết ai đang duyệt -> Rebuild cache cho người đó -> Danh sách cập nhật ngay
   const res = await callBackend("processRequestAdmin", [
       reqId, 
       status, 
@@ -672,8 +673,6 @@ window.processRequestMobile = async function (reqId, status, rejectReason) {
   
   if (res.success) {
     // Refresh lại UI ngay lập tức
-    // Nếu đang ở trong modal duyệt đơn -> Gọi lại mode approve
-    // Nếu đang ở chuông thông báo -> Gọi lại mode all
     var titleEl = document.getElementById("modal-noti-title");
     var currentMode = (titleEl && titleEl.innerText.includes("Duyệt")) ? "approve" : "all";
     
@@ -1375,6 +1374,7 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
 
 
