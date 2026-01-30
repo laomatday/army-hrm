@@ -3,7 +3,7 @@
 // ==========================================
 
 // [QUAN TRỌNG] Đảm bảo URL này đúng
-const API_URL = "https://script.google.com/macros/s/AKfycbzmB4gRhWonHuAR2Fh4-6S2GNjfayGsbb6rCdvVuIn3af0gDGf_mu098px3uSMIMy0syQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxsNi4HD2HN_LWVYOznQE0jX4z3JuYcHJvpYRZRlngR1_1S5K5r0JRgciRIekniR70Gqw/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -419,9 +419,10 @@ window.triggerCheckOut = function () {
 };
 
 // ==========================================
-// FILE: script.js -> Thay thế hàm window.openNotifications
+// FILE: script.js -> Thay thế đoạn logic Notification cũ
 // ==========================================
 
+// 1. HÀM ĐIỀU PHỐI CHÍNH (Dispatcher)
 window.openNotifications = async function (mode) {
   var modal = document.getElementById("modal-notifications");
   var content = document.getElementById("noti-content-area");
@@ -430,10 +431,12 @@ window.openNotifications = async function (mode) {
 
   titleEl.innerText = (mode === "approve") ? "Duyệt đơn từ" : "Thông báo";
 
+  // Reset UI
   document.querySelectorAll('[id^="noti-dot"], [id^="profile-noti-dot"]').forEach(d => d.classList.add("hidden"));
   modal.classList.remove("hidden");
   content.innerHTML = SKELETON_REQUEST;
 
+  // Gọi Server
   const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
 
   if (!res.success) {
@@ -441,20 +444,62 @@ window.openNotifications = async function (mode) {
     return;
   }
 
-  // Backend đã lọc kỹ, Frontend chỉ việc hiển thị
-  const approvals = res.data.approvals || [];
-  const allMyRequests = res.data.myRequests || [];
-  
-  // Lọc đơn kết quả của bản thân (Ẩn Pending đi cho đỡ rối)
-  const myResultNotifications = allMyRequests.filter(req => {
+  // --- PHÂN QUYỀN HIỂN THỊ ---
+  const MANAGER_ROLES = ["Admin", "Manager", "HR", "Accountant", "Board"];
+  const isClientManager = MANAGER_ROLES.includes(currentUser.Role);
+  const isServerManager = res.isManager === true;
+
+  // Nếu là Quản lý (thỏa mãn cả Server lẫn Client) -> Gọi hàm vẽ cho Quản lý
+  if (isClientManager && isServerManager) {
+      renderManagerView(res.data, mode);
+  } else {
+      // Nếu là Staff thường -> Gọi hàm vẽ cho Staff
+      renderStaffView(res.data);
+  }
+};
+
+// 2. HÀM HIỂN THỊ RIÊNG CHO STAFF (Chỉ xem kết quả)
+function renderStaffView(data) {
+  const content = document.getElementById("noti-content-area");
+  const allMyRequests = data.myRequests || [];
+
+  // Lọc: Chỉ hiện Approved/Rejected (Ẩn Pending)
+  const notifications = allMyRequests.filter(req => {
       const s = String(req.Status || "").toLowerCase();
-      return s !== "pending"; 
+      return s !== "pending";
+  });
+
+  if (notifications.length === 0) {
+      content.innerHTML = '<div class="text-center py-24 opacity-50"><i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i><p class="text-xs text-slate-400 font-bold uppercase">Không có thông báo mới</p></div>';
+      return;
+  }
+
+  let html = '<div><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-regular fa-bell text-orange-500"></i> Kết quả đơn của bạn</h3><div class="space-y-3">';
+  
+  notifications.forEach(req => {
+      html += buildMyRequestCard(req); // Dùng hàm vẽ thẻ chung
+  });
+  html += "</div></div>";
+
+  content.innerHTML = html;
+}
+
+// 3. HÀM HIỂN THỊ RIÊNG CHO QUẢN LÝ (Duyệt đơn + Xem kết quả)
+function renderManagerView(data, mode) {
+  const content = document.getElementById("noti-content-area");
+  const approvals = data.approvals || [];
+  const allMyRequests = data.myRequests || [];
+
+  // Lọc đơn của mình (giống Staff)
+  const myNotifications = allMyRequests.filter(req => {
+      const s = String(req.Status || "").toLowerCase();
+      return s !== "pending";
   });
 
   let html = "";
   let hasData = false;
 
-  // --- 1. PHẦN DUYỆT ĐƠN (Chỉ hiện nếu Backend trả về có dữ liệu) ---
+  // --- KHỐI A: DANH SÁCH CẦN DUYỆT ---
   if (approvals.length > 0) {
       html += `<div class="mb-6"><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-solid fa-layer-group text-emerald-500"></i> Cần duyệt (${approvals.length})</h3><div class="space-y-4">`;
       
@@ -490,51 +535,56 @@ window.openNotifications = async function (mode) {
       html += "</div></div>";
       hasData = true;
   } else if (mode === "approve") {
-      html += '<div class="text-center py-24 opacity-50"><i class="fa-solid fa-check-circle text-4xl mb-3 text-emerald-200"></i><p class="text-xs text-slate-400 font-bold uppercase">Đã duyệt hết các đơn!</p></div>';
-      content.innerHTML = html;
-      return; 
+      // Vào mode duyệt mà hết đơn
+      content.innerHTML = '<div class="text-center py-24 opacity-50"><i class="fa-solid fa-check-circle text-4xl mb-3 text-emerald-200"></i><p class="text-xs text-slate-400 font-bold uppercase">Đã duyệt hết các đơn!</p></div>';
+      return;
   }
 
-  // --- 2. PHẦN KẾT QUẢ CỦA TÔI (Ẩn khi đang ở mode chuyên duyệt) ---
-  if (mode !== "approve" && myResultNotifications.length > 0) {
-      if (hasData) html += `<div class="h-px bg-slate-100 my-6 mx-4"></div>`;
+  // --- KHỐI B: KẾT QUẢ ĐƠN CỦA TÔI ---
+  // (Chỉ hiện khi KHÔNG PHẢI mode 'approve')
+  if (mode !== "approve" && myNotifications.length > 0) {
+      if (hasData) html += `<div class="h-px bg-slate-100 my-6 mx-4"></div>`; // Kẻ ngang phân cách
 
       html += '<div><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-regular fa-bell text-orange-500"></i> Kết quả đơn của bạn</h3><div class="space-y-3">';
       
-      myResultNotifications.forEach(req => {
-          var s = String(req.Status || "").toLowerCase();
-          var isAppr = s === "approved";
-          
-          var statusIcon = isAppr ? "fa-check" : "fa-xmark";
-          var statusColor = isAppr ? "text-emerald-500 bg-emerald-50" : "text-red-500 bg-red-50";
-          var cardBg = isAppr ? "border-emerald-100" : "border-red-100";
-          var statusText = isAppr ? "Đã duyệt" : "Từ chối";
-
-          html += `
-            <div class="bg-white p-4 rounded-3xl shadow-sm border ${cardBg} flex items-center gap-4 animate-slide-up">
-                <div class="w-10 h-10 rounded-2xl ${statusColor} flex items-center justify-center text-lg shadow-sm shrink-0">
-                    <i class="fa-solid ${statusIcon}"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex justify-between items-center">
-                         <h4 class="text-sm font-bold text-slate-800">${req.Type}</h4>
-                         <span class="text-[9px] font-extrabold px-2 py-0.5 rounded ${statusColor} border border-current opacity-80">${statusText}</span>
-                    </div>
-                    <p class="text-[10px] text-slate-400 font-bold mt-0.5">${req.Dates}</p>
-                    ${req.Note ? `<p class="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded mt-1.5 italic line-clamp-1"><i class="fa-solid fa-reply mr-1"></i>${req.Note}</p>` : ""}
-                </div>
-            </div>`;
+      myNotifications.forEach(req => {
+          html += buildMyRequestCard(req);
       });
       html += "</div></div>";
       hasData = true;
   }
 
-  if (!hasData && mode !== "approve") {
+  if (!hasData) {
       html = '<div class="text-center py-24 opacity-50"><i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i><p class="text-xs text-slate-400 font-bold uppercase">Không có thông báo mới</p></div>';
   }
 
   content.innerHTML = html;
-};
+}
+
+// 4. HÀM VẼ THẺ ĐƠN CỦA TÔI (Dùng chung để code gọn)
+function buildMyRequestCard(req) {
+  var s = String(req.Status || "").toLowerCase();
+  var isAppr = s === "approved";
+  var statusText = isAppr ? "Đã duyệt" : "Từ chối";
+  var statusIcon = isAppr ? "fa-check" : "fa-xmark";
+  var statusColor = isAppr ? "text-emerald-500 bg-emerald-50" : "text-red-500 bg-red-50";
+  var cardBg = isAppr ? "border-emerald-100" : "border-red-100";
+
+  return `
+    <div class="bg-white p-4 rounded-3xl shadow-sm border ${cardBg} flex items-center gap-4 animate-slide-up">
+        <div class="w-10 h-10 rounded-2xl ${statusColor} flex items-center justify-center text-lg shadow-sm shrink-0">
+            <i class="fa-solid ${statusIcon}"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-center">
+                 <h4 class="text-sm font-bold text-slate-800">${req.Type}</h4>
+                 <span class="text-[9px] font-extrabold px-2 py-0.5 rounded ${statusColor} border border-current opacity-80">${statusText}</span>
+            </div>
+            <p class="text-[10px] text-slate-400 font-bold mt-0.5">${req.Dates}</p>
+            ${req.Note ? `<p class="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded mt-1.5 italic line-clamp-1"><i class="fa-solid fa-reply mr-1"></i>${req.Note}</p>` : ""}
+        </div>
+    </div>`;
+}
 
 window.closeNotifications = function () {
   var modal = document.getElementById("modal-notifications");
@@ -1210,6 +1260,7 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
 
 
