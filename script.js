@@ -1,7 +1,8 @@
 // ==========================================
 // 1. CẤU HÌNH & BIẾN TOÀN CỤC
 // ==========================================
-// URL Web App từ Google Apps Script (Đã cấu hình doPost)
+
+// [QUAN TRỌNG] Thay URL này bằng Web App URL của bạn (kết thúc bằng /exec)
 const API_URL = "https://script.google.com/macros/s/AKfycbw6FBSsskO4_iMlsNAdRwnG17Ac-H7RJSEzLjmG8Sg7mIrYH-QK8UN6CecPo4vsWtFQdg/exec";
 
 var currentUser = null;
@@ -51,11 +52,11 @@ const SKELETON_REQUEST = `
 // --- HÀM GỌI BACKEND (THAY THẾ GOOGLE.SCRIPT.RUN) ---
 async function callBackend(functionName, params = []) {
   try {
-    // Sử dụng text/plain để tránh lỗi CORS Preflight
+    // Sử dụng text/plain để tránh lỗi CORS Preflight phức tạp của Google
     const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: functionName, params: params }) // params bọc trong mảng hoặc object
+      body: JSON.stringify({ action: functionName, params: params }) 
     });
     
     const text = await response.text();
@@ -63,7 +64,7 @@ async function callBackend(functionName, params = []) {
     return JSON.parse(text);
   } catch (error) {
     console.error("Lỗi Backend:", error);
-    return { success: false, message: "Không thể kết nối máy chủ!" };
+    return { success: false, message: "Không thể kết nối máy chủ! " + error.message };
   }
 }
 
@@ -97,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
   setInterval(updateClock, 1000);
   updateClock();
 
-  // 3. Gán sự kiện cho nút Từ chối
+  // 3. Gán sự kiện cho nút Từ chối (nếu có trong DOM lúc load)
   var btnReject = document.getElementById("btn-confirm-reject");
   if(btnReject) {
       btnReject.onclick = handleConfirmReject;
@@ -114,7 +115,7 @@ window.handleLogin = async function () {
   }
   
   showLoading(true);
-  // Thay google.script.run.doLogin
+  // Gọi API: Tham số truyền vào là mảng [email, pass, deviceId]
   const res = await callBackend("doLogin", [emailEl.value.trim(), passEl.value.trim(), myDeviceId]);
   showLoading(false);
 
@@ -222,10 +223,10 @@ function renderUserInfo() {
   setText("user-name", getShortNameClient(currentUser.Name));
   setText("p-id", currentUser.Employee_ID);
   setText("p-email", currentUser.Email);
-  setText("p-email-display", currentUser.Email); // Thêm dòng này để khớp với ID trong modal profile
+  setText("p-email-display", currentUser.Email); 
   setText("p-phone", currentUser.Phone || "Chưa cập nhật");
   setText("p-dept", currentUser.Department || "Chưa cập nhật");
-  setText("p-dept-display", currentUser.Department || "Chưa cập nhật"); // Thêm dòng này
+  setText("p-dept-display", currentUser.Department || "Chưa cập nhật");
   setText("leave-balance", currentUser.Annual_Leave_Balance !== undefined ? currentUser.Annual_Leave_Balance : 12);
   
   ["req-user-name", "profile-user-name", "contact-user-name"].forEach(id => setText(id, currentUser.Name));
@@ -283,11 +284,9 @@ window.switchTab = function (tabName) {
     item.classList.toggle("active", isActive);
     
     var icon = item.querySelector("i");
-    // Logic đổi màu icon
-    // Lưu ý: CSS .nav-item.active .nav-item-icon đã xử lý việc này rồi,
-    // nhưng giữ lại logic JS từ file gốc để đảm bảo tương thích
+    // CSS .nav-item.active .nav-item-icon đã xử lý đổi màu, nhưng logic JS cũ vẫn giữ để tương thích
     if(icon && icon.classList.contains("text-emerald-600")) {
-        // Fallback nếu CSS chưa handle
+        // Fallback logic
     }
     
     var ind = item.querySelector(".nav-indicator");
@@ -298,7 +297,6 @@ window.switchTab = function (tabName) {
   if (tabName === "contacts" && (!cachedContacts || cachedContacts.length === 0)) {
     loadContacts();
   } 
-  // [QUAN TRỌNG] Khi vào tab Requests thì mặc định chuyển sang view Lịch sử
   else if (tabName === "requests") {
     switchActivityMode('history');
   }
@@ -348,17 +346,16 @@ async function loadHistoryFull() {
   if (daysStat) daysStat.innerHTML = '<span class="animate-pulse opacity-50">--</span>';
   if (leaveStat) leaveStat.innerHTML = '<span class="animate-pulse opacity-50">--</span>';
 
-  // Thay google.script.run.getHistory
+  // API Call
   const res = await callBackend("getHistory", [currentUser.Employee_ID]);
   
   if (res) {
       allHistoryData = res.history || [];
-      // Lấy summary từ Backend
       var stats = res.summary || { workDays: 0, lateMins: 0, errorCount: 0, remainingLeave: 12, leaveDays: 0 };
       
       currentHistoryPage = 0;
 
-      // 1. NGÀY CÔNG (Giữ nguyên logic tính toán Client-side để update UI)
+      // 1. NGÀY CÔNG
       var daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
       var standardDays = 0;
       for (var i = 1; i <= daysInMonth; i++) {
@@ -375,30 +372,23 @@ async function loadHistoryFull() {
       var workBar = document.getElementById("work-progress-bar");
       if (workBar) workBar.style.width = percent + "%";
 
-
-      // 2. PHÉP NĂM (LOGIC TRỰC TIẾP TỪ SHEET)
-      // A. SỐ TO: ĐÃ DÙNG (Lấy thẳng từ cột Leave_Days - Cột H)
+      // 2. PHÉP NĂM
       var used = stats.leaveDays !== undefined ? stats.leaveDays : 0;
       setText("home-stat-leave", used);
 
-      // B. SỐ NHỎ: CÒN LẠI (Lấy thẳng từ cột Remaining_Leave - Cột I)
       var remaining = stats.remainingLeave !== undefined ? stats.remainingLeave : 12;
       var labelEl = document.getElementById("leave-stat-label");
       if (labelEl) labelEl.innerText = remaining + " phép còn lại";
 
-      // C. THANH BAR (Hiển thị % Còn lại cho đẹp mắt)
-      // Vì ta không tính toán Max từ profile nữa, nên ta ước lượng Max = Used + Remaining
       var estimatedMax = used + remaining; 
-      if (estimatedMax === 0) estimatedMax = 12; // Tránh chia cho 0
+      if (estimatedMax === 0) estimatedMax = 12; 
 
       var leavePercent = (remaining / estimatedMax) * 100;
-      
       if(leavePercent < 0) leavePercent = 0;
       if(leavePercent > 100) leavePercent = 100;
       
       var leaveBar = document.getElementById("leave-progress-bar");
       if (leaveBar) leaveBar.style.width = leavePercent + "%";
-
 
       // 3. CÁC PHẦN KHÁC
       setText("hist-total-days", stats.workDays);
@@ -457,14 +447,14 @@ window.takePicture = async function () {
   
   navigator.geolocation.getCurrentPosition(
     async function (p) {
-      // Thay google.script.run.doCheckIn
-      const r = await callBackend("doCheckIn", {
+      // API Call: Gửi 1 object chứa thông tin checkin
+      const r = await callBackend("doCheckIn", [{
           employeeId: currentUser.Employee_ID,
           lat: p.coords.latitude,
           lng: p.coords.longitude,
           deviceId: myDeviceId,
           imageBase64: b64,
-      });
+      }]);
 
       showLoading(false);
       if (r.success) {
@@ -485,8 +475,8 @@ window.takePicture = async function () {
 window.triggerCheckOut = function () {
   showDialog("confirm", "Check-out", "Bạn muốn kết thúc ca làm việc?", async function () {
     showLoading(true);
-    // Thay google.script.run.doCheckOut
-    const r = await callBackend("doCheckOut", { employeeId: currentUser.Employee_ID });
+    // API Call
+    const r = await callBackend("doCheckOut", [{ employeeId: currentUser.Employee_ID }]);
     
     showLoading(false);
     showToast(r.success ? "success" : "error", r.message);
@@ -510,7 +500,7 @@ window.openNotifications = async function (mode) {
   modal.classList.remove("hidden");
   content.innerHTML = SKELETON_REQUEST;
 
-  // Thay google.script.run.getMobileNotifications
+  // API Call
   const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
 
   var hasApprovals = res.data && res.data.approvals && res.data.approvals.length > 0;
@@ -599,7 +589,7 @@ window.closeNotifications = function () {
 
 window.checkNewNotifications = async function () {
   if (!currentUser) return;
-  // Thay google.script.run.getMobileNotifications
+  // API Call
   const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
 
   var notiDot = document.getElementById("noti-dot");
@@ -620,31 +610,18 @@ window.checkNewNotifications = async function () {
   }
 };
 
-// ==========================================
-// 8. LOGIC TỪ CHỐI (FIX LỖI NOT DEFINED)
-// ==========================================
-
-// QUAN TRỌNG: Gán thẳng vào window để HTML onclick gọi được
+// --- Logic Từ chối ---
 window.openRejectModal = function (reqId) {
-  // Lưu ID vào biến toàn cục để dùng khi bấm nút Xác nhận
   currentRejectId = reqId;
-  
-  // Reset ô nhập lý do
-  var input = document.getElementById("input-reject-reason");
-  if(input) input.value = "";
-  
-  // Hiện Modal
-  var modal = document.getElementById("modal-reject-reason");
-  if(modal) modal.classList.remove("hidden");
+  document.getElementById("input-reject-reason").value = "";
+  document.getElementById("modal-reject-reason").classList.remove("hidden");
 };
 
 window.closeRejectModal = function () {
   currentRejectId = null;
-  var modal = document.getElementById("modal-reject-reason");
-  if(modal) modal.classList.add("hidden");
+  document.getElementById("modal-reject-reason").classList.add("hidden");
 };
 
-// Hàm này được gọi khi bấm nút "Xác nhận" trong Modal màu đỏ
 window.handleConfirmReject = function() {
   var reasonEl = document.getElementById("input-reject-reason");
   var reason = reasonEl ? reasonEl.value.trim() : "";
@@ -655,10 +632,7 @@ window.handleConfirmReject = function() {
   }
 
   if (currentRejectId) {
-    // Gọi hàm xử lý chính
     processRequestMobile(currentRejectId, "Rejected", reason);
-    
-    // Đóng modal sau khi gửi
     closeRejectModal();
   } else {
     showToast("error", "Không tìm thấy ID đơn!");
@@ -669,7 +643,7 @@ window.processRequestMobile = async function (reqId, status, rejectReason) {
   showLoading(true);
   var note = status === "Approved" ? "Đã duyệt" : rejectReason || "";
 
-  // Thay google.script.run.processRequestAdmin
+  // API Call
   const res = await callBackend("processRequestAdmin", [reqId, status, note, currentUser.Name]);
 
   showLoading(false);
@@ -716,13 +690,10 @@ window.closeRequestModal = function () {
 
 window.toVNDate = function(d) {
   if (!d) return "";
-  // Nếu đã là dạng DD/MM/YYYY rồi thì trả về luôn
   if (d.includes("/") && d.split("/")[0].length == 2) return d;
   
-  // Nếu là dạng YYYY-MM-DD (2026-01-29) -> Đảo lại thành 29/01/2026
   if (d.includes("-")) {
     var p = d.split("-");
-    // p[0]=YYYY, p[1]=MM, p[2]=DD
     return p[2] + "/" + p[1] + "/" + p[0];
   }
   return d;
@@ -750,14 +721,14 @@ window.submitRequest = async function () {
   };
 
   showLoading(true);
-  // Thay google.script.run.submitRequest
-  const r = await callBackend("submitRequest", payload); // Truyền object trực tiếp vì Backend đã xử lý
+  // API Call: Truyền object payload vào trong mảng
+  const r = await callBackend("submitRequest", [payload]);
 
   showLoading(false);
   showToast(r.success ? "success" : "error", r.message);
   if (r.success) {
     closeRequestModal();
-    cachedMyRequests = null;
+    cachedMyRequests = null; // Invalidate cache
     loadMyRequests();
     if (typeVal === "Giải trình công") loadHistoryFull();
   }
@@ -837,8 +808,8 @@ window.submitProfileUpdate = async function () {
   };
 
   showLoading(true);
-  // Thay google.script.run.updateEmployeeProfile
-  const res = await callBackend("updateEmployeeProfile", p);
+  // API Call
+  const res = await callBackend("updateEmployeeProfile", [p]);
 
   showLoading(false);
   if (res.success) {
@@ -979,7 +950,7 @@ async function loadContacts() {
   var list = document.getElementById("contacts-list");
   if (!list) return;
   list.innerHTML = SKELETON_CONTACT;
-  // Thay google.script.run.getContacts
+  // API Call
   const data = await callBackend("getContacts", [currentUser.Role, currentUser.Center_ID]);
   cachedContacts = data;
   renderContactList(data);
@@ -1092,37 +1063,29 @@ window.filterContactsPopup = function () {
   list.innerHTML = html;
 };
 
+// --- REQUESTS & HISTORY ---
 async function loadMyRequests(forceReload = false) {
   var container = document.getElementById("request-list-container");
   if (!container) return;
 
-  // 1. KIỂM TRA CACHE: Nếu có cache và không bị ép tải lại -> Hiển thị ngay
+  // Caching đơn giản
   if (cachedMyRequests && !forceReload) {
-      renderMyRequestsHTML(container, cachedMyRequests); // Gọi hàm render tách riêng
+      renderMyRequestsHTML(container, cachedMyRequests);
       return; 
   }
   
-  // 2. Nếu chưa có cache -> Hiện Skeleton và gọi Server
   container.innerHTML = SKELETON_REQUEST;
 
   const res = await callBackend("getMyRequests", [currentUser.Employee_ID]);
 
-  // Xử lý dữ liệu trả về an toàn
   let data = [];
-  if (res && Array.isArray(res)) {
-      data = res;
-  } else if (res && res.success && Array.isArray(res.data)) {
-      data = res.data;
-  }
+  if (res && Array.isArray(res)) data = res;
+  else if (res && res.success && Array.isArray(res.data)) data = res.data;
 
-  // 3. LƯU VÀO CACHE
   cachedMyRequests = data; 
-
-  // 4. Render dữ liệu
   renderMyRequestsHTML(container, data);
 }
 
-// --- HÀM RENDER TÁCH RIÊNG (Để tái sử dụng code) ---
 function renderMyRequestsHTML(container, data) {
   if (!data || data.length === 0) {
     container.innerHTML = `<div class="text-center py-12 opacity-60"><div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm border border-slate-100"><i class="fa-solid fa-clipboard-check text-2xl text-slate-300"></i></div><p class="text-xs font-bold text-slate-400">Chưa có đề xuất nào</p></div>`;
@@ -1175,7 +1138,6 @@ window.switchActivityMode = function (mode) {
   var viewReq = document.getElementById("view-act-requests");
   var viewHist = document.getElementById("view-act-history");
 
-  // ĐỔI DÒNG NÀY: Chuyển màu nền active sang Emerald
   var activeClass = "bg-emerald-600 text-white shadow-md"; 
   var inactiveClass = "text-slate-500 hover:text-slate-800 bg-transparent shadow-none";
   
@@ -1196,21 +1158,19 @@ window.switchActivityMode = function (mode) {
 
 
 window.openExplainModal = function(dateStr, errorContext) {
-  
   // 1. Gọi hàm gốc để mở Modal và chọn ngày
   openRequestModal("Giải trình", dateStr);
 
   // 2. Tự động điền ngữ cảnh lỗi vào ô Lý do (Reason)
   var reasonInput = document.getElementById("req-reason");
   if (reasonInput && errorContext) {
-      // Kết quả sẽ là: "[Quên ra về] " hoặc "[Trễ 15p] "
       reasonInput.value = "[" + errorContext + "] "; 
-      reasonInput.focus(); // Đặt con trỏ chuột vào đó luôn cho tiện
+      reasonInput.focus();
   }
 };
 
 // ==========================================
-// 2. HÀM RENDER LỊCH SỬ (PILL STYLE - VIÊN THUỐC)
+// 8. HÀM RENDER LỊCH SỬ (PILL STYLE)
 // ==========================================
 window.renderActivityHistory = function () {
   var container = document.getElementById("activity-history-list");
@@ -1264,21 +1224,14 @@ window.renderActivityHistory = function () {
     var rightStatus = "";
     
     if (needAction) {
-      // 1. Label Lỗi: Dùng chung 1 Style (Viên thuốc đỏ nhạt)
       var errorLabel = isForgotOut ? "Quên ra về" : hasInvalid ? "Sai vị trí" : isLate ? ("Trễ " + item.Late_Minutes_Total + "p") : "Thiếu giờ làm";
-      
-      // Style viên thuốc cho Label: rounded-full
       var labelHtml = `
           <span class="rounded-full px-3 py-0.5 text-[9px] font-bold bg-red-50 text-red-500 border border-red-100 mb-1.5 shadow-sm inline-block">
               ${errorLabel}
           </span>`;
-
-      // 2. Button / Badge: Dùng chung kích thước viên thuốc
-      // rounded-full: Tạo hình viên thuốc hoàn hảo
       var pillStyle = "h-8 px-4 rounded-full text-[10px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm";
 
       if (isExplanation) {
-        // --- TRẠNG THÁI: ĐÃ GIẢI TRÌNH (Viên thuốc Xanh) ---
         rightStatus = `
           <div class="flex flex-col items-end">
               ${labelHtml}
@@ -1287,7 +1240,6 @@ window.renderActivityHistory = function () {
               </div>
           </div>`;
       } else {
-        // --- TRẠNG THÁI: NÚT GIẢI TRÌNH (Viên thuốc Cam) ---
         rightStatus = `
           <div class="flex flex-col items-end">
               ${labelHtml}
@@ -1298,7 +1250,6 @@ window.renderActivityHistory = function () {
           </div>`;
       }
     } else {
-      // Trạng thái bình thường
       rightStatus = (totalHours > 0) 
           ? `<div class="flex flex-col items-end justify-center h-full"><div class="w-9 h-9 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center border border-emerald-100 shadow-sm"><i class="fa-solid fa-check"></i></div></div>`
           : `<div class="w-9 h-9 rounded-full bg-slate-50 text-slate-300 flex items-center justify-center border border-slate-100"><i class="fa-solid fa-minus"></i></div>`;
@@ -1327,7 +1278,7 @@ window.renderActivityHistory = function () {
 };
 
 // ==========================================
-// 8. UTILS
+// 9. UTILS
 // ==========================================
 function setText(id, t) {
   var e = document.getElementById(id);
