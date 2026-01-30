@@ -1,10 +1,70 @@
 // ==========================================
-// 1. CẤU HÌNH & BIẾN TOÀN CỤC
+// 0. CẤU HÌNH API GATEWAY (KẾT NỐI VERCEL -> GAS)
 // ==========================================
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwzl_RP8XxbKG4QY6wP2tViIwbeh2xnoDb_Fm5DsHu73fjFFs0aWaA1Ynvt02YEzweqnA/exec"; 
 
-// [QUAN TRỌNG] Thay URL này bằng URL Web App của bạn (kết thúc bằng /exec)
-const API_URL = "https://script.google.com/macros/s/AKfycbzHO1sdZVLypsC6rlmBW6MLFMxQx8MzOECCDFdr6qdb6TuTxIxdFdJCQsfsp3TDgtTgxA/exec";
+// --- "MOCK" GOOGLE SCRIPT RUN (CẦU NỐI GIẢ LẬP) ---
+// Đoạn này biến các lệnh google.script.run thành fetch API gửi về Google
+if (typeof google === 'undefined') {
+    var google = {
+        script: {
+            run: {
+                withSuccessHandler: function(successCallback) {
+                    return {
+                        withFailureHandler: function(failureCallback) {
+                            return createProxy(successCallback, failureCallback);
+                        },
+                        // Trường hợp code viết tắt không có failure handler
+                        ...createProxy(successCallback, (err) => {
+                            console.error("API Error:", err);
+                            if(window.showToast) window.showToast("error", "Lỗi kết nối: " + err);
+                            if(window.showLoading) window.showLoading(false);
+                        })
+                    };
+                }
+            }
+        }
+    };
+}
 
+function createProxy(onSuccess, onFailure) {
+    return new Proxy({}, {
+        get: function(target, functionName) {
+            return function(...args) {
+                console.log(`📡 Đang gọi API: ${functionName}`, args);
+                
+                // Gọi fetch đến Google Apps Script
+                fetch(GAS_API_URL, {
+                    method: "POST",
+                    mode: "cors", // Quan trọng để browser không chặn
+                    headers: {
+                        "Content-Type": "text/plain;charset=utf-8", 
+                    },
+                    body: JSON.stringify({
+                        action: functionName,
+                        params: args
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(`✅ Kết quả ${functionName}:`, data);
+                    if (onSuccess) onSuccess(data);
+                })
+                .catch(error => {
+                    console.error(`❌ Lỗi ${functionName}:`, error);
+                    if (onFailure) onFailure(error);
+                    else alert("Lỗi kết nối Server: " + error);
+                    
+                    if(window.showLoading) window.showLoading(false);
+                });
+            };
+        }
+    });
+}
+
+// ==========================================
+// 1. CẤU HÌNH & BIẾN TOÀN CỤC (LOGIC CHÍNH)
+// ==========================================
 var currentUser = null;
 var videoStream = null;
 var allHistoryData = [];
@@ -94,6 +154,7 @@ window.handleLogin = function() {
         return;
     }
     showLoading(true);
+    // Gọi qua Proxy đã định nghĩa ở trên
     google.script.run
         .withSuccessHandler(function(res) {
             showLoading(false);
@@ -1376,4 +1437,3 @@ function updateClock() {
     setText("clock-display", timeStr);
     setText("date-display", dateStr);
 }
-
