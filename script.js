@@ -3,7 +3,7 @@
 // ==========================================
 
 // [QUAN TRỌNG] Thay URL này bằng URL Web App của bạn (kết thúc bằng /exec)
-const API_URL = "https://script.google.com/macros/s/AKfycbxtn7rJeJscJcrMaEaQRwnpMdEEL907IDLdmD8j7uLPOgot89SujRbIY9IY5ZlsDRHySA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycby22-WkzXgPXJUWJDDGte86p6eANsBDCjLtmpK5PvcbiaVcIrsz1S8kbVwNHwFtFmo5jQ/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -806,10 +806,18 @@ window.previewAvatarInModal = function (input) {
   }
 };
 
-// [ĐÃ SỬA] Dùng callBackend
 async function loadLocations() {
-  const data = await callBackend("getLocations");
-  cachedLocations = data || [];
+  // Gọi hàm mới vừa tạo bên Backend
+  const res = await callBackend("getLocations");
+  
+  // [FIX LỖI]: Kiểm tra success và lấy data array
+  if (res && res.success && Array.isArray(res.data)) {
+      cachedLocations = res.data;
+  } else {
+      console.warn("Lỗi tải locations:", res);
+      cachedLocations = [];
+  }
+  
   renderLocationList();
 }
 
@@ -1252,3 +1260,4 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
