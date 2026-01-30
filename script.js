@@ -3,7 +3,7 @@
 // ==========================================
 
 // [QUAN TRỌNG] Thay URL này bằng URL Web App của bạn (kết thúc bằng /exec)
-const API_URL = "https://script.google.com/macros/s/AKfycby22-WkzXgPXJUWJDDGte86p6eANsBDCjLtmpK5PvcbiaVcIrsz1S8kbVwNHwFtFmo5jQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzcH4LLHHdUPNFBW-10L8JKIc3HeM_fdYzO2Frqv60iXt0EsvPs7t7Pnc0nQ94ii9Ct8A/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -1260,4 +1260,5 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
