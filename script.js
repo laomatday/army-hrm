@@ -3,7 +3,7 @@
 // ==========================================
 
 // [QUAN TRỌNG] Đảm bảo URL này đúng
-const API_URL = "https://script.google.com/macros/s/AKfycbz6oegNbTLUXqCMtIqpRrWI81H4pj_hmNe4p3wYEJdTUgjjyMSEOzvhyeGqYNiwSb0ocQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxT0B2s3mRySlNzyDFdR7IHR4ViWm3Jzjy8lkRlOB2NKF8ciE3Ubro3lksymRb0nzBpZA/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -443,7 +443,7 @@ window.openNotifications = async function (mode) {
 
   const approvals = res.data.approvals || [];
   const allMyRequests = res.data.myRequests || [];
-  const isManager = res.isManager === true; 
+  const isManager = (res.isManager === true) && (currentUser.Role !== "Staff");
 
   const myNotifications = allMyRequests.filter(req => req.Status !== "Pending");
   let html = "";
@@ -1194,3 +1194,4 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
