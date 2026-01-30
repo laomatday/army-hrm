@@ -3,7 +3,7 @@
 // ==========================================
 
 // [QUAN TRỌNG] Đảm bảo URL này đúng
-const API_URL = "https://script.google.com/macros/s/AKfycbzauAHOAs10eKggKbtaQ8l354cjfGHj1QnEMQcvyvQ1w_gjaRzYepAWWoDAU0hxDLVVqA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzLPzrNNrz3Q8yGzkScwh8kLYuhGOhU2E7bSCjqM_pu8YrutfvVkDtHKp3z1GdRUjA8qg/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -47,19 +47,24 @@ const SKELETON_REQUEST = `
      <div class="h-10 w-full bg-slate-200 rounded-2xl"></div>
   </div>`.repeat(3);
 
-// --- HÀM GỌI BACKEND (THAY THẾ GOOGLE.SCRIPT.RUN) ---
 async function callBackend(functionName, params = []) {
   try {
     const response = await fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      headers: { "Content-Type": "text/plain;charset=utf-8" }, // Header này OK
       body: JSON.stringify({ action: functionName, params: params }) 
     });
+    
     const text = await response.text();
-    return JSON.parse(text);
+    try {
+      return JSON.parse(text); // Thử Parse JSON
+    } catch (e) {
+      console.error("Lỗi từ Server (Không phải JSON):", text.slice(0, 200)); 
+      throw new Error("Dữ liệu trả về từ máy chủ không hợp lệ.");
+    }
   } catch (error) {
-    console.error("Lỗi Backend:", error);
-    return { success: false, message: "Lỗi kết nối server: " + error.message };
+    console.error("Lỗi kết nối:", error);
+    return { success: false, message: "Lỗi kết nối: " + error.message };
   }
 }
 
@@ -1182,6 +1187,7 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
 
 
