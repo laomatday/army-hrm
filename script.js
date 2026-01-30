@@ -1109,12 +1109,20 @@ window.openExplainModal = function(dateStr, errorContext) {
 };
 
 window.renderActivityHistory = function () {
-  var container = document.getElementById("activity-history-list");
-  if (!container) return;
-  if (!allHistoryData || allHistoryData.length === 0) {
-    container.innerHTML = '<div class="text-center py-10 opacity-50"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500"></i></div>';
-    return;
-  }
+    var container = document.getElementById("activity-history-list");
+    if (!container) return;
+
+    // [FIX] Thêm check an toàn cho mảng
+    if (!allHistoryData || !Array.isArray(allHistoryData) || allHistoryData.length === 0) {
+      container.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-10 opacity-50">
+            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3">
+                <i class="fa-solid fa-calendar-xmark text-2xl text-slate-300"></i>
+            </div>
+            <p class="text-xs font-bold uppercase text-slate-400">Chưa có dữ liệu chấm công</p>
+        </div>`;
+      return;
+    }
   var startIndex = currentHistoryPage * HISTORY_PAGE_SIZE;
   var endIndex = startIndex + HISTORY_PAGE_SIZE;
   var displayData = allHistoryData.slice(startIndex, endIndex);
@@ -1260,5 +1268,6 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
 
