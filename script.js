@@ -3,7 +3,7 @@
 // ==========================================
 
 // [QUAN TRỌNG] Đảm bảo URL này đúng
-const API_URL = "https://script.google.com/macros/s/AKfycbxT0B2s3mRySlNzyDFdR7IHR4ViWm3Jzjy8lkRlOB2NKF8ciE3Ubro3lksymRb0nzBpZA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyBNEAowwNfPrsfaatRvFKXQl7ZvI-kqiHtsxPoGU_xKM-L7BLASe3jS2mFX-4N6JGeNw/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -418,14 +418,18 @@ window.triggerCheckOut = function () {
   });
 };
 
+// ==========================================
+// FILE: script.js -> Thay thế hàm này
+// ==========================================
+
 window.openNotifications = async function (mode) {
   var modal = document.getElementById("modal-notifications");
   var content = document.getElementById("noti-content-area");
   var titleEl = document.getElementById("modal-noti-title");
   if (!modal || !content) return;
 
-  // mode = 'approve': Vào từ Profile -> Chế độ làm việc tập trung (Chỉ hiện đơn cần duyệt)
-  // mode = 'all': Vào từ Chuông -> Chế độ xem tin tức (Hiện kết quả của mình + Việc cần làm)
+  // mode = 'approve': Vào từ Profile (Chỉ dành cho Quản lý làm việc)
+  // mode = 'all': Vào từ Chuông (Dành cho tất cả xem thông báo)
   titleEl.innerText = (mode === "approve") ? "Duyệt đơn từ" : "Thông báo";
 
   document.querySelectorAll('[id^="noti-dot"], [id^="profile-noti-dot"]').forEach(d => d.classList.add("hidden"));
@@ -440,25 +444,31 @@ window.openNotifications = async function (mode) {
     return;
   }
 
-  const approvals = res.data.approvals || []; // Danh sách lính gửi cho mình
-  const allMyRequests = res.data.myRequests || []; // Danh sách đơn mình gửi đi
+  const approvals = res.data.approvals || []; // Danh sách lính gửi
+  const allMyRequests = res.data.myRequests || []; // Danh sách mình gửi đi
   
-  // Kiểm tra quyền quản lý (Server + Client check)
+  // 2. CHECK QUYỀN (Server + Client)
+  // Chỉ hiện khung duyệt nếu Server báo là Manager VÀ Role ở Client cũng thuộc nhóm quản lý
   const MANAGER_ROLES = ["Admin", "Manager", "HR", "Accountant", "Board"];
-  const isUserRoleManager = MANAGER_ROLES.includes(currentUser.Role);
-  const isManager = (res.isManager === true) && isUserRoleManager;
+  const isUserRoleManager = MANAGER_ROLES.includes(currentUser.Role); // 'Staff' sẽ trả về false
+  
+  const showApprovalSection = (res.isManager === true) && isUserRoleManager;
 
-  // Lọc đơn của mình: Chỉ lấy đơn đã có kết quả (Approved/Rejected) để báo tin
-  const myResultNotifications = allMyRequests.filter(req => req.Status !== "Pending");
+  // 3. LỌC THÔNG BÁO CHO STAFF (Kết quả đơn từ)
+  // Chỉ lấy đơn KHÔNG PHẢI là Pending (tức là Approved hoặc Rejected)
+  // Dùng toLowerCase() để so sánh chính xác bất kể viết hoa thường
+  const myResultNotifications = allMyRequests.filter(req => {
+      const status = String(req.Status || "").toLowerCase();
+      return status !== "pending"; 
+  });
 
   let html = "";
   let hasData = false;
 
   // ============================================================
-  // KHỐI 1: DANH SÁCH CẦN DUYỆT (Ưu tiên hiển thị trên cùng)
-  // Điều kiện: Là Quản lý VÀ Có đơn cần duyệt
+  // KHỐI 1: DANH SÁCH CẦN DUYỆT (Chỉ hiện cho Quản lý)
   // ============================================================
-  if (isManager && approvals.length > 0) {
+  if (showApprovalSection && approvals.length > 0) {
       html += `<div class="mb-6"><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-solid fa-layer-group text-emerald-500"></i> Cần duyệt (${approvals.length})</h3><div class="space-y-4">`;
       
       approvals.forEach(req => {
@@ -493,31 +503,31 @@ window.openNotifications = async function (mode) {
       html += "</div></div>";
       hasData = true;
   } else if (mode === "approve") {
-      // Nếu vào chế độ chuyên duyệt mà hết đơn
+      // Vào mode duyệt mà hết đơn
       html += '<div class="text-center py-24 opacity-50"><i class="fa-solid fa-check-circle text-4xl mb-3 text-emerald-200"></i><p class="text-xs text-slate-400 font-bold uppercase">Đã duyệt hết các đơn!</p></div>';
       content.innerHTML = html;
       return; 
   }
 
   // ============================================================
-  // KHỐI 2: KẾT QUẢ ĐƠN CỦA TÔI (Hiển thị cho TẤT CẢ mọi người)
-  // Điều kiện: Không phải đang ở chế độ chuyên duyệt (mode != 'approve')
+  // KHỐI 2: KẾT QUẢ ĐƠN CỦA TÔI (Cho Staff & Manager xem kết quả)
+  // Chỉ hiện khi KHÔNG PHẢI mode "approve"
   // ============================================================
   if (mode !== "approve" && myResultNotifications.length > 0) {
-      // Thêm đường kẻ phân cách nếu phía trên đã có danh sách duyệt
-      if (hasData) {
-          html += `<div class="h-px bg-slate-100 my-6 mx-4"></div>`;
-      }
+      // Nếu ở trên đã có danh sách duyệt thì thêm đường kẻ
+      if (hasData) html += `<div class="h-px bg-slate-100 my-6 mx-4"></div>`;
 
       html += '<div><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-regular fa-bell text-orange-500"></i> Kết quả đơn của bạn</h3><div class="space-y-3">';
       
       myResultNotifications.forEach(req => {
-          var isAppr = req.Status === "Approved";
-          var isRej = req.Status === "Rejected";
+          var statusLower = String(req.Status || "").toLowerCase();
+          var isAppr = statusLower === "approved";
+          var isRej = statusLower === "rejected";
           
           var statusIcon = isAppr ? "fa-check" : "fa-xmark";
           var statusColor = isAppr ? "text-emerald-500 bg-emerald-50" : "text-red-500 bg-red-50";
           var cardBg = isAppr ? "border-emerald-100" : "border-red-100";
+          var statusText = isAppr ? "Đã duyệt" : "Từ chối";
 
           html += `
             <div class="bg-white p-4 rounded-3xl shadow-sm border ${cardBg} flex items-center gap-4 animate-slide-up">
@@ -527,7 +537,7 @@ window.openNotifications = async function (mode) {
                 <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-center">
                          <h4 class="text-sm font-bold text-slate-800">${req.Type}</h4>
-                         <span class="text-[9px] font-extrabold px-2 py-0.5 rounded ${statusColor} border border-current opacity-80">${req.Status}</span>
+                         <span class="text-[9px] font-extrabold px-2 py-0.5 rounded ${statusColor} border border-current opacity-80">${statusText}</span>
                     </div>
                     <p class="text-[10px] text-slate-400 font-bold mt-0.5">${req.Dates}</p>
                     ${req.Note ? `<p class="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded mt-1.5 italic line-clamp-1"><i class="fa-solid fa-reply mr-1"></i>${req.Note}</p>` : ""}
@@ -538,7 +548,7 @@ window.openNotifications = async function (mode) {
       hasData = true;
   }
 
-  // Trường hợp cả 2 khối đều không có gì
+  // Trường hợp cả 2 khối đều trống
   if (!hasData && mode !== "approve") {
       html = '<div class="text-center py-24 opacity-50"><i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i><p class="text-xs text-slate-400 font-bold uppercase">Không có thông báo mới</p></div>';
   }
@@ -1220,6 +1230,7 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
 
 
