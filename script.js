@@ -3,7 +3,7 @@
 // ==========================================
 
 // [QUAN TRỌNG] Đảm bảo URL này đúng
-const API_URL = "https://script.google.com/macros/s/AKfycbwGD_dtI1VlDlIHq5e21Sbd2lNA3miPQOF1vQf1MtZpKkmhkKmsc_07Fsx0Dx3_VfUm1g/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxuYHMhFTXh7K6KksKDTowOFdMqZvcFAUU0dZkgOUy_Ju36v2t0Pcw9fZSNpC5qjdr86Q/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -431,81 +431,81 @@ window.openNotifications = async function (mode) {
   const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
   if (!res.success) { content.innerHTML = "Lỗi tải dữ liệu"; return; }
 
-  // CHẾ ĐỘ 3: TRANG DUYỆT ĐƠN (Chỉ hiện đơn cần duyệt)
   if (mode === "approve") {
-      renderManagerApprovalOnly(res.data.approvals);
+    // Chế độ 3: Chỉ hiện đơn cần duyệt
+    renderManagerApprovalView(res.data.approvals);
   } else {
-      // CHẾ ĐỘ 2: TRANG THÔNG BÁO (Kết quả trong tháng + Đơn cần duyệt nếu là sếp)
-      renderNotificationGeneral(res.data, res.isManager);
+    // Chế độ 2: Staff & Manager (Kết quả tháng + Đơn cần duyệt nếu có)
+    renderGeneralNotificationView(res.data, res.isManager);
   }
 };
 
-// Hàm vẽ trang THÔNG BÁO (Dành cho mọi nhân sự)
-function renderNotificationGeneral(data, isManager) {
+// VIEW 1: Dành cho mọi nhân sự (Staff & Sếp)
+function renderGeneralNotificationView(data, isManager) {
   const content = document.getElementById("noti-content-area");
   let html = "";
 
-  // ADMIN/MANAGER thấy thêm đơn cần duyệt ở đầu
-  if (isManager && data.approvals.length > 0) {
-      html += `<div class="mb-6"><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-bell-concierge text-emerald-500"></i> Cần bạn duyệt (${data.approvals.length})</h3>`;
-      data.approvals.forEach(req => html += buildApprovalCard(req));
-      html += `</div><div class="h-px bg-slate-100 my-4"></div>`;
+  // 1. Hiện đơn cần duyệt lên đầu (Nếu là Sếp)
+  if (isManager && data.approvals && data.approvals.length > 0) {
+    html += `<div class="mb-6"><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-layer-group text-emerald-500"></i> Cần bạn duyệt (${data.approvals.length})</h3>`;
+    data.approvals.forEach(req => html += buildApprovalCard(req));
+    html += `</div><div class="h-px bg-slate-100 my-4 mx-4"></div>`;
   }
 
-  // TẤT CẢ nhân sự thấy đơn đã duyệt trong tháng
-  if (data.myHistory.length > 0) {
-      html += `<div><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-check-double text-blue-500"></i> Đã duyệt trong tháng</h3>`;
-      data.myHistory.forEach(req => html += buildStatusCard(req));
-      html += `</div>`;
+  // 2. Hiện kết quả đơn của chính mình trong tháng
+  if (data.myHistory && data.myHistory.length > 0) {
+    html += `<div><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-regular fa-bell text-orange-500"></i> Đã duyệt trong tháng</h3><div class="space-y-3">`;
+    data.myHistory.forEach(req => html += buildResultCard(req));
+    html += `</div></div>`;
   }
 
-  content.innerHTML = html || '<div class="text-center py-20 opacity-50 text-xs font-bold uppercase">Không có thông báo nào</div>';
+  content.innerHTML = html || '<div class="text-center py-24 opacity-50 text-xs font-bold uppercase">Không có thông báo mới</div>';
 }
 
-// Hàm vẽ trang DUYỆT ĐƠN TỪ (Dành cho sếp)
-function renderManagerApprovalOnly(approvals) {
-    const content = document.getElementById("noti-content-area");
-    if (!approvals || approvals.length === 0) {
-        content.innerHTML = '<div class="text-center py-20 opacity-50 text-xs font-bold uppercase">Đã duyệt hết đơn cần làm</div>';
-        return;
-    }
-    let html = '<div class="space-y-4">';
-    approvals.forEach(req => html += buildApprovalCard(req));
-    html += '</div>';
-    content.innerHTML = html;
+// VIEW 2: Chỉ dành cho trang Duyệt đơn từ
+function renderManagerApprovalView(approvals) {
+  const content = document.getElementById("noti-content-area");
+  if (!approvals || approvals.length === 0) {
+    content.innerHTML = '<div class="text-center py-24 opacity-50 text-xs font-bold uppercase">Đã duyệt hết đơn cần làm</div>';
+    return;
+  }
+  let html = '<div class="space-y-4">';
+  approvals.forEach(req => html += buildApprovalCard(req));
+  html += '</div>';
+  content.innerHTML = html;
 }
 
-// Helper: Thẻ đơn chờ duyệt (có nút bấm)
+// HELPER: Thẻ chờ duyệt (Có nút bấm)
 function buildApprovalCard(req) {
-    return `<div class="bg-white p-5 rounded-[24px] shadow-sm border border-slate-50 mb-3">
-        <div class="flex justify-between items-start mb-3">
-            <div class="font-bold text-sm text-slate-800">${req.Name}</div>
-            <span class="text-[9px] px-2 py-1 bg-slate-100 rounded-lg font-black uppercase text-slate-500">${req.Type}</span>
-        </div>
-        <div class="text-[11px] text-slate-500 mb-4 italic">"${req.Reason}"</div>
-        <div class="grid grid-cols-2 gap-2">
-            <button onclick="openRejectModal('${req.Request_ID}')" class="py-2 bg-slate-50 text-red-500 rounded-xl text-xs font-bold">Từ chối</button>
-            <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" class="py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold">Duyệt</button>
-        </div>
-    </div>`;
+  return `<div class="bg-white p-5 rounded-[24px] shadow-sm border border-slate-50 mb-3 animate-slide-up">
+    <div class="flex justify-between items-start mb-3">
+        <div class="font-bold text-sm text-slate-800">${req.Name || req.Employee_ID}</div>
+        <span class="text-[9px] px-2 py-1 bg-blue-50 text-blue-600 rounded-lg font-black uppercase">${req.Type}</span>
+    </div>
+    <div class="text-[11px] text-slate-500 mb-4 line-clamp-2 italic">"${req.Reason}"</div>
+    <div class="grid grid-cols-2 gap-3">
+        <button onclick="openRejectModal('${req.Request_ID}')" class="py-2.5 bg-slate-50 text-red-500 rounded-xl text-xs font-bold active:scale-95 transition-all">Từ chối</button>
+        <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" class="py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold active:scale-95 transition-all shadow-md shadow-emerald-100">Duyệt đơn</button>
+    </div>
+  </div>`;
 }
 
-// Helper: Thẻ kết quả (chỉ xem)
-function buildStatusCard(req) {
-    const isAppr = String(req.Status).toLowerCase() === 'approved';
-    const color = isAppr ? 'emerald' : 'red';
-    return `<div class="bg-white p-4 rounded-3xl shadow-sm border border-${color}-50 flex items-center gap-4 mb-2">
-        <div class="w-10 h-10 rounded-2xl bg-${color}-50 text-${color}-600 flex items-center justify-center shadow-sm shrink-0">
-            <i class="fa-solid ${isAppr ? 'fa-check' : 'fa-xmark'}"></i>
+// HELPER: Thẻ kết quả (Chỉ xem)
+function buildResultCard(req) {
+  const isAppr = String(req.Status).toLowerCase() === 'approved';
+  const color = isAppr ? 'emerald' : 'red';
+  return `<div class="bg-white p-4 rounded-3xl shadow-sm border border-${color}-50 flex items-center gap-4 animate-slide-up">
+    <div class="w-10 h-10 rounded-2xl bg-${color}-50 text-${color}-600 flex items-center justify-center shadow-sm shrink-0">
+        <i class="fa-solid ${isAppr ? 'fa-check' : 'fa-xmark'}"></i>
+    </div>
+    <div class="flex-1">
+        <div class="flex justify-between items-center">
+            <h4 class="text-xs font-bold text-slate-800">${req.Type}</h4>
+            <span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-${color}-100 text-${color}-700 uppercase">${isAppr ? 'Đã duyệt' : 'Từ chối'}</span>
         </div>
-        <div class="flex-1">
-            <div class="flex justify-between items-center">
-                <h4 class="text-xs font-bold text-slate-800">${req.Type}</h4>
-                <span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-${color}-100 text-${color}-700 uppercase">${req.Status}</span>
-            </div>
-            <p class="text-[9px] text-slate-400 font-bold">${req.From_Date || req["From Date"]}</p>
-        </div>
-    </div>`;
+        <p class="text-[9px] text-slate-400 font-bold mt-0.5">${req.From_Date || req["From Date"]}</p>
+    </div>
+  </div>`;
 }
 
 window.closeNotifications = function () {
@@ -1182,6 +1182,7 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
 
 
