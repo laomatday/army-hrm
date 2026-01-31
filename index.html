@@ -341,17 +341,17 @@
                   </div>
                 </div>
               </div>
-
-              <div class="mb-8">
-                <button onclick="openProfileModal()" class="w-full btn-gradient py-4 flex items-center justify-center gap-2 group">
-                    <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover:rotate-12 transition-transform">
+              <div class="space-y-4 mb-10">
+                <button onclick="openProfileModal()" class="w-full bg-white p-4 rounded-[20px] shadow-sm border border-slate-100 flex justify-between items-center active:scale-[0.98] transition-all group hover:border-emerald-100">
+                  <div class="flex gap-4 items-center">
+                    <div class="w-12 h-12 rounded-[18px] bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 group-hover:bg-emerald-100 transition-colors">
                         <i class="fa-regular fa-pen-to-square text-xs"></i>
                     </div>
-                    <span>Cập nhật thông tin</span>
+                    <div class="flex flex-col items-start">
+                        <span class="font-black text-slate-800 text-sm">Cập nhật thông tin</span>
+                    </div>
+                  </div>
                 </button>
-              </div>
-
-              <div class="space-y-4 mb-10">
                 <button id="btn-profile-approval" onclick="openNotifications('approve')" class="w-full bg-white p-4 rounded-[20px] shadow-sm border border-slate-100 flex justify-between items-center active:scale-[0.98] transition-all hidden group hover:border-emerald-100">
                   <div class="flex gap-4 items-center">
                     <div class="w-12 h-12 rounded-[18px] bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 group-hover:bg-emerald-100 transition-colors">
@@ -478,26 +478,26 @@
             >THỜI GIAN ÁP DỤNG</label
           >
           <div class="flex items-center gap-3">
-            <div class="flex-1 bg-slate-50 rounded-2xl px-3 py-3 flex items-center gap-2 border border-transparent focus-within:bg-white focus-within:shadow-sm transition-all relative">
-              <i class="fa-regular fa-calendar text-slate-400 text-sm ml-1 z-10 pointer-events-none"></i>
+            <div
+              class="flex-1 bg-slate-50 rounded-2xl px-3 py-3 flex items-center gap-2 border border-transparent focus-within:bg-white focus-within:shadow-sm transition-all"
+              onclick="document.getElementById('req-date-start').showPicker()"
+            >
+              <i class="fa-regular fa-calendar text-slate-400 text-sm ml-1"></i>
               <input
                 type="date"
                 id="req-date-start"
-                class="absolute inset-0 w-full h-full opacity-0 z-20 cursor-pointer"
-                onchange="updateDateDisplay('start'); autoFillEndDate()"
+                class="input-clean"
+                onchange="autoFillEndDate()"
+                onclick="this.showPicker()"
               />
-              <span id="display-date-start" class="text-sm font-bold text-slate-700 z-10 pointer-events-none">Chọn ngày</span>
             </div>
-          
-            <div class="flex-1 bg-slate-50 rounded-2xl px-3 py-3 flex items-center gap-2 border border-transparent focus-within:bg-white focus-within:shadow-sm transition-all relative">
-              <i class="fa-regular fa-calendar-check text-slate-400 text-sm ml-1 z-10 pointer-events-none"></i>
-              <input
-                type="date"
-                id="req-date-end"
-                class="absolute inset-0 w-full h-full opacity-0 z-20 cursor-pointer"
-                onchange="updateDateDisplay('end')"
-              />
-              <span id="display-date-end" class="text-sm font-bold text-slate-700 z-10 pointer-events-none">Chọn ngày</span>
+            <div
+              class="flex-1 bg-slate-50 rounded-2xl px-3 py-3 flex items-center gap-2 border border-transparent focus-within:bg-white focus-within:shadow-sm transition-all"
+              id="req-date-end-container"
+              onclick="document.getElementById('req-date-end').showPicker()"
+            >
+              <i class="fa-regular fa-calendar-check text-slate-400 text-sm ml-1"></i>
+              <input type="date" id="req-date-end" class="input-clean" onclick="this.showPicker()" />
             </div>
           </div>
         </div>
@@ -520,13 +520,13 @@
       <div class="fixed bottom-0 left-0 w-full p-6 flex gap-4 pb-safe z-50 pointer-events-none">
         <button
           onclick="closeRequestModal()"
-          class="pointer-events-auto w-1/3 btn-white rounded-[30px] font-bold text-sm"
+          class="w-1/3 py-3.5 rounded-[20px] pointer-events-auto w-1/3 btn-white rounded-[30px] font-bold text-sm"
         >
           Hủy
         </button>
         <button
           onclick="submitRequest()"
-          class="pointer-events-auto flex-1 btn-gradient flex items-center justify-center gap-2"
+          class="w-1/3 py-3.5 rounded-[20px] pointer-events-auto flex-1 btn-gradient flex items-center justify-center gap-2"
         >
           Gửi đề xuất <i class="fa-solid fa-paper-plane text-xs"></i>
         </button>
@@ -561,30 +561,30 @@
     >
       <div class="pt-safe px-6 pt-6 pb-2 shrink-0 flex items-center justify-between">
         <h2 id="profile-modal-title" class="text-3xl font-black text-slate-800 tracking-tight drop-shadow-sm">
-          Thông tin cá nhân
+          Hồ sơ cá nhân
         </h2>
         <button
           onclick="closeProfileModal()"
-          class="btn-icon bg-transparent border-none shadow-none text-slate-400 hover:text-slate-600"
+          class="btn-icon bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-slate-600 w-10 h-10 rounded-full flex items-center justify-center"
         >
-          <i class="fa-solid fa-arrow-right text-xl"></i>
+          <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
-    
-      <div class="flex-1 overflow-y-auto no-scrollbar px-6 pb-32 space-y-4 pt-4">
+
+      <div class="flex-1 overflow-y-auto no-scrollbar px-6 pb-32 space-y-6 pt-4">
         
-        <div class="card flex flex-col items-center">
+        <div class="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 flex flex-col items-center">
           <div class="relative group cursor-pointer" onclick="document.getElementById('input-edit-avatar').click()">
-            <div class="p-1 rounded-full border-2 border-emerald-100 bg-slate-50">
-              <img id="edit-avatar-preview" src="" class="w-24 h-24 rounded-full object-cover shadow-sm" />
+            <div class="p-1.5 rounded-full border-2 border-emerald-50 bg-emerald-50/50">
+              <img id="edit-avatar-preview" src="" class="w-24 h-24 rounded-full object-cover shadow-sm bg-white" />
             </div>
             <div
-              class="absolute bottom-0 right-0 w-8 h-8 bg-[#1e293b] text-white rounded-full flex items-center justify-center border-2 border-white shadow-lg active:scale-90 transition-transform"
+              class="absolute bottom-0 right-0 w-8 h-8 bg-slate-800 text-white rounded-full flex items-center justify-center border-2 border-white shadow-lg active:scale-90 transition-transform"
             >
               <i class="fa-solid fa-camera text-xs"></i>
             </div>
           </div>
-          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-3">Chạm để đổi ảnh đại diện</p>
+          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-3">Chạm để đổi ảnh</p>
           <input
             type="file"
             id="input-edit-avatar"
@@ -593,69 +593,69 @@
             onchange="previewAvatarInModal(this)"
           />
         </div>
-    
-        <div class="card">
-          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-3 tracking-wider pl-1"
-            >THÔNG TIN LIÊN HỆ</label
-          >
+
+        <div>
+          <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-3 tracking-widest pl-2">Liên hệ</label>
           <div class="space-y-3">
             
-            <div class="bg-slate-50 rounded-2xl px-4 py-3.5 flex items-center gap-3 border border-transparent opacity-80">
-              <i class="fa-solid fa-phone text-slate-400 text-sm"></i>
-              <div class="flex-1">
-                <p class="text-[9px] font-bold text-slate-400 uppercase">SỐ ĐIỆN THOẠI</p>
-                <input type="tel" id="edit-phone" disabled class="input-clean w-full bg-transparent text-sm font-bold text-slate-700 outline-none cursor-not-allowed" placeholder="..." />
+            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-phone text-sm"></i>
               </div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Điện thoại</span>
+              <input type="tel" id="edit-phone" disabled class="input-clean flex-1 text-right bg-transparent text-sm font-bold text-slate-800 outline-none cursor-not-allowed truncate" placeholder="..." />
             </div>
-    
-            <div class="bg-slate-50 rounded-2xl px-4 py-3.5 flex items-center gap-3 border border-transparent opacity-80">
-              <i class="fa-solid fa-envelope text-slate-400 text-sm"></i>
-              <div class="flex-1 overflow-hidden">
-                <p class="text-[9px] font-bold text-slate-400 uppercase">EMAIL</p>
-                <input type="text" id="edit-email" disabled class="input-clean w-full bg-transparent text-sm font-bold text-slate-700 outline-none cursor-not-allowed" placeholder="..." />
+
+            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-envelope text-sm"></i>
               </div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Email</span>
+              <input type="text" id="edit-email" disabled class="input-clean flex-1 text-right bg-transparent text-sm font-bold text-slate-800 outline-none cursor-not-allowed truncate" placeholder="..." />
             </div>
-    
+
           </div>
         </div>
-    
-        <div class="card relative z-20">
-          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-3 tracking-wider pl-1">TỔ CHỨC</label>
-          <div class="space-y-4">
+
+        <div>
+          <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-3 tracking-widest pl-2">Công việc</label>
+          <div class="space-y-3">
             
-            <div class="bg-slate-50 rounded-2xl px-4 py-3.5 flex items-center gap-3 border border-transparent opacity-80">
-                <i class="fa-solid fa-map-location-dot text-slate-400 text-sm"></i>
-                <div class="flex-1">
-                    <p class="text-[9px] font-bold text-slate-400 uppercase">TRUNG TÂM / CHI NHÁNH</p>
-                    <input type="text" id="profile-location-display" disabled class="input-clean w-full bg-transparent text-sm font-bold text-slate-700 outline-none cursor-not-allowed" placeholder="..." />
+            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 text-purple-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-location-dot text-sm"></i>
                 </div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Chi nhánh</span>
+                <input type="text" id="profile-location-display" disabled class="input-clean flex-1 text-right bg-transparent text-sm font-bold text-slate-800 outline-none cursor-not-allowed truncate" placeholder="..." />
             </div>
-    
-            <div class="bg-slate-50 rounded-2xl px-4 py-3.5 flex items-center gap-3 border border-transparent opacity-80">
-              <i class="fa-solid fa-building-user text-slate-400 text-sm"></i>
-              <div class="flex-1">
-                <p class="text-[9px] font-bold text-slate-400 uppercase">PHÒNG BAN</p>
-                <input type="text" id="edit-dept" disabled class="input-clean w-full bg-transparent text-sm font-bold text-slate-700 outline-none cursor-not-allowed" placeholder="..." />
+
+            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-orange-50 border border-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-briefcase text-sm"></i>
               </div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Phòng ban</span>
+              <input type="text" id="edit-dept" disabled class="input-clean flex-1 text-right bg-transparent text-sm font-bold text-slate-800 outline-none cursor-not-allowed truncate" placeholder="..." />
             </div>
-    
+
           </div>
         </div>
       </div>
-    
-      <div class="fixed bottom-0 left-0 w-full p-6 flex gap-4 pb-safe z-50 pointer-events-none">
-        <button
-          onclick="closeProfileModal()"
-          class="pointer-events-auto w-1/3 btn-white rounded-[30px] font-bold text-sm"
-        >
-          Đóng
-        </button>
-        <button
-          onclick="submitProfileUpdate()"
-          class="pointer-events-auto flex-1 btn-gradient flex items-center justify-center gap-2"
-        >
-          Lưu ảnh đại diện
-        </button>
+
+      <div class="fixed bottom-0 left-0 w-full p-6 pb-safe z-50 pointer-events-none bg-gradient-to-t from-white via-white/90 to-transparent">
+        <div class="flex gap-4 pointer-events-auto">
+            <button
+              onclick="closeProfileModal()"
+              class="w-1/3 py-3.5 rounded-[20px] font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+            >
+              Đóng
+            </button>
+            <button
+              onclick="submitProfileUpdate()"
+              class="w-1/3 py-3.5 rounded-[20px]  pointer-events-auto flex-1 btn-gradient flex items-center justify-center gap-2"
+            >
+              <i class="fa-solid fa-check"></i> Lưu ảnh
+            </button>
+        </div>
       </div>
     </div>
 
@@ -664,84 +664,90 @@
       class="fixed inset-0 z-[260] bg-slate-50 hidden flex flex-col animate-slide-up h-full w-full"
     >
       <div class="pt-safe px-6 pt-6 pb-2 shrink-0 flex items-center justify-between">
-        <h2 class="text-2xl font-black text-slate-800 tracking-tight">Thông tin nhân sự</h2>
+        <h2 class="text-3xl font-black text-slate-800 tracking-tight drop-shadow-sm">Thông tin nhân sự</h2>
         <button
           onclick="closeContactDetail()"
-          class="btn-icon bg-transparent border-none shadow-none text-slate-400 hover:text-slate-600"
+          class="btn-icon bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-slate-600 w-10 h-10 rounded-full flex items-center justify-center"
         >
-          <i class="fa-solid fa-arrow-right text-xl"></i>
+          <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
 
-      <div class="flex-1 overflow-y-auto no-scrollbar px-6 pb-32 space-y-4 pt-4">
-        <div class="card flex flex-col items-center">
-          <div class="p-1.5 rounded-full border-2 border-emerald-100 bg-slate-50 mb-3">
-            <img id="contact-detail-avatar" src="" class="w-24 h-24 rounded-full object-cover shadow-sm bg-slate-200" />
+      <div class="flex-1 overflow-y-auto no-scrollbar px-6 pb-32 space-y-6 pt-4">
+        
+        <div class="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 flex flex-col items-center">
+          <div class="p-1.5 rounded-full border-2 border-emerald-50 bg-emerald-50/50 mb-3">
+            <img id="contact-detail-avatar" src="" class="w-24 h-24 rounded-full object-cover shadow-sm bg-white" />
           </div>
           <h3 id="contact-detail-name" class="text-xl font-black text-slate-800 text-center mb-1">...</h3>
-          <p id="contact-detail-position" class="badge badge-success px-3 py-1 rounded-full border border-emerald-100">
+          <p id="contact-detail-position" class="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200">
             Staff
           </p>
         </div>
 
-        <div class="card">
-          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-3 tracking-wider pl-1"
-            >THÔNG TIN LIÊN HỆ</label
-          >
+        <div>
+          <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-3 tracking-widest pl-2">Liên hệ</label>
           <div class="space-y-3">
+            
             <a
               id="contact-detail-call"
               href="#"
-              class="bg-slate-50 rounded-2xl px-4 py-3.5 flex items-center gap-3 border border-transparent active:scale-[0.98] transition-all hover:bg-emerald-50 group"
+              class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3 active:scale-[0.98] transition-transform"
             >
-              <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-emerald-500 shadow-sm">
-                <i class="fa-solid fa-phone text-xs"></i>
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-phone text-sm"></i>
               </div>
-              <div class="flex-1">
-                <p class="text-[9px] font-bold text-slate-400 uppercase">SỐ ĐIỆN THOẠI</p>
-                <p id="contact-detail-phone" class="text-sm font-bold text-slate-700 group-hover:text-emerald-700">
-                  ...
-                </p>
-              </div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Điện thoại</span>
+              <p id="contact-detail-phone" class="flex-1 text-right text-sm font-bold text-emerald-600 truncate">...</p>
             </a>
-            <div class="bg-slate-50 rounded-2xl px-4 py-3.5 flex items-center gap-3 border border-transparent">
-              <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-blue-500 shadow-sm">
-                <i class="fa-solid fa-envelope text-xs"></i>
+
+            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-envelope text-sm"></i>
               </div>
-              <div class="flex-1 overflow-hidden">
-                <p class="text-[9px] font-bold text-slate-400 uppercase">EMAIL</p>
-                <p id="contact-detail-email" class="text-sm font-bold text-slate-700 truncate">...</p>
-              </div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Email</span>
+              <p id="contact-detail-email" class="flex-1 text-right text-sm font-bold text-slate-800 truncate">...</p>
             </div>
+
           </div>
         </div>
 
-        <div class="card">
-          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-3 tracking-wider pl-1">TỔ CHỨC</label>
+        <div>
+          <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-3 tracking-widest pl-2">Công việc</label>
           <div class="space-y-3">
-            <div class="bg-slate-50 rounded-2xl px-4 py-3.5 flex items-center gap-3 border border-transparent">
-              <i class="fa-solid fa-id-card text-slate-300 text-sm"></i>
-              <div class="flex-1">
-                <p class="text-[9px] font-bold text-slate-400 uppercase">MÃ NHÂN VIÊN</p>
-                <p id="contact-detail-id" class="text-sm font-bold text-slate-700">...</p>
-              </div>
+            
+            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 text-slate-500 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-id-card text-sm"></i>
+                </div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Mã NV</span>
+                <p id="contact-detail-id" class="flex-1 text-right text-sm font-bold text-slate-800 truncate">...</p>
             </div>
-            <div class="bg-slate-50 rounded-2xl px-4 py-3.5 flex items-center gap-3 border border-transparent">
-              <i class="fa-solid fa-building-user text-slate-300 text-sm"></i>
-              <div class="flex-1">
-                <p class="text-[9px] font-bold text-slate-400 uppercase">PHÒNG BAN</p>
-                <p id="contact-detail-dept" class="text-sm font-bold text-slate-700">...</p>
-              </div>
+
+            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 text-purple-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-location-dot text-sm"></i>
+                </div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Chi nhánh</span>
+                <p id="contact-detail-center" class="flex-1 text-right text-sm font-bold text-slate-800 truncate">...</p>
             </div>
-            <div class="bg-slate-50 rounded-2xl px-4 py-3.5 flex items-center gap-3 border border-transparent">
-              <i class="fa-solid fa-map-location-dot text-slate-300 text-sm"></i>
-              <div class="flex-1">
-                <p class="text-[9px] font-bold text-slate-400 uppercase">TRUNG TÂM</p>
-                <p id="contact-detail-center" class="text-sm font-bold text-slate-700">...</p>
+
+            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-orange-50 border border-orange-100 text-orange-600 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-briefcase text-sm"></i>
               </div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Phòng ban</span>
+              <p id="contact-detail-dept" class="flex-1 text-right text-sm font-bold text-slate-800 truncate">...</p>
             </div>
+
           </div>
         </div>
+      </div>
+
+      <div class="fixed bottom-0 left-0 w-full p-6 pb-safe z-50 pointer-events-none bg-gradient-to-t from-white via-white/90 to-transparent">
+        <button onclick="closeContactDetail()" class="pointer-events-auto w-full py-3.5 rounded-[20px] font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors shadow-sm">
+            Đóng
+        </button>
       </div>
     </div>
 
