@@ -302,36 +302,88 @@ function renderHistoryStats(summary) {
   setText("hist-errors", summary.errorCount);
 }
 
-function renderNotificationsBadge(notiData) {
-    // notiData ở đây là nội dung của res.data từ getMobileNotifications
-    // Trong code.js: data: { approvals: [...], myRequests: [...] }
+// File: js.html
+  // Thay thế hàm này để bỏ chấm đỏ trên thẻ đơn
+  function renderNotificationContent(data, mode) {
+    var content = document.getElementById("noti-content-area");
+    var hasApp = data.approvals && data.approvals.length > 0;
+    var hasMy = data.myRequests && data.myRequests.length > 0;
     
-    var count = notiData.approvals ? notiData.approvals.length : 0;
+    // Reset mảng chọn khi mở lại popup
+    selectedRequests = [];
+    updateBatchActions(); 
+
+    if(!hasApp && !hasMy) return content.innerHTML = `<div class="text-center py-24 opacity-60"><p>Không có thông báo</p></div>`;
     
-    var notiDot = document.getElementById("noti-dot");
-    var profileDot = document.getElementById("profile-noti-dot");
-    var homePendingEl = document.getElementById("home-stat-pending");
+    var html = "";
+    
+    // --- 1. PHẦN DUYỆT ĐƠN (CÓ CHECKBOX) ---
+    if(hasApp) {
+        html += `
+        <div class="mb-6">
+            <div class="flex justify-between items-center mb-3 px-1">
+                <h3 class="text-xs font-bold text-slate-400 uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group"></i> Cần duyệt (${data.approvals.length})
+                </h3>
+                <button onclick="toggleSelectAll(${data.approvals.length})" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
+                    Chọn tất cả
+                </button>
+            </div>
+            <div class="space-y-4">`;
 
-    if (homePendingEl) homePendingEl.innerText = count;
-
-    // Đếm đơn chưa đọc của tôi
-    var myUnreadCount = 0;
-    if (notiData.myRequests) {
-        notiData.myRequests.forEach(function(r) {
-            if (checkIsUnread(r.Request_ID, r.Status)) {
-                myUnreadCount++;
-            }
+        data.approvals.forEach((req) => {
+            var chkId = `chk-req-${req.Request_ID}`;
+            html += `
+            <div class="bg-white p-4 rounded-[20px] shadow-sm border border-slate-50 relative overflow-hidden flex gap-3">
+                <div class="flex flex-col justify-center">
+                    <input type="checkbox" id="${chkId}" onchange="toggleSelectRequest('${req.Request_ID}')" 
+                    class="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer accent-emerald-600 transition-all">
+                </div>
+                <div class="flex-1 min-w-0" onclick="document.getElementById('${chkId}').click()">
+                    <div class="flex justify-between items-start mb-2">
+                       <div>
+                          <h4 class="font-bold text-slate-800 text-sm leading-tight">${req.Name}</h4>
+                          <p class="text-[11px] font-bold text-slate-500 mt-1 flex items-center gap-1.5">
+                             <span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">${req.Position || "NV"}</span>
+                             <span>${req.Location_Name || ""}</span>
+                          </p>
+                       </div>
+                       <span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-purple-50 text-purple-600 border border-purple-100 uppercase tracking-wide">${req.Type}</span>
+                    </div>
+                    <div class="bg-slate-50 rounded-xl p-2.5 mb-2 border border-slate-100">
+                         <div class="flex items-center gap-2 text-xs font-bold text-slate-700 mb-0.5">
+                            <i class="fa-regular fa-calendar text-emerald-500"></i> ${req.Dates}
+                         </div>
+                         <p class="text-xs text-slate-500 italic pl-5 line-clamp-1">"${req.Reason}"</p>
+                    </div>
+                </div>
+            </div>`;
         });
+        html += `</div></div>`;
+    } 
+    
+    // --- 2. PHẦN ĐƠN CỦA TÔI (ĐÃ BỎ CHẤM ĐỎ) ---
+    if(mode !== "approve" && hasMy) {
+        html += `<div><h3 class="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2"><i class="fa-regular fa-bell"></i> Đơn của tôi</h3><div class="space-y-3">`;
+        data.myRequests.forEach(req => {
+             var st = req.Status;
+             var col = st==="Approved"?"text-emerald-500 bg-emerald-50":st==="Rejected"?"text-red-500 bg-red-50":"text-orange-500 bg-orange-50";
+             // Đã xóa biến dot và ${dot} trong HTML dưới đây
+             html += `
+             <div class="bg-white p-4 rounded-[20px] border border-slate-100 flex items-center gap-4 shadow-sm relative overflow-hidden">
+                <div class="w-10 h-10 rounded-2xl ${col} flex items-center justify-center text-lg shadow-sm shrink-0"><i class="fa-solid ${st==="Approved"?"fa-check":st==="Rejected"?"fa-xmark":"fa-hourglass"}"></i></div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-center mb-0.5"><span class="font-bold text-sm text-slate-800">${req.Type}</span><span class="text-[9px] font-extrabold ${col} px-2 py-0.5 rounded border border-current opacity-80">${st}</span></div>
+                    <p class="text-[10px] text-slate-400 font-bold">${req.Dates}</p>
+                    ${req.Note ? `<p class="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded mt-1.5 italic line-clamp-1"><i class="fa-solid fa-reply mr-1"></i>${req.Note}</p>` : ""}
+                </div>
+             </div>`;
+        });
+        html += `</div></div>`;
     }
 
-    if (count > 0 || myUnreadCount > 0) {
-      if (notiDot) notiDot.classList.remove("hidden");
-      if (profileDot) profileDot.classList.remove("hidden");
-    } else {
-      if (notiDot) notiDot.classList.add("hidden");
-      if (profileDot) profileDot.classList.add("hidden");
-    }
-}
+    content.innerHTML = html;
+  }
 
 function renderNotificationContent(data, mode) {
     var content = document.getElementById("noti-content-area");
@@ -1221,3 +1273,4 @@ window.changeHistoryPage = function (direction) {
     renderActivityHistory();
   }
 };
+
