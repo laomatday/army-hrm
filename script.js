@@ -200,13 +200,9 @@ async function loadDashboardData() {
 
         // 3. Thông báo
         if (d.notifications) {
-            cachedNotifications = d.notifications;
-            renderNotificationsBadge(d.notifications);
-            if (!document.getElementById("modal-notifications").classList.contains("hidden")) {
-                var title = document.getElementById("modal-noti-title").innerText;
-                var mode = (title === "Duyệt đơn từ") ? "approve" : "all";
-                renderNotificationContent(cachedNotifications, mode);
-            }
+            cachedNotifications = d.notifications; 
+            // Anh lưu ý: Nếu hàm GAS trả về object lồng nhau thì dùng d.notifications.data
+            renderNotificationsBadge(d.notifications.success ? d.notifications.data : d.notifications);
         }
 
         // 4. Danh sách đơn của tôi
@@ -563,11 +559,10 @@ window.openNotifications = async function (mode) {
     
     if (!modal || !content) return;
 
-    // Cập nhật tiêu đề và hiển thị Modal
-    titleEl.innerText = mode === "approve" ? "Duyệt đơn từ" : "Thông báo";
+    titleEl.innerText = (mode === "approve") ? "Duyệt đơn từ" : "Thông báo";
     modal.classList.remove("hidden");
 
-    // BƯỚC 1: QUAN TRỌNG - Xóa sạch nội dung cũ và CHỈ hiện hiệu ứng "Đang tải"
+    // BƯỚC 1: QUAN TRỌNG - CHỈ hiện hiệu ứng "Đang tải"
     content.innerHTML = `
         <div id="noti-waiting" class="text-center py-20 animate-fade-in">
             <div class="animate-spin inline-block w-8 h-8 border-[3px] border-emerald-500 border-t-transparent rounded-full mb-4"></div>
@@ -575,28 +570,22 @@ window.openNotifications = async function (mode) {
         </div>`;
 
     try {
-        // BƯỚC 2: Gọi Server thông qua hàm callBackend thay cho google.script.run
+        // BƯỚC 2: Gọi Server lấy data mới nhất (vì Anh mới chỉnh hàm này bên GAS)
         const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
 
         if (res && res.success) {
-            // Cập nhật biến cache toàn cục
-            cachedNotifications = res.data;
+            cachedNotifications = res.data; // Cập nhật Cache toàn cục
 
-            // Chỉ vẽ giao diện sau khi đã nhận được dữ liệu thực sự từ Server
-            if (typeof renderNotificationContent === "function") {
-                renderNotificationContent(res.data, mode);
-            }
+            // BƯỚC 3: Vẽ giao diện từ dữ liệu mới
+            renderNotificationContent(res.data, mode);
 
-            // Đánh dấu đã xem để xử lý logic tắt chấm đỏ thông báo
-            if (typeof markNotificationsAsRead === "function") {
-                markNotificationsAsRead(res.data);
-            }
+            // BƯỚC 4: Xử lý chấm đỏ thông minh (Dựa vào Request_ID)
+            markNotificationsAsRead(res.data);
+            
         } else {
-            // Hiển thị thông báo lỗi cụ thể từ Server
-            content.innerHTML = `<p class="text-center py-10 text-xs text-red-400 font-bold">${res ? res.message : "Dữ liệu không phản hồi"}</p>`;
+            content.innerHTML = `<p class="text-center py-10 text-xs text-red-400 font-bold">${res ? res.message : "Lỗi server"}</p>`;
         }
     } catch (err) {
-        // Xử lý khi có sự cố kết nối Network
         console.error("Lỗi openNotifications:", err);
         content.innerHTML = `<p class="text-center py-10 text-xs text-red-400 font-bold">Lỗi kết nối Server!</p>`;
     }
@@ -608,19 +597,20 @@ function getReadList() {
 }
 
 function checkIsUnread(reqId, status) {
-    if (status === "Pending") return false;
+    if (status === "Pending") return false; // Đơn đang chờ thì không tính là "Kết quả mới"
     var readList = getReadList();
-    return !readList.includes(reqId);
+    return !readList.includes(String(reqId));
 }
 
 function markNotificationsAsRead(data) {
     var readList = getReadList();
     var hasChange = false;
 
+    // Chỉ lưu IDs của các đơn Đã duyệt hoặc Từ chối
     if (data.myRequests) {
         data.myRequests.forEach(function (r) {
-            if (r.Status !== "Pending" && !readList.includes(r.Request_ID)) {
-                readList.push(r.Request_ID);
+            if (r.Status !== "Pending" && !readList.includes(String(r.Request_ID))) {
+                readList.push(String(r.Request_ID));
                 hasChange = true;
             }
         });
@@ -628,7 +618,8 @@ function markNotificationsAsRead(data) {
 
     if (hasChange) {
         localStorage.setItem("army_read_ids", JSON.stringify(readList));
-        renderNotificationsBadge(data);
+        // Vẽ lại chấm đỏ trên icon Chuông và icon Profile
+        renderNotificationsBadge(data); 
     }
 }
 
@@ -637,9 +628,11 @@ function renderNotificationsBadge(notiData) {
     var profileDot = document.getElementById("profile-noti-dot");
     var homePendingEl = document.getElementById("home-stat-pending");
 
+    // 1. Số đơn cần duyệt (Cho Sếp)
     var approvalsCount = notiData.approvals ? notiData.approvals.length : 0;
     if (homePendingEl) homePendingEl.innerText = approvalsCount;
 
+    // 2. Kiểm tra có kết quả đơn mới nào chưa xem không (Cho NV)
     var myUnreadCount = 0;
     if (notiData.myRequests) {
         notiData.myRequests.forEach(function (r) {
@@ -649,6 +642,7 @@ function renderNotificationsBadge(notiData) {
         });
     }
 
+    // Hiện chấm đỏ nếu có đơn cần duyệt HOẶC có kết quả đơn mới
     if (approvalsCount > 0 || myUnreadCount > 0) {
         if (notiDot) notiDot.classList.remove("hidden");
         if (profileDot) profileDot.classList.remove("hidden");
@@ -1400,6 +1394,7 @@ function updateClock() {
     setText("clock-display", timeStr);
     setText("date-display", dateStr);
 }
+
 
 
 
