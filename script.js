@@ -1,7 +1,7 @@
 // ==========================================
 // 1. CẤU HÌNH & KẾT NỐI API (QUAN TRỌNG)
 // ==========================================
-const API_URL = "https://script.google.com/macros/s/AKfycbxv0bOJVRTZfpSzVLnK5gwFcUEhPO2iI3LT1LQjZ4afB3n2VsUnADWwwr_gkdOzhXCATA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbx6dgm8qYoH_C0aaVRWuMc1Domb6tv1UwC9zmEVRYMaLqBwlkNRKIf8-lIpiTXTO3Qidw/exec";
 
 /**
  * Hàm thay thế cho google.script.run
@@ -556,31 +556,37 @@ window.triggerCheckOut = function () {
 // ==========================================
 // 8. THÔNG BÁO & DUYỆT ĐƠN (MOBILE)
 // ==========================================
-window.openNotifications = async function (mode) {
+window.openNotifications = function (mode) {
     var modal = document.getElementById("modal-notifications");
     var content = document.getElementById("noti-content-area");
     var titleEl = document.getElementById("modal-noti-title");
     if (!modal || !content) return;
 
     titleEl.innerText = (mode === "approve") ? "Duyệt đơn từ" : "Thông báo";
-    document.querySelectorAll('[id^="noti-dot"], [id^="profile-noti-dot"]').forEach(d => d.classList.add("hidden"));
     modal.classList.remove("hidden");
 
-    if (cachedNotifications) {
-        renderNotificationContent(cachedNotifications, mode);
-        markNotificationsAsRead(cachedNotifications);
-    } else {
-        content.innerHTML = '<div class="text-center py-20 opacity-50"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500 text-2xl"></i></div>';
-    }
+    // BƯỚC 1: Hiện text "Đang chờ" và xóa dữ liệu cũ để tránh nhầm lẫn
+    content.innerHTML = `
+        <div id="noti-waiting" class="text-center py-20">
+            <div class="animate-spin inline-block w-6 h-6 border-[3px] border-emerald-500 border-t-transparent rounded-full mb-3"></div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Đang chờ thông báo...</p>
+        </div>`;
 
-    // GỌI API LẤY THÔNG BÁO MỚI NHẤT
-    const res = await callAPI("getMobileNotifications", [currentUser.Employee_ID]);
-    
-    if (res.success) {
-        cachedNotifications = res.data;
-        renderNotificationContent(res.data, mode);
-        markNotificationsAsRead(res.data);
-    }
+    // BƯỚC 2: Gọi Server để lấy data mới nhất (Không dùng cache cũ ở bước này để đảm bảo chính xác)
+    google.script.run
+        .withSuccessHandler(function(res) {
+            if (res.success) {
+                cachedNotifications = res.data; // Cập nhật cache mới nhất
+                renderNotificationContent(res.data, mode);
+                markNotificationsAsRead(res.data);
+            } else {
+                content.innerHTML = `<p class="text-center py-10 text-xs text-red-400">Lỗi: ${res.message}</p>`;
+            }
+        })
+        .withFailureHandler(function(err) {
+            content.innerHTML = `<p class="text-center py-10 text-xs text-red-400">Lỗi kết nối server</p>`;
+        })
+        .getMobileNotifications(currentUser.Employee_ID);
 };
 
 function getReadList() {
@@ -640,87 +646,108 @@ function renderNotificationsBadge(notiData) {
 }
 
 function renderNotificationContent(data, mode) {
-    var content = document.getElementById("noti-content-area");
-    var hasApprovals = data.approvals && data.approvals.length > 0;
-    var hasMyRequests = data.myRequests && data.myRequests.length > 0;
+      var content = document.getElementById("noti-content-area");
+      var hasApprovals = data.approvals && data.approvals.length > 0;
+      var hasMyRequests = data.myRequests && data.myRequests.length > 0;
 
-    if (!hasApprovals && !hasMyRequests) {
-        content.innerHTML = '<div class="text-center py-24 opacity-50"><i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i><p class="text-xs text-slate-400 font-bold uppercase">Không có dữ liệu</p></div>';
-        return;
-    }
+      // Nếu cả 2 danh sách đều trống hoặc không tồn tại (xác nhận từ Server)
+      if (!hasApprovals && !hasMyRequests) {
+          content.innerHTML = `
+              <div class="text-center py-24 opacity-60 animate-slide-up">
+                  <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-slate-100">
+                      <i class="fa-solid fa-inbox text-2xl text-slate-300"></i>
+                  </div>
+                  <p class="text-xs font-black text-slate-400 uppercase tracking-widest">Không có thông báo nào</p>
+              </div>`;
+          return;
+      }
 
-    var html = "";
+      var html = "";
 
-    if (hasApprovals) {
-        html += `<div class="mb-6"><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Cần duyệt (${data.approvals.length})</h3><div class="space-y-4">`;
-        data.approvals.forEach(function (req) {
+      // 1. Phần Duyệt đơn (Cho Quản lý/Admin)
+      if (hasApprovals) {
+          html += `<div class="mb-6 animate-slide-up">
+                      <h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group"></i> Cần duyệt (${data.approvals.length})
+                      </h3>
+                      <div class="space-y-4">`;
+          
+          data.approvals.forEach(function (req) {
             var isLeave = (req.Type || "").toLowerCase().includes("nghỉ");
             var badgeClass = isLeave ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-purple-50 text-purple-600 border-purple-100";
             var avatarHtml = getAvatarHtml(req.Name, req.Avatar, "w-10 h-10", "text-xs");
 
             html += `
-              <div class="bg-white p-5 rounded-[24px] shadow-sm border border-slate-50 animate-slide-up relative overflow-hidden group">
-                  <div class="flex justify-between items-start mb-3">
-                      <div class="flex items-center gap-3">
-                          ${avatarHtml}
-                          <div>
-                              <h4 class="font-bold text-slate-800 text-sm leading-tight">${req.Name}</h4>
-                              <p class="text-[10px] font-bold text-slate-400 mt-0.5">${req.Position || "NV"} • ${req.Center_Name || "CN"}</p>
-                          </div>
-                      </div>
-                      <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold border ${badgeClass} uppercase tracking-wide">${req.Type}</span>
-                  </div>
-                  <div class="bg-slate-50/80 rounded-2xl p-3 mb-4 border border-slate-100">
-                       <div class="flex items-center gap-2 text-xs font-bold text-slate-700 mb-1">
-                          <i class="fa-regular fa-calendar text-emerald-500"></i> ${req.Dates}
-                       </div>
-                       <p class="text-xs text-slate-500 italic line-clamp-2 pl-6 border-l-2 border-slate-200">"${req.Reason}"</p>
-                  </div>
-                  <div class="grid grid-cols-2 gap-3">
-                      <button onclick="openRejectModal('${req.Request_ID}')" class="py-2.5 rounded-xl bg-white border border-red-100 text-red-500 text-xs font-bold active:scale-95 transition-all shadow-sm">Từ chối</button>
-                      <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" 
-                          class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold active:scale-95 transition-all shadow-md">
-                          Duyệt đơn
-                      </button>
-                  </div>
-              </div>`;
-        });
-        html += "</div></div>";
-    } else if (mode === "approve") {
-        html += '<div class="text-center py-20 opacity-50"><i class="fa-solid fa-check-circle text-4xl mb-3 text-emerald-200"></i><p class="text-xs text-slate-400 font-bold uppercase">Đã duyệt hết các đơn!</p></div>';
-    }
+                <div class="bg-white p-5 rounded-[24px] shadow-sm border border-slate-50 relative overflow-hidden group">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center gap-3">
+                            ${avatarHtml}
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm leading-tight">${req.Name}</h4>
+                                <p class="text-[10px] font-bold text-slate-400 mt-0.5">${req.Position || "NV"} • ${req.Center_Name || "CN"}</p>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold border ${badgeClass} uppercase tracking-wide">${req.Type}</span>
+                    </div>
+                    <div class="bg-slate-50/80 rounded-2xl p-3 mb-4 border border-slate-100">
+                         <div class="flex items-center gap-2 text-xs font-bold text-slate-700 mb-1">
+                            <i class="fa-regular fa-calendar text-emerald-500"></i> ${req.Dates}
+                         </div>
+                         <p class="text-xs text-slate-500 italic line-clamp-2 pl-6 border-l-2 border-slate-200">"${req.Reason}"</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="openRejectModal('${req.Request_ID}')" class="py-2.5 rounded-xl bg-white border border-red-100 text-red-500 text-xs font-bold active:scale-95 transition-all shadow-sm">Từ chối</button>
+                        <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" 
+                            class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold active:scale-95 transition-all shadow-md">
+                            Duyệt đơn
+                        </button>
+                    </div>
+                </div>`;
+          });
+          html += "</div></div>";
+      } else if (mode === "approve") {
+          html += '<div class="text-center py-20 opacity-50 animate-slide-up"><i class="fa-solid fa-check-circle text-4xl mb-3 text-emerald-200"></i><p class="text-xs text-slate-400 font-bold uppercase">Đã duyệt hết các đơn!</p></div>';
+      }
 
-    if (mode !== "approve" && hasMyRequests) {
-        html += '<div><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-regular fa-bell"></i> Đơn của tôi</h3><div class="space-y-3">';
-        data.myRequests.forEach(function (req) {
+      // 2. Phần Đơn của tôi (Luôn hiện nếu không phải mode duyệt)
+      if (mode !== "approve" && hasMyRequests) {
+          html += `<div class="animate-slide-up">
+                    <h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2">
+                        <i class="fa-regular fa-bell"></i> Đơn của tôi
+                    </h3>
+                    <div class="space-y-3">`;
+          
+          data.myRequests.forEach(function (req) {
             var isAppr = req.Status === "Approved";
             var isRej = req.Status === "Rejected";
             var statusIcon = isAppr ? "fa-check" : isRej ? "fa-xmark" : "fa-hourglass-half";
             var statusColor = isAppr ? "text-emerald-500 bg-emerald-50" : isRej ? "text-red-500 bg-red-50" : "text-orange-500 bg-orange-50";
             var cardBg = isAppr ? "border-emerald-100" : isRej ? "border-red-100" : "border-orange-100";
+
+            // Kiểm tra chưa đọc (Mới)
             var isUnread = checkIsUnread(req.Request_ID, req.Status);
-            var newBadge = isUnread ? `<span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>` : "";
+            var unreadIndicator = isUnread ? `<span class="absolute top-4 right-4 w-2 h-2 bg-red-500 rounded-full border border-white"></span>` : "";
 
             html += `
-              <div class="bg-white p-4 rounded-3xl shadow-sm border ${cardBg} flex items-center gap-4 animate-slide-up relative">
-                  ${newBadge}
-                  <div class="w-10 h-10 rounded-2xl ${statusColor} flex items-center justify-center text-lg shadow-sm shrink-0">
-                      <i class="fa-solid ${statusIcon}"></i>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                      <div class="flex justify-between items-center">
-                           <h4 class="text-sm font-bold text-slate-800">${req.Type}</h4>
-                           <span class="text-[9px] font-extrabold px-2 py-0.5 rounded ${statusColor} border border-current opacity-80">${req.Status}</span>
-                      </div>
-                      <p class="text-[10px] text-slate-400 font-bold mt-0.5">${req.Dates}</p>
-                      ${req.Note ? `<p class="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded mt-1.5 italic line-clamp-1"><i class="fa-solid fa-reply mr-1"></i>${req.Note}</p>` : ""}
-                  </div>
-              </div>`;
-        });
-        html += "</div></div>";
-    }
-    content.innerHTML = html;
-}
+                <div class="bg-white p-4 rounded-3xl shadow-sm border ${cardBg} flex items-center gap-4 relative overflow-hidden group">
+                    ${unreadIndicator}
+                    <div class="w-10 h-10 rounded-2xl ${statusColor} flex items-center justify-center text-lg shadow-sm shrink-0">
+                        <i class="fa-solid ${statusIcon}"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-center">
+                             <h4 class="text-sm font-bold text-slate-800">${req.Type}</h4>
+                             <span class="text-[9px] font-extrabold px-2 py-0.5 rounded ${statusColor} border border-current opacity-80">${req.Status}</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 font-bold mt-0.5">${req.Dates}</p>
+                        ${req.Note ? `<p class="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded mt-1.5 italic line-clamp-1"><i class="fa-solid fa-reply mr-1"></i>${req.Note}</p>` : ""}
+                    </div>
+                </div>`;
+          });
+          html += "</div></div>";
+      }
+      content.innerHTML = html;
+  }
 
 window.closeNotifications = function () {
     var modal = document.getElementById("modal-notifications");
@@ -1360,3 +1387,4 @@ function updateClock() {
     setText("clock-display", timeStr);
     setText("date-display", dateStr);
 }
+
