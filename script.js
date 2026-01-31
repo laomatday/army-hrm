@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbxf_mPjDYnmnvzrdpO6WRBGiPDAr393YJor9VWTWY9-u4sglaSBA5fScamHzCncCWSZtg/execc";
+const API_URL = "https://script.google.com/macros/s/AKfycbz3Gnw3O2wm_uB8AKQtmJ2FrjmAG5y6AAa8kbi1rHYd8gSTtTi3kCCNRyijj0dLtfyNcA/exec";
 async function callAPI(action, params = []) {
     try {
         // Gửi dữ liệu dạng text/plain để tránh lỗi CORS preflight phức tạp của Google
@@ -1352,5 +1352,6 @@ function updateClock() {
     setText("clock-display", timeStr);
     setText("date-display", dateStr);
 }
+
 
 
