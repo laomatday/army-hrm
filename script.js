@@ -305,96 +305,81 @@ function renderHistoryStats(summary) {
   setText("hist-errors", summary.errorCount);
 }
 
-function renderNotificationsBadge(notiData) {
-  // notiData ở đây là nội dung của res.data từ getMobileNotifications
-  // Trong code.js: data: { approvals: [...], myRequests: [...] }
-
-  var count = notiData.approvals ? notiData.approvals.length : 0;
-
-  var notiDot = document.getElementById("noti-dot");
-  var profileDot = document.getElementById("profile-noti-dot");
-  var homePendingEl = document.getElementById("home-stat-pending");
-
-  if (homePendingEl) homePendingEl.innerText = count;
-
-  // Đếm đơn chưa đọc của tôi
-  var myUnreadCount = 0;
-  if (notiData.myRequests) {
-    notiData.myRequests.forEach(function (r) {
-      if (checkIsUnread(r.Request_ID, r.Status)) {
-        myUnreadCount++;
-      }
-    });
-  }
-
-  if (count > 0 || myUnreadCount > 0) {
-    if (notiDot) notiDot.classList.remove("hidden");
-    if (profileDot) profileDot.classList.remove("hidden");
-  } else {
-    if (notiDot) notiDot.classList.add("hidden");
-    if (profileDot) profileDot.classList.add("hidden");
-  }
-}
-
-// File: js.html
-// Thay thế hàm này để bỏ chấm đỏ trên thẻ đơn
 function renderNotificationContent(data, mode) {
-  var content = document.getElementById("noti-content-area");
-  var hasApp = data.approvals && data.approvals.length > 0;
-  var hasMy = data.myRequests && data.myRequests.length > 0;
-
-  // Reset mảng chọn khi mở lại popup
-  selectedRequests = [];
-  updateBatchActions();
-
-  if (!hasApp && !hasMy)
-    return (content.innerHTML = `<div class="text-center py-24 opacity-60"><p>Không có thông báo</p></div>`);
-
-  var html = "";
-
-  // --- 1. PHẦN DUYỆT ĐƠN (CÓ CHECKBOX) ---
-  if (hasApp) {
-    html += `
-        <div class="mb-6">
-            <div class="flex justify-between items-center mb-3 px-1">
-                <h3 class="text-xs font-bold text-slate-400 uppercase flex items-center gap-2">
-                    <i class="fa-solid fa-layer-group"></i> Cần duyệt (${data.approvals.length})
-                </h3>
-                <button onclick="toggleSelectAll(${data.approvals.length})" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
-                    Chọn tất cả
-                </button>
-            </div>
-            <div class="space-y-4">`;
-
-    data.approvals.forEach((req) => {
-      var chkId = `chk-req-${req.Request_ID}`;
-      html += `
-            <div class="bg-white p-4 rounded-[20px] shadow-sm border border-slate-50 relative overflow-hidden flex gap-3">
-                <div class="flex flex-col justify-center">
-                    <input type="checkbox" id="${chkId}" onchange="toggleSelectRequest('${req.Request_ID}')" 
-                    class="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer accent-emerald-600 transition-all">
+    var content = document.getElementById("noti-content-area");
+    var hasApp = data.approvals && data.approvals.length > 0;
+    var hasMy = data.myRequests && data.myRequests.length > 0;
+    
+    if(!hasApp && !hasMy) return content.innerHTML = `<div class="text-center py-24 opacity-60"><p>Không có thông báo</p></div>`;
+    
+    var html = "";
+    
+    // --- 1. PHẦN DUYỆT ĐƠN (APPROVALS) ---
+    if(hasApp) {
+        html += `<div class="mb-6"><h3 class="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Cần duyệt (${data.approvals.length})</h3><div class="space-y-4">`;
+        data.approvals.forEach(req => {
+            // ĐÃ XÓA AVATAR Ở ĐÂY
+            html += `
+            <div class="bg-white p-5 rounded-[24px] shadow-sm border border-slate-50 relative overflow-hidden">
+                <div class="flex justify-between items-start mb-3">
+                   <div>
+                      <h4 class="font-bold text-slate-800 text-sm leading-tight">${req.Name}</h4>
+                      
+                      <p class="text-[11px] font-bold text-slate-500 mt-1 flex items-center gap-1.5">
+                         <span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">${req.Position || "NV"}</span>
+                         <span class="text-slate-300">•</span>
+                         <span>${req.Location_Name || "CN"}</span>
+                      </p>
+                   </div>
+                   <span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-purple-50 text-purple-600 border border-purple-100 uppercase tracking-wide">${req.Type}</span>
                 </div>
-                <div class="flex-1 min-w-0" onclick="document.getElementById('${chkId}').click()">
-                    <div class="flex justify-between items-start mb-2">
-                       <div>
-                          <h4 class="font-bold text-slate-800 text-sm leading-tight">${req.Name}</h4>
-                          <p class="text-[11px] font-bold text-slate-500 mt-1 flex items-center gap-1.5">
-                             <span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">${req.Position || "NV"}</span>
-                             <span>${req.Location_Name || ""}</span>
-                          </p>
-                       </div>
-                       <span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-purple-50 text-purple-600 border border-purple-100 uppercase tracking-wide">${req.Type}</span>
-                    </div>
-                    <div class="bg-slate-50 rounded-xl p-2.5 mb-2 border border-slate-100">
-                         <div class="flex items-center gap-2 text-xs font-bold text-slate-700 mb-0.5">
-                            <i class="fa-regular fa-calendar text-emerald-500"></i> ${req.Dates}
-                         </div>
-                         <p class="text-xs text-slate-500 italic pl-5 line-clamp-1">"${req.Reason}"</p>
-                    </div>
+                
+                <div class="bg-slate-50/80 rounded-2xl p-3 mb-4 border border-slate-100">
+                     <div class="flex items-center gap-2 text-xs font-bold text-slate-700 mb-1">
+                        <i class="fa-regular fa-calendar text-emerald-500"></i> ${req.Dates}
+                     </div>
+                     <p class="text-xs text-slate-500 italic pl-6 border-l-2 border-slate-200">"${req.Reason}"</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="openRejectModal('${req.Request_ID}')" class="py-2.5 rounded-xl bg-white border border-red-100 text-red-500 text-xs font-bold active:scale-95 transition-all shadow-sm">Từ chối</button>
+                    <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" class="py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold active:scale-95 transition-all shadow-md">Duyệt đơn</button>
                 </div>
             </div>`;
-    });
-    html += `</div></div>`;
+        });
+        html += `</div></div>`;
+    } else if (mode === "approve") {
+        html += `<div class="text-center py-10 text-slate-400 text-xs">Đã duyệt hết các đơn!</div>`;
+    }
+
+    // --- 2. PHẦN ĐƠN CỦA TÔI (MY REQUESTS) ---
+    if(mode !== "approve" && hasMy) {
+        html += `<div><h3 class="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2"><i class="fa-regular fa-bell"></i> Đơn của tôi</h3><div class="space-y-3">`;
+        data.myRequests.forEach(req => {
+            var isUnread = checkIsUnread(req.Request_ID, req.Status);
+            var dot = isUnread ? `<span class="absolute top-4 right-4 w-2 h-2 bg-red-500 rounded-full border border-white shadow-sm"></span>` : "";
+            var st = req.Status;
+            var col = st==="Approved"?"text-emerald-500 bg-emerald-50":st==="Rejected"?"text-red-500 bg-red-50":"text-orange-500 bg-orange-50";
+            var ic = st==="Approved"?"fa-check":st==="Rejected"?"fa-xmark":"fa-hourglass";
+            
+            html += `
+            <div class="bg-white p-4 rounded-[20px] border border-slate-100 flex items-center gap-4 relative overflow-hidden group shadow-sm">
+                ${dot}
+                <div class="w-10 h-10 rounded-2xl ${col} flex items-center justify-center text-lg shadow-sm shrink-0">
+                    <i class="fa-solid ${ic}"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-center mb-0.5">
+                        <span class="font-bold text-sm text-slate-800">${req.Type}</span>
+                        <span class="text-[9px] font-extrabold ${col} px-2 py-0.5 rounded border border-current opacity-80">${st}</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-bold">${req.Dates}</p>
+                </div>
+            </div>`;
+        });
+        html += `</div></div>`;
+    }
+    content.innerHTML = html;
   }
 
   // --- 2. PHẦN ĐƠN CỦA TÔI (ĐÃ BỎ CHẤM ĐỎ) ---
@@ -1263,131 +1248,4 @@ window.changeHistoryPage = function (direction) {
     currentHistoryPage = newPage;
     renderActivityHistory();
   }
-};
-// --- LOGIC BATCH ACTION ---
-// 1. Hàm chọn/bỏ chọn 1 đơn
-window.toggleSelectRequest = function (reqId) {
-  const index = selectedRequests.indexOf(reqId);
-  if (index > -1) {
-    selectedRequests.splice(index, 1);
-  } else {
-    selectedRequests.push(reqId);
-  }
-  updateBatchActions();
-};
-
-// 2. Hàm chọn tất cả
-window.toggleSelectAll = function (totalCount) {
-  // Logic đơn giản: Nếu chưa chọn hết thì chọn hết, nếu chọn hết rồi thì bỏ chọn
-  if (!cachedNotifications || !cachedNotifications.approvals) return;
-
-  const allIds = cachedNotifications.approvals.map((r) => r.Request_ID);
-  const checkboxes = document.querySelectorAll('input[type="checkbox"][id^="chk-req-"]');
-
-  if (selectedRequests.length < allIds.length) {
-    selectedRequests = [...allIds];
-    checkboxes.forEach((cb) => (cb.checked = true));
-  } else {
-    selectedRequests = [];
-    checkboxes.forEach((cb) => (cb.checked = false));
-  }
-  updateBatchActions();
-};
-
-// 3. Cập nhật giao diện thanh công cụ
-function updateBatchActions() {
-  const bar = document.getElementById("batch-action-bar");
-  const countSpan = document.getElementById("batch-count");
-
-  // Nếu chưa có thanh bar thì tạo nó (Chèn vào index.html động)
-  if (!bar) {
-    createBatchActionBar();
-    return updateBatchActions(); // Gọi lại sau khi tạo
-  }
-
-  if (selectedRequests.length > 0) {
-    bar.classList.remove("translate-y-full", "opacity-0");
-    countSpan.innerText = selectedRequests.length;
-  } else {
-    bar.classList.add("translate-y-full", "opacity-0");
-  }
-}
-
-// 4. Tạo thanh công cụ động (Inject HTML)
-function createBatchActionBar() {
-  const div = document.createElement("div");
-  div.id = "batch-action-bar";
-  div.className =
-    "fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-slate-800 text-white p-4 rounded-2xl shadow-2xl z-[300] flex items-center justify-between transition-all duration-300 transform translate-y-full opacity-0";
-  div.innerHTML = `
-          <div class="font-bold text-sm">Đã chọn <span id="batch-count" class="text-emerald-400">0</span> đơn</div>
-          <div class="flex gap-3">
-              <button onclick="submitBatchAction('Rejected')" class="px-4 py-2 bg-red-500/20 text-red-400 font-bold text-xs rounded-xl border border-red-500/50">Từ chối</button>
-              <button onclick="submitBatchAction('Approved')" class="px-4 py-2 bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/30">Duyệt ngay</button>
-          </div>
-      `;
-  document.body.appendChild(div);
-}
-
-// 5. Gửi lệnh về Server
-window.submitBatchAction = function (status) {
-  if (selectedRequests.length === 0) return;
-
-  const actionName = status === "Approved" ? "Duyệt" : "Từ chối";
-  showDialog("confirm", "Xác nhận", `Bạn muốn ${actionName} ${selectedRequests.length} đơn đã chọn?`, () => {
-    showLoading(true);
-
-    // Ẩn thanh công cụ ngay
-    selectedRequests = [];
-    updateBatchActions();
-    closeNotifications(); // Đóng popup
-
-    google.script.run
-      .withSuccessHandler((res) => {
-        showLoading(false);
-        showToast(res.success ? "success" : "error", res.message);
-        if (res.success) {
-          loadDashboardData(); // Tải lại dữ liệu mới
-        }
-      })
-      .withFailureHandler((err) => {
-        showLoading(false);
-        showToast("error", "Lỗi: " + err);
-      })
-      .processBatchRequests({
-        requestIds: selectedRequests, // Gửi mảng ID cũ (lúc bấm nút) - cần fix logic biến toàn cục
-        status: status,
-        managerName: currentUser.Name,
-      });
-  });
-};
-
-// FIX BUG NHỎ Ở HÀM submitBatchAction:
-// Do selectedRequests bị reset ngay lập tức nên phải copy lại trước khi gửi
-window.submitBatchAction = function (status) {
-  const idsToSend = [...selectedRequests]; // Copy lại mảng
-  if (idsToSend.length === 0) return;
-
-  const actionName = status === "Approved" ? "Duyệt" : "Từ chối";
-  showDialog("confirm", "Xác nhận", `Bạn muốn ${actionName} ${idsToSend.length} đơn đã chọn?`, () => {
-    showLoading(true);
-    // Đóng UI
-    document.getElementById("batch-action-bar").classList.add("translate-y-full");
-    closeNotifications();
-
-    google.script.run
-      .withSuccessHandler((res) => {
-        showLoading(false);
-        showToast(res.success ? "success" : "error", res.message);
-        if (res.success) {
-          selectedRequests = []; // Clear hẳn
-          loadDashboardData();
-        }
-      })
-      .processBatchRequests({
-        requestIds: idsToSend,
-        status: status,
-        managerName: currentUser.Name,
-      });
-  });
 };
