@@ -1,4 +1,3 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbzdeTDLWipn5sb7qbLdow6isEC6UoS7HuSHWdLpc3B7wbbXtQE_c4KDJ8lwopx4iCHX/exec";
 /**
  * ====================================================================
  * script.js - Phiên bản Vercel (Frontend)
@@ -7,7 +6,7 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzdeTDLWipn5sb7qbLdow6i
  */
 
 // [QUAN TRỌNG] URL Web App từ Google Apps Script (Hãy thay đổi nếu bạn deploy mới)
-const API_URL = "https://script.google.com/macros/s/AKfycbwQMBzb1l_uYt09pPm9ENlPMUNhjFgOTEPaLATgExQg93bx0wrV3_zGGmQmX56mxe-SlA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzI1pIrSrmw93GrkJF-Wt7mxg-99xmVmSebg1EB5sSJrG7ivhyHfpKwGRT84NvDRpv1HQ/exec";
 
 // ==========================================
 // 1. CÁC HÀM TIỆN ÍCH GIAO DIỆN (UTILS) - Đặt đầu file để tránh lỗi
@@ -1222,4 +1221,3 @@ window.changeHistoryPage = function (direction) {
     renderActivityHistory();
   }
 };
-
