@@ -1,7 +1,7 @@
 // ==========================================
 // 1. CẤU HÌNH & KẾT NỐI API (QUAN TRỌNG)
 // ==========================================
-const API_URL = "https://script.google.com/macros/s/AKfycbx6dgm8qYoH_C0aaVRWuMc1Domb6tv1UwC9zmEVRYMaLqBwlkNRKIf8-lIpiTXTO3Qidw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwqlGurGe7FNMslMyEopKsmoJDkM4kFuWT2RJS08rI1ZdCFhJ-LF6KKNBBaXgD3RjND/exec";
 
 /**
  * Hàm thay thế cho google.script.run
@@ -557,29 +557,49 @@ window.triggerCheckOut = function () {
 // 8. THÔNG BÁO & DUYỆT ĐƠN (MOBILE)
 // ==========================================
 window.openNotifications = async function (mode) {
-  var modal = document.getElementById("modal-notifications");
-  var content = document.getElementById("noti-content-area");
-  var titleEl = document.getElementById("modal-noti-title");
-  if (!modal || !content) return;
+    var modal = document.getElementById("modal-notifications");
+    var content = document.getElementById("noti-content-area");
+    var titleEl = document.getElementById("modal-noti-title");
+    
+    if (!modal || !content) return;
 
-  titleEl.innerText = (mode === "approve") ? "Duyệt đơn từ" : "Thông báo";
-  
-  // Ẩn chấm đỏ
-  document.querySelectorAll('[id^="noti-dot"], [id^="profile-noti-dot"]').forEach(d => d.classList.add("hidden"));
-  modal.classList.remove("hidden");
+    // Cập nhật tiêu đề và hiển thị Modal
+    titleEl.innerText = mode === "approve" ? "Duyệt đơn từ" : "Thông báo";
+    modal.classList.remove("hidden");
 
-  if (cachedNotifications) {
-      renderNotificationContent(cachedNotifications, mode);
-  } else {
-      content.innerHTML = SKELETON_REQUEST;
-      const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
-      if (res.success) {
-          cachedNotifications = res.data;
-          renderNotificationContent(res.data, mode);
-      } else {
-          content.innerHTML = '<div class="text-center py-10 text-slate-400">Lỗi tải dữ liệu</div>';
-      }
-  }
+    // BƯỚC 1: QUAN TRỌNG - Xóa sạch nội dung cũ và CHỈ hiện hiệu ứng "Đang tải"
+    content.innerHTML = `
+        <div id="noti-waiting" class="text-center py-20 animate-fade-in">
+            <div class="animate-spin inline-block w-8 h-8 border-[3px] border-emerald-500 border-t-transparent rounded-full mb-4"></div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Đang tải thông báo...</p>
+        </div>`;
+
+    try {
+        // BƯỚC 2: Gọi Server thông qua hàm callBackend thay cho google.script.run
+        const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
+
+        if (res && res.success) {
+            // Cập nhật biến cache toàn cục
+            cachedNotifications = res.data;
+
+            // Chỉ vẽ giao diện sau khi đã nhận được dữ liệu thực sự từ Server
+            if (typeof renderNotificationContent === "function") {
+                renderNotificationContent(res.data, mode);
+            }
+
+            // Đánh dấu đã xem để xử lý logic tắt chấm đỏ thông báo
+            if (typeof markNotificationsAsRead === "function") {
+                markNotificationsAsRead(res.data);
+            }
+        } else {
+            // Hiển thị thông báo lỗi cụ thể từ Server
+            content.innerHTML = `<p class="text-center py-10 text-xs text-red-400 font-bold">${res ? res.message : "Dữ liệu không phản hồi"}</p>`;
+        }
+    } catch (err) {
+        // Xử lý khi có sự cố kết nối Network
+        console.error("Lỗi openNotifications:", err);
+        content.innerHTML = `<p class="text-center py-10 text-xs text-red-400 font-bold">Lỗi kết nối Server!</p>`;
+    }
 };
 
 function getReadList() {
@@ -1380,5 +1400,6 @@ function updateClock() {
     setText("clock-display", timeStr);
     setText("date-display", dateStr);
 }
+
 
 
