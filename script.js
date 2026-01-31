@@ -143,7 +143,7 @@ window.handleLogin = async function () {
   if (res.success) {
     currentUser = res.data;
     localStorage.setItem("army_user_v2026", JSON.stringify(currentUser));
-    showToast("success", "Xin chào, " + currentUser.Name);
+    showToast("success", "Xin chào, " + getShortNameClient(currentUser.Name));
     routeUserFlow();
   } else {
     showDialog("error", "Đăng nhập thất bại", res.message);
@@ -793,6 +793,7 @@ window.openProfileModal = function () {
   toggleGlobalNav(false);
 
   if (currentUser) {
+    // 1. Ảnh đại diện
     var avaUrl = currentUser.Avatar;
     if (avaUrl && avaUrl.length > 5 && !avaUrl.includes("ui-avatars.com")) {
       document.getElementById("edit-avatar-preview").src = avaUrl;
@@ -800,48 +801,29 @@ window.openProfileModal = function () {
       document.getElementById("edit-avatar-preview").src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(currentUser.Name) + "&background=059669&color=fff";
     }
 
+    // 2. Điền dữ liệu vào ô Input (Chỉ để hiển thị)
     var phoneInput = document.getElementById("edit-phone");
-    phoneInput.value = currentUser.Phone || "";
+    var emailInput = document.getElementById("edit-email");
+    var deptInput = document.getElementById("edit-dept");
+    var locationInput = document.getElementById("profile-location-display");
     
-    var userCenterId = currentUser.Center_ID || "";
-    var userCenterName = "Chọn trung tâm";
-    if (cachedLocations.length > 0) {
-      var foundCenter = cachedLocations.find((l) => l.id == userCenterId);
-      if (foundCenter) userCenterName = foundCenter.name;
-    }
-    selectProfileLocation(userCenterId, userCenterName);
+    if (phoneInput) phoneInput.value = currentUser.Phone || "";
+    if (emailInput) emailInput.value = currentUser.Email || "";
+    if (deptInput) deptInput.value = currentUser.Department || "";
 
-    var isAdmin = currentUser.Role === "Admin";
-    document.getElementById("profile-modal-title").innerText = isAdmin ? "Cập nhật thông tin" : "Thông tin cá nhân";
-
-    var boxPhone = document.getElementById("box-edit-phone");
-    var iconEditPhone = document.getElementById("icon-edit-phone");
-    var locTrigger = document.getElementById("profile-location-trigger");
-    var iconLock = document.getElementById("profile-location-lock");
-    var locArrow = document.getElementById("profile-location-arrow");
-
-    if (isAdmin) {
-      phoneInput.disabled = false;
-      boxPhone.classList.remove("opacity-80", "bg-slate-100");
-      boxPhone.classList.add("focus-within:bg-white", "focus-within:shadow-sm");
-      if(iconEditPhone) iconEditPhone.classList.remove("hidden");
-
-      locTrigger.onclick = toggleLocationDropdown;
-      locTrigger.classList.remove("opacity-80", "cursor-not-allowed");
-      if(locArrow) locArrow.classList.remove("hidden");
-      if(iconLock) iconLock.classList.add("hidden");
-    } else {
-      phoneInput.disabled = true;
-      boxPhone.classList.add("opacity-80", "bg-slate-100");
-      boxPhone.classList.remove("focus-within:bg-white", "focus-within:shadow-sm");
-      if(iconEditPhone) iconEditPhone.classList.add("hidden");
-
-      locTrigger.onclick = null;
-      locTrigger.classList.add("opacity-80", "cursor-not-allowed");
-      if(locArrow) locArrow.classList.add("hidden");
-      if(iconLock) iconLock.classList.remove("hidden");
+    // 3. Hiển thị tên địa điểm
+    if (locationInput) {
+        var userCenterId = currentUser.Center_ID || "";
+        var userCenterName = "Chưa cập nhật";
+        if (cachedLocations.length > 0) {
+            var foundCenter = cachedLocations.find((l) => l.id == userCenterId);
+            if (foundCenter) userCenterName = foundCenter.name;
+        }
+        locationInput.value = userCenterName;
     }
   }
+  
+  // Reset biến tạm của Avatar
   tempAvatarBase64 = null;
 };
 
@@ -852,26 +834,26 @@ window.closeProfileModal = function () {
 
 // [ASYNC] Cập nhật Profile
 window.submitProfileUpdate = async function () {
-  var phone = document.getElementById("edit-phone").value;
+  // Chỉ thực hiện nếu có ảnh mới
+  if (!tempAvatarBase64) {
+    showToast("error", "Bạn chưa chọn ảnh mới!");
+    return;
+  }
+
+  // Payload chỉ chứa ID và Avatar
   var p = {
     employeeId: currentUser.Employee_ID,
-    phone: phone,
-    centerId: currentProfileLocation,
-    avatarBase64: tempAvatarBase64,
+    avatarBase64: tempAvatarBase64
   };
 
   showLoading(true);
+  // Backend sẽ chỉ cập nhật Face_Ref_URL nếu nhận được avatarBase64
   const res = await callBackend("updateEmployeeProfile", [p]);
   showLoading(false);
   
   if (res.success) {
-    showToast("success", "Cập nhật thành công!");
+    showToast("success", "Đổi ảnh đại diện thành công!");
     closeProfileModal();
-
-    currentUser.Phone = p.phone;
-    currentUser.Center_ID = p.centerId;
-    var loc = cachedLocations.find((l) => l.id == p.centerId);
-    if (loc) currentUser.Location_Name = loc.name;
 
     if (res.newAvatar) currentUser.Avatar = res.newAvatar;
     localStorage.setItem("army_user_v2026", JSON.stringify(currentUser));
@@ -1388,6 +1370,7 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
 
 
