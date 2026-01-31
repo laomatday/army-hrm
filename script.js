@@ -556,37 +556,30 @@ window.triggerCheckOut = function () {
 // ==========================================
 // 8. THÔNG BÁO & DUYỆT ĐƠN (MOBILE)
 // ==========================================
-window.openNotifications = function (mode) {
-    var modal = document.getElementById("modal-notifications");
-    var content = document.getElementById("noti-content-area");
-    var titleEl = document.getElementById("modal-noti-title");
-    if (!modal || !content) return;
+window.openNotifications = async function (mode) {
+  var modal = document.getElementById("modal-notifications");
+  var content = document.getElementById("noti-content-area");
+  var titleEl = document.getElementById("modal-noti-title");
+  if (!modal || !content) return;
 
-    titleEl.innerText = (mode === "approve") ? "Duyệt đơn từ" : "Thông báo";
-    modal.classList.remove("hidden");
+  titleEl.innerText = (mode === "approve") ? "Duyệt đơn từ" : "Thông báo";
+  
+  // Ẩn chấm đỏ
+  document.querySelectorAll('[id^="noti-dot"], [id^="profile-noti-dot"]').forEach(d => d.classList.add("hidden"));
+  modal.classList.remove("hidden");
 
-    // BƯỚC 1: Hiện text "Đang chờ" và xóa dữ liệu cũ để tránh nhầm lẫn
-    content.innerHTML = `
-        <div id="noti-waiting" class="text-center py-20">
-            <div class="animate-spin inline-block w-6 h-6 border-[3px] border-emerald-500 border-t-transparent rounded-full mb-3"></div>
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Đang chờ thông báo...</p>
-        </div>`;
-
-    // BƯỚC 2: Gọi Server để lấy data mới nhất (Không dùng cache cũ ở bước này để đảm bảo chính xác)
-    google.script.run
-        .withSuccessHandler(function(res) {
-            if (res.success) {
-                cachedNotifications = res.data; // Cập nhật cache mới nhất
-                renderNotificationContent(res.data, mode);
-                markNotificationsAsRead(res.data);
-            } else {
-                content.innerHTML = `<p class="text-center py-10 text-xs text-red-400">Lỗi: ${res.message}</p>`;
-            }
-        })
-        .withFailureHandler(function(err) {
-            content.innerHTML = `<p class="text-center py-10 text-xs text-red-400">Lỗi kết nối server</p>`;
-        })
-        .getMobileNotifications(currentUser.Employee_ID);
+  if (cachedNotifications) {
+      renderNotificationContent(cachedNotifications, mode);
+  } else {
+      content.innerHTML = SKELETON_REQUEST;
+      const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
+      if (res.success) {
+          cachedNotifications = res.data;
+          renderNotificationContent(res.data, mode);
+      } else {
+          content.innerHTML = '<div class="text-center py-10 text-slate-400">Lỗi tải dữ liệu</div>';
+      }
+  }
 };
 
 function getReadList() {
@@ -1387,4 +1380,5 @@ function updateClock() {
     setText("clock-display", timeStr);
     setText("date-display", dateStr);
 }
+
 
