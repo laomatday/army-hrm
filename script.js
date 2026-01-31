@@ -1,4 +1,13 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbzdeTDLWipn5sb7qbLdow6isEC6UoS7HuSHWdLpc3B7wbbXtQE_c4KDJ8lwopx4iCHX/exec";
+/**
+ * ====================================================================
+ * script.js - Phiên bản Vercel (Frontend)
+ * Đã chuyển đổi từ mã nguồn HTML + Tương thích Backend GAS
+ * ====================================================================
+ */
+
+// [QUAN TRỌNG] URL Web App từ Google Apps Script (Hãy thay đổi nếu bạn deploy mới)
+const API_URL = "https://script.google.com/macros/s/AKfycbwQMBzb1l_uYt09pPm9ENlPMUNhjFgOTEPaLATgExQg93bx0wrV3_zGGmQmX56mxe-SlA/exec";
 
 // ==========================================
 // 1. CÁC HÀM TIỆN ÍCH GIAO DIỆN (UTILS) - Đặt đầu file để tránh lỗi
@@ -10,9 +19,9 @@ async function callBackend(functionName, params = []) {
     const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: functionName, params: params }),
+      body: JSON.stringify({ action: functionName, params: params }) 
     });
-
+    
     if (!response.ok) throw new Error("HTTP Error: " + response.status);
     const text = await response.text();
     // Xử lý trường hợp response rỗng
@@ -65,10 +74,7 @@ function setText(id, t) {
 
 function showLoading(s) {
   var el = document.getElementById("loader");
-  if (el)
-    el.className = s
-      ? "fixed inset-0 z-[999] bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center"
-      : "hidden";
+  if (el) el.className = s ? "fixed inset-0 z-[999] bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center" : "hidden";
 }
 
 function showToast(type, m) {
@@ -76,19 +82,16 @@ function showToast(type, m) {
   if (!x) return;
   document.getElementById("toast-msg").innerText = m;
   var iconBox = x.querySelector("div");
-  iconBox.className =
-    "w-8 h-8 rounded-full flex items-center justify-center shadow-sm " +
-    (type === "error" ? "bg-red-100 text-red-600" : "bg-emerald-100 text-emerald-600");
+  iconBox.className = "w-8 h-8 rounded-full flex items-center justify-center shadow-sm " + 
+      (type === "error" ? "bg-red-100 text-red-600" : "bg-emerald-100 text-emerald-600");
   x.classList.remove("hidden");
-  void x.offsetWidth;
+  void x.offsetWidth; 
   x.style.opacity = "1";
   x.style.transform = "translate(-50%, 0)";
   setTimeout(function () {
     x.style.opacity = "0";
     x.style.transform = "translate(-50%, -20px)";
-    setTimeout(function () {
-      x.classList.add("hidden");
-    }, 300);
+    setTimeout(function () { x.classList.add("hidden"); }, 300);
   }, 3000);
 }
 
@@ -129,12 +132,12 @@ function toggleHomeState(state) {
   if (!loadingEl || !idleEl || !workEl) return;
 
   const hide = (el) => {
-    el.classList.remove("opacity-100", "scale-100", "z-30", "z-20", "z-10");
-    el.classList.add("opacity-0", "scale-90", "pointer-events-none");
+     el.classList.remove("opacity-100", "scale-100", "z-30", "z-20", "z-10");
+     el.classList.add("opacity-0", "scale-90", "pointer-events-none");
   };
   const show = (el, zIndex) => {
-    el.classList.remove("opacity-0", "scale-90", "pointer-events-none");
-    el.classList.add("opacity-100", "scale-100", zIndex);
+     el.classList.remove("opacity-0", "scale-90", "pointer-events-none");
+     el.classList.add("opacity-100", "scale-100", zIndex);
   };
 
   [loadingEl, idleEl, workEl].forEach(hide);
@@ -200,16 +203,16 @@ function renderUserInfo() {
 
   setText("user-name", getShortNameClient(currentUser.Name));
   setText("p-id", currentUser.Employee_ID);
-
+  
   // Profile Modal Fields
   var emailDisplay = document.getElementById("edit-email");
-  if (emailDisplay) emailDisplay.value = currentUser.Email || "";
-
+  if(emailDisplay) emailDisplay.value = currentUser.Email || "";
+  
   var phoneDisplay = document.getElementById("edit-phone");
-  if (phoneDisplay) phoneDisplay.value = currentUser.Phone || "";
-
+  if(phoneDisplay) phoneDisplay.value = currentUser.Phone || "";
+  
   var deptDisplay = document.getElementById("edit-dept");
-  if (deptDisplay) deptDisplay.value = currentUser.Department || "";
+  if(deptDisplay) deptDisplay.value = currentUser.Department || "";
 
   // Text Display Fields (nếu có)
   setText("p-email", currentUser.Email);
@@ -217,12 +220,12 @@ function renderUserInfo() {
   setText("p-dept", currentUser.Department || "Chưa cập nhật");
 
   // Các ID mới thêm vào Modal Profile
-  setText("p-email-display", currentUser.Email);
+  setText("p-email-display", currentUser.Email); 
   setText("p-dept-display", currentUser.Department || "Chưa cập nhật");
 
   setText("leave-balance", currentUser.Annual_Leave_Balance !== undefined ? currentUser.Annual_Leave_Balance : 12);
-
-  ["req-user-name", "profile-user-name", "contact-user-name"].forEach((id) => setText(id, currentUser.Name));
+  
+  ["req-user-name", "profile-user-name", "contact-user-name"].forEach(id => setText(id, currentUser.Name));
 
   const displayTitle = currentUser.Position || "Staff";
   const displayLocation = currentUser.Location_Name || "Chưa cập nhật";
@@ -234,28 +237,23 @@ function renderUserInfo() {
 
   // Location Input trong Modal
   var locDisplay = document.getElementById("profile-location-display");
-  if (locDisplay) locDisplay.value = displayLocation;
+  if(locDisplay) locDisplay.value = displayLocation;
 
   // Quyền Admin/Manager
   const adminRoles = ["Admin", "Manager", "HR"];
   const btnApproval = document.getElementById("btn-profile-approval");
   if (btnApproval) {
-    btnApproval.classList.toggle("hidden", adminRoles.indexOf(currentUser.Role) === -1);
+      btnApproval.classList.toggle("hidden", adminRoles.indexOf(currentUser.Role) === -1);
   }
 
-  const avatarUrl =
-    currentUser.Avatar && currentUser.Avatar.startsWith("http")
-      ? currentUser.Avatar
+  const avatarUrl = (currentUser.Avatar && currentUser.Avatar.startsWith("http")) 
+      ? currentUser.Avatar 
       : "https://ui-avatars.com/api/?name=" + encodeURIComponent(currentUser.Name) + "&background=059669&color=fff";
 
-  document
-    .querySelectorAll(
-      "#user-avatar, #profile-user-avatar, #req-user-avatar, #contact-user-avatar, #edit-avatar-preview"
-    )
-    .forEach((img) => {
+  document.querySelectorAll("#user-avatar, #profile-user-avatar, #req-user-avatar, #contact-user-avatar, #edit-avatar-preview").forEach(img => {
       img.src = avatarUrl;
       img.style.objectFit = "cover";
-    });
+  });
 }
 
 function renderHistoryStats(summary) {
@@ -270,8 +268,8 @@ function renderHistoryStats(summary) {
   var daysInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
   var standardDays = 0;
   for (var i = 1; i <= daysInMonth; i++) {
-    var tempDate = new Date(d.getFullYear(), d.getMonth(), i);
-    if (tempDate.getDay() !== 0) standardDays++;
+      var tempDate = new Date(d.getFullYear(), d.getMonth(), i);
+      if (tempDate.getDay() !== 0) standardDays++; 
   }
 
   setText("home-stat-days", summary.workDays);
@@ -280,7 +278,7 @@ function renderHistoryStats(summary) {
   var percent = standardDays > 0 ? Math.round((summary.workDays / standardDays) * 100) : 0;
   if (percent > 100) percent = 100;
   setText("work-percentage", percent + "%");
-
+  
   var workBar = document.getElementById("work-progress-bar");
   if (workBar) workBar.style.width = percent + "%";
 
@@ -291,12 +289,12 @@ function renderHistoryStats(summary) {
   var labelEl = document.getElementById("leave-stat-label");
   if (labelEl) labelEl.innerText = remaining + " phép còn lại";
 
-  var estimatedMax = used + remaining;
+  var estimatedMax = used + remaining; 
   if (estimatedMax === 0) estimatedMax = 12;
   var leavePercent = (remaining / estimatedMax) * 100;
-  if (leavePercent < 0) leavePercent = 0;
-  if (leavePercent > 100) leavePercent = 100;
-
+  if(leavePercent < 0) leavePercent = 0;
+  if(leavePercent > 100) leavePercent = 100;
+  
   var leaveBar = document.getElementById("leave-progress-bar");
   if (leaveBar) leaveBar.style.width = leavePercent + "%";
 
@@ -305,109 +303,121 @@ function renderHistoryStats(summary) {
   setText("hist-errors", summary.errorCount);
 }
 
+function renderNotificationsBadge(notiData) {
+    // notiData ở đây là nội dung của res.data từ getMobileNotifications
+    // Trong code.js: data: { approvals: [...], myRequests: [...] }
+    
+    var count = notiData.approvals ? notiData.approvals.length : 0;
+    
+    var notiDot = document.getElementById("noti-dot");
+    var profileDot = document.getElementById("profile-noti-dot");
+    var homePendingEl = document.getElementById("home-stat-pending");
+
+    if (homePendingEl) homePendingEl.innerText = count;
+
+    // Đếm đơn chưa đọc của tôi
+    var myUnreadCount = 0;
+    if (notiData.myRequests) {
+        notiData.myRequests.forEach(function(r) {
+            if (checkIsUnread(r.Request_ID, r.Status)) {
+                myUnreadCount++;
+            }
+        });
+    }
+
+    if (count > 0 || myUnreadCount > 0) {
+      if (notiDot) notiDot.classList.remove("hidden");
+      if (profileDot) profileDot.classList.remove("hidden");
+    } else {
+      if (notiDot) notiDot.classList.add("hidden");
+      if (profileDot) profileDot.classList.add("hidden");
+    }
+}
+
 function renderNotificationContent(data, mode) {
     var content = document.getElementById("noti-content-area");
-    var hasApp = data.approvals && data.approvals.length > 0;
-    var hasMy = data.myRequests && data.myRequests.length > 0;
-    
-    if(!hasApp && !hasMy) return content.innerHTML = `<div class="text-center py-24 opacity-60"><p>Không có thông báo</p></div>`;
-    
-    var html = "";
-    
-    // --- 1. PHẦN DUYỆT ĐƠN (APPROVALS) ---
-    if(hasApp) {
-        html += `<div class="mb-6"><h3 class="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Cần duyệt (${data.approvals.length})</h3><div class="space-y-4">`;
-        data.approvals.forEach(req => {
-            // ĐÃ XÓA AVATAR Ở ĐÂY
-            html += `
-            <div class="bg-white p-5 rounded-[24px] shadow-sm border border-slate-50 relative overflow-hidden">
-                <div class="flex justify-between items-start mb-3">
-                   <div>
-                      <h4 class="font-bold text-slate-800 text-sm leading-tight">${req.Name}</h4>
-                      
-                      <p class="text-[11px] font-bold text-slate-500 mt-1 flex items-center gap-1.5">
-                         <span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">${req.Position || "NV"}</span>
-                         <span class="text-slate-300">•</span>
-                         <span>${req.Location_Name || "CN"}</span>
-                      </p>
-                   </div>
-                   <span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-purple-50 text-purple-600 border border-purple-100 uppercase tracking-wide">${req.Type}</span>
-                </div>
-                
-                <div class="bg-slate-50/80 rounded-2xl p-3 mb-4 border border-slate-100">
-                     <div class="flex items-center gap-2 text-xs font-bold text-slate-700 mb-1">
-                        <i class="fa-regular fa-calendar text-emerald-500"></i> ${req.Dates}
-                     </div>
-                     <p class="text-xs text-slate-500 italic pl-6 border-l-2 border-slate-200">"${req.Reason}"</p>
-                </div>
+    var hasApprovals = data.approvals && data.approvals.length > 0;
+    var hasMyRequests = data.myRequests && data.myRequests.length > 0;
 
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="openRejectModal('${req.Request_ID}')" class="py-2.5 rounded-xl bg-white border border-red-100 text-red-500 text-xs font-bold active:scale-95 transition-all shadow-sm">Từ chối</button>
-                    <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" class="py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold active:scale-95 transition-all shadow-md">Duyệt đơn</button>
-                </div>
-            </div>`;
-        });
-        html += `</div></div>`;
-    } else if (mode === "approve") {
-        html += `<div class="text-center py-10 text-slate-400 text-xs">Đã duyệt hết các đơn!</div>`;
+    if (!hasApprovals && !hasMyRequests) {
+        content.innerHTML = '<div class="text-center py-24 opacity-50"><i class="fa-regular fa-folder-open text-4xl mb-3 text-slate-300"></i><p class="text-xs text-slate-400 font-bold uppercase">Không có dữ liệu</p></div>';
+        return;
     }
 
-    // --- 2. PHẦN ĐƠN CỦA TÔI (MY REQUESTS) ---
-    if(mode !== "approve" && hasMy) {
-        html += `<div><h3 class="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2"><i class="fa-regular fa-bell"></i> Đơn của tôi</h3><div class="space-y-3">`;
-        data.myRequests.forEach(req => {
-            var isUnread = checkIsUnread(req.Request_ID, req.Status);
-            var dot = isUnread ? `<span class="absolute top-4 right-4 w-2 h-2 bg-red-500 rounded-full border border-white shadow-sm"></span>` : "";
-            var st = req.Status;
-            var col = st==="Approved"?"text-emerald-500 bg-emerald-50":st==="Rejected"?"text-red-500 bg-red-50":"text-orange-500 bg-orange-50";
-            var ic = st==="Approved"?"fa-check":st==="Rejected"?"fa-xmark":"fa-hourglass";
-            
-            html += `
-            <div class="bg-white p-4 rounded-[20px] border border-slate-100 flex items-center gap-4 relative overflow-hidden group shadow-sm">
-                ${dot}
-                <div class="w-10 h-10 rounded-2xl ${col} flex items-center justify-center text-lg shadow-sm shrink-0">
-                    <i class="fa-solid ${ic}"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex justify-between items-center mb-0.5">
-                        <span class="font-bold text-sm text-slate-800">${req.Type}</span>
-                        <span class="text-[9px] font-extrabold ${col} px-2 py-0.5 rounded border border-current opacity-80">${st}</span>
-                    </div>
-                    <p class="text-[10px] text-slate-400 font-bold">${req.Dates}</p>
-                </div>
-            </div>`;
+    var html = "";
+
+    // 1. Phần Duyệt đơn
+    if (hasApprovals) {
+        html += `<div class="mb-6"><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> Cần duyệt (${data.approvals.length})</h3><div class="space-y-4">`;
+        data.approvals.forEach(function (req) {
+          var isLeave = (req.Type || "").toLowerCase().includes("nghỉ");
+          var badgeClass = isLeave ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-purple-50 text-purple-600 border-purple-100";
+          var avatarHtml = getAvatarHtml(req.Name, req.Avatar, "w-10 h-10", "text-xs");
+
+          html += `
+              <div class="bg-white p-5 rounded-[24px] shadow-sm border border-slate-50 animate-slide-up relative overflow-hidden group">
+                  <div class="flex justify-between items-start mb-3">
+                      <div class="flex items-center gap-3">
+                          ${avatarHtml}
+                          <div>
+                              <h4 class="font-bold text-slate-800 text-sm leading-tight">${req.Name}</h4>
+                              <p class="text-[10px] font-bold text-slate-400 mt-0.5">${req.Position || "NV"} • ${req.Center_Name || "CN"}</p>
+                          </div>
+                      </div>
+                      <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold border ${badgeClass} uppercase tracking-wide">${req.Type}</span>
+                  </div>
+                  <div class="bg-slate-50/80 rounded-2xl p-3 mb-4 border border-slate-100">
+                       <div class="flex items-center gap-2 text-xs font-bold text-slate-700 mb-1">
+                          <i class="fa-regular fa-calendar text-emerald-500"></i> ${req.Dates}
+                       </div>
+                       <p class="text-xs text-slate-500 italic line-clamp-2 pl-6 border-l-2 border-slate-200">"${req.Reason}"</p>
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                      <button onclick="openRejectModal('${req.Request_ID}')" class="py-2.5 rounded-xl bg-white border border-red-100 text-red-500 text-xs font-bold active:scale-95 transition-all shadow-sm">Từ chối</button>
+                      <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" 
+                          class="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold active:scale-95 transition-all shadow-md">
+                          Duyệt đơn
+                      </button>
+                  </div>
+              </div>`;
         });
-        html += `</div></div>`;
+        html += "</div></div>";
+    } else if (mode === "approve") {
+        html += '<div class="text-center py-20 opacity-50"><i class="fa-solid fa-check-circle text-4xl mb-3 text-emerald-200"></i><p class="text-xs text-slate-400 font-bold uppercase">Đã duyệt hết các đơn!</p></div>';
+    }
+
+    // 2. Phần Đơn của tôi
+    if (mode !== "approve" && hasMyRequests) {
+        html += '<div><h3 class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 pl-1 flex items-center gap-2"><i class="fa-regular fa-bell"></i> Đơn của tôi</h3><div class="space-y-3">';
+        data.myRequests.forEach(function (req) {
+          var isAppr = req.Status === "Approved";
+          var isRej = req.Status === "Rejected";
+          var statusIcon = isAppr ? "fa-check" : isRej ? "fa-xmark" : "fa-hourglass-half";
+          var statusColor = isAppr ? "text-emerald-500 bg-emerald-50" : isRej ? "text-red-500 bg-red-50" : "text-orange-500 bg-orange-50";
+          var cardBg = isAppr ? "border-emerald-100" : isRej ? "border-red-100" : "border-orange-100";
+
+          var isUnread = checkIsUnread(req.Request_ID, req.Status);
+          var newBadge = isUnread ? `<span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>` : "";
+
+          html += `
+              <div class="bg-white p-4 rounded-3xl shadow-sm border ${cardBg} flex items-center gap-4 animate-slide-up relative">
+                  ${newBadge}
+                  <div class="w-10 h-10 rounded-2xl ${statusColor} flex items-center justify-center text-lg shadow-sm shrink-0">
+                      <i class="fa-solid ${statusIcon}"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                      <div class="flex justify-between items-center">
+                           <h4 class="text-sm font-bold text-slate-800">${req.Type}</h4>
+                           <span class="text-[9px] font-extrabold px-2 py-0.5 rounded ${statusColor} border border-current opacity-80">${req.Status}</span>
+                      </div>
+                      <p class="text-[10px] text-slate-400 font-bold mt-0.5">${req.Dates}</p>
+                      ${req.Note ? `<p class="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded mt-1.5 italic line-clamp-1"><i class="fa-solid fa-reply mr-1"></i>${req.Note}</p>` : ""}
+                  </div>
+              </div>`;
+        });
+        html += "</div></div>";
     }
     content.innerHTML = html;
-  }
-
-  // --- 2. PHẦN ĐƠN CỦA TÔI (ĐÃ BỎ CHẤM ĐỎ) ---
-  if (mode !== "approve" && hasMy) {
-    html += `<div><h3 class="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2"><i class="fa-regular fa-bell"></i> Đơn của tôi</h3><div class="space-y-3">`;
-    data.myRequests.forEach((req) => {
-      var st = req.Status;
-      var col =
-        st === "Approved"
-          ? "text-emerald-500 bg-emerald-50"
-          : st === "Rejected"
-            ? "text-red-500 bg-red-50"
-            : "text-orange-500 bg-orange-50";
-      // Đã xóa biến dot và ${dot} trong HTML dưới đây
-      html += `
-             <div class="bg-white p-4 rounded-[20px] border border-slate-100 flex items-center gap-4 shadow-sm relative overflow-hidden">
-                <div class="w-10 h-10 rounded-2xl ${col} flex items-center justify-center text-lg shadow-sm shrink-0"><i class="fa-solid ${st === "Approved" ? "fa-check" : st === "Rejected" ? "fa-xmark" : "fa-hourglass"}"></i></div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex justify-between items-center mb-0.5"><span class="font-bold text-sm text-slate-800">${req.Type}</span><span class="text-[9px] font-extrabold ${col} px-2 py-0.5 rounded border border-current opacity-80">${st}</span></div>
-                    <p class="text-[10px] text-slate-400 font-bold">${req.Dates}</p>
-                    ${req.Note ? `<p class="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded mt-1.5 italic line-clamp-1"><i class="fa-solid fa-reply mr-1"></i>${req.Note}</p>` : ""}
-                </div>
-             </div>`;
-    });
-    html += `</div></div>`;
-  }
-
-  content.innerHTML = html;
 }
 
 function renderMyRequestsHTML(container, data) {
@@ -420,32 +430,25 @@ function renderMyRequestsHTML(container, data) {
     var typeRaw = req["Type"] || "Khác";
     var fDate = req["From Date"] || req["From_Date"] || "";
     var tDate = req["To Date"] || req["To_Date"] || "";
-    var dateDisplay = fDate === tDate && fDate ? fDate : fDate + " - " + tDate;
+    var dateDisplay = (fDate === tDate && fDate) ? fDate : (fDate + " - " + tDate);
     if (!fDate) dateDisplay = "Đang cập nhật";
     var reason = req["Reason"] || "Không có lý do";
     var status = req["Status"] || "Pending";
-
+    
     var badgeClass = "";
     if (status === "Approved") badgeClass = "bg-emerald-50 text-emerald-600 border-emerald-100";
     else if (status === "Rejected") badgeClass = "bg-red-50 text-red-600 border-red-100";
     else badgeClass = "bg-orange-50 text-orange-600 border-orange-100";
-
+    
     var statusBadge = `<span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold border ${badgeClass}">${status === "Approved" ? "Đã duyệt" : status === "Rejected" ? "Từ chối" : "Chờ duyệt"}</span>`;
 
     var icon = "fa-file-lines";
     var colorBg = "bg-slate-50 text-slate-500";
     var typeLower = String(typeRaw).toLowerCase();
-
-    if (typeLower.includes("giải trình")) {
-      icon = "fa-file-pen";
-      colorBg = "bg-orange-50 text-orange-600";
-    } else if (typeLower.includes("nghỉ")) {
-      icon = "fa-umbrella-beach";
-      colorBg = "bg-blue-50 text-blue-600";
-    } else if (typeLower.includes("công tác")) {
-      icon = "fa-plane-departure";
-      colorBg = "bg-purple-50 text-purple-600";
-    }
+    
+    if (typeLower.includes("giải trình")) { icon = "fa-file-pen"; colorBg = "bg-orange-50 text-orange-600"; }
+    else if (typeLower.includes("nghỉ")) { icon = "fa-umbrella-beach"; colorBg = "bg-blue-50 text-blue-600"; }
+    else if (typeLower.includes("công tác")) { icon = "fa-plane-departure"; colorBg = "bg-purple-50 text-purple-600"; }
 
     html += `
       <div class="bg-white p-5 rounded-[24px] shadow-sm border border-white animate-slide-up mb-4 relative overflow-hidden group hover:shadow-md transition-all">
@@ -486,15 +489,15 @@ document.addEventListener("DOMContentLoaded", function () {
   updateClock();
 
   var btnReject = document.getElementById("btn-confirm-reject");
-  if (btnReject) {
-    btnReject.onclick = handleConfirmReject;
+  if(btnReject) {
+      btnReject.onclick = handleConfirmReject;
   }
   var inputUser = document.getElementById("login-user");
   var inputPass = document.getElementById("login-pass");
 
   function triggerLoginOnEnter(event) {
     if (event.key === "Enter") {
-      event.preventDefault();
+      event.preventDefault(); 
       handleLogin();
     }
   }
@@ -527,8 +530,8 @@ window.handleLogin = async function () {
 
 window.logout = function () {
   if (refreshInterval) {
-    clearInterval(refreshInterval);
-    refreshInterval = null;
+      clearInterval(refreshInterval);
+      refreshInterval = null;
   }
   localStorage.removeItem("army_user_v2026");
   currentUser = null;
@@ -555,23 +558,23 @@ function routeUserFlow() {
 function showMainApp() {
   document.getElementById("view-main").classList.remove("hidden");
   toggleGlobalNav(true);
-
+  
   // Quan trọng: Gọi sau khi hàm đã được định nghĩa
   renderUserInfo();
   switchTab("home");
   toggleHomeState("loading");
 
   // GỌI API BAN ĐẦU
-  loadDashboardData();
+  loadDashboardData(); 
 
   // Auto refresh
   if (refreshInterval) clearInterval(refreshInterval);
-  refreshInterval = setInterval(function () {
-    // Gọi ngầm các API quan trọng
-    Promise.all([
-      checkNewNotifications(),
-      // Các API khác nếu cần thiết (không nên gọi quá nhiều để tránh spam server)
-    ]);
+  refreshInterval = setInterval(function() {
+      // Gọi ngầm các API quan trọng
+      Promise.all([
+          checkNewNotifications(),
+          // Các API khác nếu cần thiết (không nên gọi quá nhiều để tránh spam server)
+      ]);
   }, 30000);
 }
 
@@ -581,13 +584,13 @@ async function loadDashboardData() {
   // Vì backend KHÔNG CÓ getDashboardData, ta dùng Promise.all gọi song song
   // Các hàm con sẽ tự lo việc update UI của phần mình
   await Promise.all([
-    checkNewNotifications(), // Tải thông báo
-    loadHistoryFull(), // Tải lịch sử chấm công
-    loadMyRequests(), // Tải đơn của tôi
-    loadLocations(), // Tải danh sách địa điểm
-    loadContacts(), // Tải danh bạ
+      checkNewNotifications(), // Tải thông báo
+      loadHistoryFull(),       // Tải lịch sử chấm công
+      loadMyRequests(),        // Tải đơn của tôi
+      loadLocations(),         // Tải danh sách địa điểm
+      loadContacts()           // Tải danh bạ
   ]);
-
+  
   // Sau khi tất cả xong, update UI tổng thể nếu cần
   updateCurrentStatusUI();
 }
@@ -597,36 +600,29 @@ async function loadDashboardData() {
 // ==========================================
 
 function updateCurrentStatusUI() {
-  var vnDate = new Date().toLocaleDateString("en-GB");
+  var vnDate = new Date().toLocaleDateString('en-GB'); 
   var isCurrentlyCheckedIn = false;
-
+  
   if (allHistoryData.length > 0) {
-    var todayRec = allHistoryData.find((r) => r.Date === vnDate);
-    if (todayRec && todayRec.Time_List && todayRec.Time_List.some((t) => t.out === "...")) {
-      isCurrentlyCheckedIn = true;
-    }
+      var todayRec = allHistoryData.find(r => r.Date === vnDate);
+      if (todayRec && todayRec.Time_List && todayRec.Time_List.some(t => t.out === "...")) {
+          isCurrentlyCheckedIn = true;
+      }
   }
   toggleHomeState(isCurrentlyCheckedIn ? "working" : "idle");
 }
 
 window.switchTab = function (tabName) {
-  [
-    "modal-notifications",
-    "modal-request",
-    "modal-profile",
-    "modal-contact-detail",
-    "view-approvals",
-    "modal-search-contact",
-  ].forEach((id) => {
-    var el = document.getElementById(id);
-    if (el) el.classList.add("hidden");
+  ["modal-notifications", "modal-request", "modal-profile", "modal-contact-detail", "view-approvals", "modal-search-contact"].forEach(id => {
+      var el = document.getElementById(id);
+      if(el) el.classList.add("hidden");
   });
-
+  
   toggleGlobalNav(true);
 
-  ["home", "requests", "contacts", "profile"].forEach((t) => {
+  ["home", "requests", "contacts", "profile"].forEach(t => {
     var el = document.getElementById("tab-" + t);
-    if (el) el.classList.add("hidden");
+    if(el) el.classList.add("hidden");
   });
 
   var target = document.getElementById("tab-" + tabName);
@@ -634,26 +630,27 @@ window.switchTab = function (tabName) {
 
   var navItems = document.querySelectorAll(".nav-item");
   var idxMap = { home: 0, requests: 1, contacts: 2, profile: 3 };
-
+  
   navItems.forEach((item, index) => {
     var isActive = index === idxMap[tabName];
     item.classList.toggle("active", isActive);
-
+    
     var icon = item.querySelector("i");
-    if (icon) {
-      icon.className = isActive
-        ? icon.className.replace("text-slate-400", "text-emerald-600")
-        : icon.className.replace("text-emerald-600", "text-slate-400");
+    if(icon) {
+        icon.className = isActive 
+          ? icon.className.replace("text-slate-400", "text-emerald-600")
+          : icon.className.replace("text-emerald-600", "text-slate-400");
     }
-
+    
     var ind = item.querySelector(".indicator");
-    if (ind) ind.classList.toggle("opacity-0", !isActive);
+    if(ind) ind.classList.toggle("opacity-0", !isActive);
   });
 
   if (tabName === "contacts" && (!cachedContacts || cachedContacts.length === 0)) {
     loadContacts();
-  } else if (tabName === "requests") {
-    switchActivityMode("history");
+  } 
+  else if (tabName === "requests") {
+    switchActivityMode('history');
   }
 };
 
@@ -667,9 +664,9 @@ async function loadLocations() {
 async function loadContacts() {
   var list = document.getElementById("contacts-list");
   if (list && !document.getElementById("tab-contacts").classList.contains("hidden")) {
-    list.innerHTML = SKELETON_CONTACT;
+      list.innerHTML = SKELETON_CONTACT;
   }
-
+  
   const data = await callBackend("getContacts", [currentUser.Role, currentUser.Center_ID]);
   cachedContacts = data;
   renderContactList(data);
@@ -688,7 +685,7 @@ window.submitProfileUpdate = async function () {
   showLoading(true);
   const res = await callBackend("updateEmployeeProfile", [p]);
   showLoading(false);
-
+  
   if (res.success) {
     showToast("success", "Cập nhật thành công!");
     closeProfileModal();
@@ -712,8 +709,7 @@ window.submitProfileUpdate = async function () {
 window.triggerCheckIn = function () {
   document.getElementById("modal-camera").classList.remove("hidden");
   toggleGlobalNav(false);
-  navigator.mediaDevices
-    .getUserMedia({ video: { facingMode: "user" } })
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
     .then(function (s) {
       videoStream = s;
       document.getElementById("video").srcObject = s;
@@ -724,7 +720,7 @@ window.triggerCheckIn = function () {
 };
 
 window.closeCamera = function () {
-  if (videoStream) videoStream.getTracks().forEach((t) => t.stop());
+  if (videoStream) videoStream.getTracks().forEach(t => t.stop());
   document.getElementById("modal-camera").classList.add("hidden");
   toggleGlobalNav(true);
 };
@@ -738,18 +734,16 @@ window.takePicture = async function () {
   var b64 = c.toDataURL("image/jpeg", 0.6);
   closeCamera();
   showLoading(true);
-
+  
   navigator.geolocation.getCurrentPosition(
     async function (p) {
-      const r = await callBackend("doCheckIn", [
-        {
+      const r = await callBackend("doCheckIn", [{
           employeeId: currentUser.Employee_ID,
           lat: p.coords.latitude,
           lng: p.coords.longitude,
           deviceId: myDeviceId,
           imageBase64: b64,
-        },
-      ]);
+      }]);
       showLoading(false);
       if (r.success) {
         showToast("success", r.message);
@@ -781,44 +775,44 @@ window.triggerCheckOut = function () {
 window.checkNewNotifications = async function () {
   if (!currentUser) return;
   const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
-
+  
   // Nếu thành công thì update cache và badge
   if (res.success) {
-    // Lưu ý: res.data bây giờ có cấu trúc { approvals: [], myRequests: [] }
-    cachedNotifications = res.data;
-    renderNotificationsBadge(res.data);
+      // Lưu ý: res.data bây giờ có cấu trúc { approvals: [], myRequests: [] }
+      cachedNotifications = res.data;
+      renderNotificationsBadge(res.data);
   }
 };
 
 function getReadList() {
-  var s = localStorage.getItem("army_read_ids");
-  return s ? JSON.parse(s) : [];
+    var s = localStorage.getItem("army_read_ids");
+    return s ? JSON.parse(s) : [];
 }
 
 function checkIsUnread(reqId, status) {
-  if (status === "Pending") return false;
-  var readList = getReadList();
-  return !readList.includes(reqId);
+    if (status === "Pending") return false; 
+    var readList = getReadList();
+    return !readList.includes(reqId);
 }
 
 function markNotificationsAsRead(data) {
-  var readList = getReadList();
-  var hasChange = false;
-
-  if (data && data.myRequests) {
-    data.myRequests.forEach(function (r) {
-      if (r.Status !== "Pending" && !readList.includes(r.Request_ID)) {
-        readList.push(r.Request_ID);
-        hasChange = true;
-      }
-    });
-  }
-
-  if (hasChange) {
-    localStorage.setItem("army_read_ids", JSON.stringify(readList));
-    // Gọi lại để cập nhật badge
-    renderNotificationsBadge(data);
-  }
+    var readList = getReadList();
+    var hasChange = false;
+    
+    if (data && data.myRequests) {
+        data.myRequests.forEach(function(r) {
+            if (r.Status !== "Pending" && !readList.includes(r.Request_ID)) {
+                readList.push(r.Request_ID);
+                hasChange = true;
+            }
+        });
+    }
+    
+    if (hasChange) {
+        localStorage.setItem("army_read_ids", JSON.stringify(readList));
+        // Gọi lại để cập nhật badge
+        renderNotificationsBadge(data); 
+    }
 }
 
 window.openNotifications = async function (mode) {
@@ -827,23 +821,22 @@ window.openNotifications = async function (mode) {
   var titleEl = document.getElementById("modal-noti-title");
   if (!modal || !content) return;
 
-  titleEl.innerText = mode === "approve" ? "Duyệt đơn từ" : "Thông báo";
-
-  document.querySelectorAll('[id^="noti-dot"], [id^="profile-noti-dot"]').forEach((d) => d.classList.add("hidden"));
+  titleEl.innerText = (mode === "approve") ? "Duyệt đơn từ" : "Thông báo";
+  
+  document.querySelectorAll('[id^="noti-dot"], [id^="profile-noti-dot"]').forEach(d => d.classList.add("hidden"));
   modal.classList.remove("hidden");
 
   // Hiển thị loading trước
-  content.innerHTML =
-    '<div class="text-center py-20 opacity-50"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500 text-2xl"></i></div>';
+  content.innerHTML = '<div class="text-center py-20 opacity-50"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500 text-2xl"></i></div>';
 
   // Gọi trực tiếp để lấy dữ liệu mới nhất
   const res = await callBackend("getMobileNotifications", [currentUser.Employee_ID]);
-  if (res.success) {
-    cachedNotifications = res.data;
-    renderNotificationContent(res.data, mode);
-    markNotificationsAsRead(res.data);
+  if(res.success) {
+      cachedNotifications = res.data;
+      renderNotificationContent(res.data, mode);
+      markNotificationsAsRead(res.data);
   } else {
-    content.innerHTML = `<p class="text-center text-red-500 mt-10">${res.message}</p>`;
+      content.innerHTML = `<p class="text-center text-red-500 mt-10">${res.message}</p>`;
   }
 };
 
@@ -857,21 +850,21 @@ window.closeNotifications = function () {
 async function loadMyRequests(forceReload = false) {
   var container = document.getElementById("request-list-container");
   if (!container) return;
-
+  
   if (cachedMyRequests && !forceReload) {
-    renderMyRequestsHTML(container, cachedMyRequests);
-    return;
+      renderMyRequestsHTML(container, cachedMyRequests);
+      return; 
   }
-
+  
   container.innerHTML = SKELETON_REQUEST;
   const res = await callBackend("getMyRequests", [currentUser.Employee_ID]);
-
+  
   let data = [];
   if (Array.isArray(res)) data = res;
   else if (res && res.success && Array.isArray(res.data)) data = res.data;
-  else if (Array.isArray(res.data)) data = res.data;
+  else if (Array.isArray(res.data)) data = res.data; 
 
-  cachedMyRequests = data;
+  cachedMyRequests = data; 
   renderMyRequestsHTML(container, data);
 }
 
@@ -885,7 +878,7 @@ window.openRequestModal = function (type, targetDate) {
   document.getElementById("req-reason").value = "";
   document.getElementById("req-date-start").value = "";
   document.getElementById("req-date-end").value = "";
-
+  
   type = type || "Nghỉ phép";
   selectReqType(type);
 
@@ -908,7 +901,7 @@ window.closeRequestModal = function () {
   toggleGlobalNav(true);
 };
 
-window.toVNDate = function (d) {
+window.toVNDate = function(d) {
   if (!d) return "";
   if (d.includes("/") && d.split("/")[0].length == 2) return d;
   if (d.includes("-")) {
@@ -942,7 +935,7 @@ window.submitRequest = async function () {
   showLoading(true);
   const r = await callBackend("submitRequest", [payload]);
   showLoading(false);
-
+  
   showToast(r.success ? "success" : "error", r.message);
   if (r.success) {
     closeRequestModal();
@@ -962,13 +955,13 @@ window.toggleReqDropdown = function () {
   const arrow = document.getElementById("req-type-arrow");
   const container = document.getElementById("req-type-container");
   const isOpening = menu.classList.contains("hidden");
-
+  
   menu.classList.toggle("hidden");
   container.classList.toggle("ring-2", isOpening);
   container.classList.toggle("ring-emerald-100", isOpening);
   container.classList.toggle("bg-white", isOpening);
-  if (arrow) arrow.style.transform = isOpening ? "rotate(180deg)" : "rotate(0deg)";
-
+  if(arrow) arrow.style.transform = isOpening ? "rotate(180deg)" : "rotate(0deg)";
+  
   if (isOpening) renderReqTypeItems();
 };
 
@@ -1009,7 +1002,7 @@ window.closeRejectModal = function () {
   document.getElementById("modal-reject-reason").classList.add("hidden");
 };
 
-window.handleConfirmReject = function () {
+window.handleConfirmReject = function() {
   var reason = document.getElementById("input-reject-reason").value.trim();
   if (!reason) {
     showToast("error", "Vui lòng nhập lý do từ chối!");
@@ -1017,7 +1010,7 @@ window.handleConfirmReject = function () {
   }
   if (currentRejectId) {
     var idToProcess = currentRejectId;
-    closeRejectModal();
+    closeRejectModal(); 
     processRequestMobile(idToProcess, "Rejected", reason);
   }
 };
@@ -1026,19 +1019,13 @@ window.processRequestMobile = async function (reqId, status, rejectReason) {
   showLoading(true);
   var note = status === "Approved" ? "Đã duyệt" : rejectReason || "";
 
-  const res = await callBackend("processRequestAdmin", [
-    reqId,
-    status,
-    note,
-    currentUser.Name,
-    currentUser.Employee_ID,
-  ]);
-
+  const res = await callBackend("processRequestAdmin", [reqId, status, note, currentUser.Name, currentUser.Employee_ID]);
+  
   showLoading(false);
   showToast(res.success ? "success" : "error", res.message);
   if (res.success) {
     // Reload lại dữ liệu để cập nhật danh sách
-    loadDashboardData();
+    loadDashboardData(); 
     closeNotifications();
   }
 };
@@ -1072,39 +1059,39 @@ window.previewAvatarInModal = function (input) {
 // --- Lịch sử ---
 async function loadHistoryFull() {
   if (!currentUser) return;
-
+  
   var d = new Date();
   var currentMonth = d.getMonth() + 1;
   var currentYear = d.getFullYear();
   var timeLabel = "Tháng " + currentMonth + "/" + currentYear;
-
+  
   setText("current-month-badge", timeLabel);
   setText("hist-month-badge", timeLabel);
   setText("home-stat-month-label", timeLabel);
   setText("stat-year-label", "Năm " + currentYear);
-
+  
   const res = await callBackend("getHistory", [currentUser.Employee_ID]);
-
+  
   if (res) {
-    allHistoryData = res.history || [];
-    var stats = res.summary || { workDays: 0, lateMins: 0, errorCount: 0, remainingLeave: 12, leaveDays: 0 };
-
-    currentHistoryPage = 0;
-    renderHistoryStats(stats);
-
-    var vnDate = ("0" + d.getDate()).slice(-2) + "/" + ("0" + (d.getMonth() + 1)).slice(-2) + "/" + d.getFullYear();
-    var isCurrentlyCheckedIn = false;
-    if (allHistoryData.length > 0) {
-      var todayRec = allHistoryData.find((r) => r.Date === vnDate);
-      if (todayRec && todayRec.Time_List && todayRec.Time_List.some((t) => t.out === "...")) {
-        isCurrentlyCheckedIn = true;
+      allHistoryData = res.history || [];
+      var stats = res.summary || { workDays: 0, lateMins: 0, errorCount: 0, remainingLeave: 12, leaveDays: 0 };
+      
+      currentHistoryPage = 0;
+      renderHistoryStats(stats);
+      
+      var vnDate = ("0" + d.getDate()).slice(-2) + "/" + ("0" + (d.getMonth() + 1)).slice(-2) + "/" + d.getFullYear();
+      var isCurrentlyCheckedIn = false;
+      if (allHistoryData.length > 0) {
+          var todayRec = allHistoryData.find(r => r.Date === vnDate);
+          if (todayRec && todayRec.Time_List && todayRec.Time_List.some(t => t.out === "...")) {
+              isCurrentlyCheckedIn = true;
+          }
       }
-    }
-    toggleHomeState(isCurrentlyCheckedIn ? "working" : "idle");
+      toggleHomeState(isCurrentlyCheckedIn ? "working" : "idle");
 
-    if (!document.getElementById("view-act-history").classList.contains("hidden")) {
-      renderActivityHistory();
-    }
+      if (!document.getElementById("view-act-history").classList.contains("hidden")) {
+        renderActivityHistory();
+      }
   }
 }
 
@@ -1113,8 +1100,7 @@ window.renderActivityHistory = function () {
   if (!container) return;
 
   if (!allHistoryData || allHistoryData.length === 0) {
-    container.innerHTML =
-      '<div class="text-center py-10 opacity-50"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500"></i></div>';
+    container.innerHTML = '<div class="text-center py-10 opacity-50"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500"></i></div>';
     return;
   }
 
@@ -1131,8 +1117,7 @@ window.renderActivityHistory = function () {
   if (btnPrev) btnPrev.style.opacity = currentHistoryPage === 0 ? "0.3" : "1";
   if (btnNext) btnNext.style.opacity = currentHistoryPage >= maxPage ? "0.3" : "1";
   if (displayData.length > 0 && label) {
-    label.innerText =
-      displayData[displayData.length - 1].Date.substring(0, 5) + " - " + displayData[0].Date.substring(0, 5);
+     label.innerText = displayData[displayData.length - 1].Date.substring(0, 5) + " - " + displayData[0].Date.substring(0, 5);
   }
 
   var html = "";
@@ -1146,41 +1131,30 @@ window.renderActivityHistory = function () {
 
     var dayName = ["CN", "TH 2", "TH 3", "TH 4", "TH 5", "TH 6", "TH 7"][recordDate.getDay()];
     var totalHours = parseFloat(item.Total_Work_Hours);
-
-    var timeDetailsHtml =
-      item.Time_List && item.Time_List.length > 0
-        ? item.Time_List.map(
-            (t) =>
-              `<div class="text-[10px] font-bold text-slate-500 mt-0.5 flex items-center gap-1"><i class="fa-regular fa-clock text-slate-300"></i> ${t.in} - ${t.out}</div>`
-          ).join("")
-        : `<div class="text-[10px] text-slate-400 italic">Chưa có dữ liệu</div>`;
+    
+    var timeDetailsHtml = (item.Time_List && item.Time_List.length > 0) 
+      ? item.Time_List.map(t => `<div class="text-[10px] font-bold text-slate-500 mt-0.5 flex items-center gap-1"><i class="fa-regular fa-clock text-slate-300"></i> ${t.in} - ${t.out}</div>`).join('')
+      : `<div class="text-[10px] text-slate-400 italic">Chưa có dữ liệu</div>`;
 
     var isLate = item.Late_Minutes_Total > 0;
     var hasInvalid = item.Status_List && item.Status_List.some((s) => s.includes("Invalid"));
     var isPast = recordDate < today;
     var isForgotOut = isPast && item.Time_List && item.Time_List.some((t) => t.out === "...");
-    var isLowHours = isPast && totalHours > 0 && totalHours < 7;
+    var isLowHours = isPast && totalHours > 0 && totalHours < 7; 
 
     var needAction = isPast && (isLate || hasInvalid || isForgotOut || isLowHours);
     var isExplanation = item.Has_Explained === true;
     var rightStatus = "";
-
+    
     if (needAction) {
-      var errorLabel = isForgotOut
-        ? "Quên ra về"
-        : hasInvalid
-          ? "Sai vị trí"
-          : isLate
-            ? "Trễ " + item.Late_Minutes_Total + "p"
-            : "Thiếu giờ làm";
-
+      var errorLabel = isForgotOut ? "Quên ra về" : hasInvalid ? "Sai vị trí" : isLate ? ("Trễ " + item.Late_Minutes_Total + "p") : "Thiếu giờ làm";
+      
       var labelHtml = `
           <span class="rounded-full px-3 py-0.5 text-[9px] font-bold bg-red-50 text-red-500 border border-red-100 mb-1.5 shadow-sm inline-block">
               ${errorLabel}
           </span>`;
 
-      var pillStyle =
-        "h-8 px-4 rounded-full text-[10px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm";
+      var pillStyle = "h-8 px-4 rounded-full text-[10px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm";
 
       if (isExplanation) {
         rightStatus = `
@@ -1201,8 +1175,7 @@ window.renderActivityHistory = function () {
           </div>`;
       }
     } else {
-      rightStatus =
-        totalHours > 0
+      rightStatus = (totalHours > 0) 
           ? `<div class="flex flex-col items-end justify-center h-full"><div class="w-9 h-9 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center border border-emerald-100 shadow-sm"><i class="fa-solid fa-check"></i></div></div>`
           : `<div class="w-9 h-9 rounded-full bg-slate-50 text-slate-300 flex items-center justify-center border border-slate-100"><i class="fa-solid fa-minus"></i></div>`;
     }
@@ -1229,17 +1202,17 @@ window.renderActivityHistory = function () {
   container.innerHTML = html;
 };
 
-window.openExplainModal = function (dateStr, errorContext) {
+window.openExplainModal = function(dateStr, errorContext) {
   openRequestModal("Giải trình", dateStr);
   var reasonInput = document.getElementById("req-reason");
   if (reasonInput && errorContext) {
-    reasonInput.value = "[" + errorContext + "] ";
-    reasonInput.focus();
+      reasonInput.value = "[" + errorContext + "] "; 
+      reasonInput.focus(); 
   }
 };
 
 window.changeHistoryPage = function (direction) {
-  if (!allHistoryData || allHistoryData.length === 0) return;
+  if(!allHistoryData || allHistoryData.length === 0) return;
   var maxPage = Math.ceil(allHistoryData.length / HISTORY_PAGE_SIZE) - 1;
   var newPage = currentHistoryPage - direction;
   if (newPage < 0) newPage = 0;
@@ -1249,3 +1222,4 @@ window.changeHistoryPage = function (direction) {
     renderActivityHistory();
   }
 };
+
