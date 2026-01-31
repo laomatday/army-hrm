@@ -104,9 +104,28 @@ document.addEventListener("DOMContentLoaded", function () {
   if(btnReject) {
       btnReject.onclick = handleConfirmReject;
   }
+
+  // ============================================================
+  // [FIX] 4. GÁN SỰ KIỆN ENTER NGAY KHI TRANG TẢI XONG
+  // ============================================================
+  var inputUser = document.getElementById("login-user");
+  var inputPass = document.getElementById("login-pass");
+
+  function triggerLoginOnEnter(event) {
+    if (event.key === "Enter") {
+      event.preventDefault(); // Ngăn reload trang
+      handleLogin(); // Gọi hàm đăng nhập
+    }
+  }
+
+  // Gán sự kiện lắng nghe
+  if (inputUser) inputUser.addEventListener("keydown", triggerLoginOnEnter);
+  if (inputPass) inputPass.addEventListener("keydown", triggerLoginOnEnter);
 });
 
-// [ASYNC] Đăng nhập
+// ============================================================
+// HÀM ĐĂNG NHẬP (ĐỂ RA NGOÀI RIÊNG BIỆT)
+// ============================================================
 window.handleLogin = async function () {
   var emailEl = document.getElementById("login-user");
   var passEl = document.getElementById("login-pass");
@@ -129,18 +148,6 @@ window.handleLogin = async function () {
   } else {
     showDialog("error", "Đăng nhập thất bại", res.message);
   }
-  var inputUser = document.getElementById("login-user");
-  var inputPass = document.getElementById("login-pass");
-
-  function triggerLoginOnEnter(event) {
-    if (event.key === "Enter") {
-      event.preventDefault(); // Ngăn reload trang nếu có thẻ form
-      handleLogin(); // Gọi hàm đăng nhập
-    }
-  }
-
-  if (inputUser) inputUser.addEventListener("keydown", triggerLoginOnEnter);
-  if (inputPass) inputPass.addEventListener("keydown", triggerLoginOnEnter);
 };
 
 window.logout = function () {
@@ -1381,6 +1388,7 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
 
 
 
