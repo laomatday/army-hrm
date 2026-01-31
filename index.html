@@ -106,9 +106,10 @@
                 <h2 id="user-name" class="text-2xl font-extrabold text-slate-800 leading-tight truncate w-40">...</h2>
               </div>
             </div>
-            <button onclick="openNotifications('all')" class="btn-icon-ghost relative">
-              <i class="fa-regular fa-bell text-xl"></i>
-              <span id="noti-dot" class="hidden noti-dot-clean"></span>
+            <button onclick="openNotifications('all')" class="w-10 h-10 rounded-full bg-white border border-slate-100 shadow-sm flex items-center justify-center relative active:scale-95 transition-all group">
+                <i class="fa-regular fa-bell text-slate-600 group-hover:text-emerald-600 transition-colors"></i>
+                
+                <span id="noti-dot" class="hidden absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full animate-bounce z-50 shadow-sm"></span>
             </button>
           </div>
 
