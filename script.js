@@ -1190,6 +1190,37 @@ function updateClock() {
   setText("date-display", dateStr);
 }
 
+function toggleGlobalNav(show) {
+  var nav = document.getElementById("global-nav");
+  if (!nav) return;
+  if (show) nav.classList.remove("hidden");
+  else nav.classList.add("hidden");
+}
+
+function getShortNameClient(fullName) {
+  if (!fullName) return "...";
+  var parts = fullName.trim().split(" ");
+  return parts.length > 0 ? parts[parts.length - 1] : fullName;
+}
+
+function getAvatarHtml(name, url, sizeClass = "w-12 h-12", textSize = "text-sm") {
+  // Hàm tạo avatar (ảnh hoặc chữ cái đầu)
+  if (url && url.length > 5 && !url.includes("ui-avatars.com")) {
+    return `<img src="${url}" class="${sizeClass} rounded-2xl object-cover border border-slate-100 shadow-sm bg-slate-200">`;
+  }
+  var initials = "--";
+  if (name) {
+    var parts = name.trim().split(" ");
+    initials = parts.length === 1 ? parts[0].substring(0, 2) : parts[0].charAt(0) + parts[parts.length - 1].charAt(0);
+    initials = initials.toUpperCase();
+  }
+  return `<div class="${sizeClass} rounded-2xl bg-slate-100 text-slate-600 border border-slate-200 shadow-sm flex items-center justify-center font-black ${textSize}">${initials}</div>`;
+}
+
+function setText(id, t) {
+  var e = document.getElementById(id);
+  if (e) e.innerText = t;
+}
 
 
 
