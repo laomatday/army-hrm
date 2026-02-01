@@ -18,7 +18,7 @@ var selectedRequests = [];
 // Cấu hình phân trang & thiết bị
 var myDeviceId = getDeviceId();
 var currentHistoryPage = 0;
-const HISTORY_PAGE_SIZE = 7;
+const HISTORY_PAGE_SIZE = 5;
 
 // Biến tạm cho Form
 var tempAvatarBase64 = null;
@@ -1360,27 +1360,40 @@ window.openExplainModal = function (dateStr, errorContext) {
 window.renderActivityHistory = function () {
   var container = document.getElementById("activity-history-list");
   if (!container) return;
+
   if (!allHistoryData || allHistoryData.length === 0) {
     container.innerHTML =
       '<div class="text-center py-10 opacity-50"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500"></i></div>';
     return;
   }
+
+  // --- FIX LỖI Ở ĐÂY: Khai báo biến itemsToShow ---
+  // Tính toán số lượng item sẽ hiển thị dựa trên trang hiện tại
+  var itemsToShow = (currentHistoryPage + 1) * HISTORY_PAGE_SIZE;
+  // ------------------------------------------------
+
   var startIndex = currentHistoryPage * HISTORY_PAGE_SIZE;
-  var endIndex = startIndex + HISTORY_PAGE_SIZE;
+  // Giới hạn endIndex không vượt quá độ dài dữ liệu thực tế
+  var endIndex = Math.min(startIndex + HISTORY_PAGE_SIZE, allHistoryData.length);
+  
   var displayData = allHistoryData.slice(startIndex, endIndex);
+
+  // Logic phân trang cũ (Giữ nguyên để đảm bảo nút Prev/Next hoạt động nếu có)
   var maxPage = Math.ceil(allHistoryData.length / HISTORY_PAGE_SIZE) - 1;
   var btnPrev = document.getElementById("btn-hist-next");
   var btnNext = document.getElementById("btn-hist-prev");
   var label = document.getElementById("hist-pagination-label");
+  
   if (btnPrev) btnPrev.style.opacity = currentHistoryPage === 0 ? "0.3" : "1";
   if (btnNext) btnNext.style.opacity = currentHistoryPage >= maxPage ? "0.3" : "1";
+  
   if (displayData.length > 0 && label) {
+    // Hiển thị range ngày (ví dụ: 01/02 - 07/02)
     label.innerText =
       displayData[displayData.length - 1].Date.substring(0, 5) + " - " + displayData[0].Date.substring(0, 5);
   }
+
   var html = "";
-  var today = new Date();
-  today.setHours(0, 0, 0, 0);
 
   function getDayNameVietnamese(dayIndex) {
     return ["CN", "TH 2", "TH 3", "TH 4", "TH 5", "TH 6", "TH 7"][dayIndex];
@@ -1461,10 +1474,20 @@ window.renderActivityHistory = function () {
       </div>`;
     });
 
+  // --- Nút Xem thêm (Load More) ---
+  // Sử dụng biến itemsToShow đã khai báo ở đầu hàm để kiểm tra
   if (itemsToShow < allHistoryData.length) {
     html += `<div class="text-center mt-4 pb-4"><button onclick="loadMoreHistory()" class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-4 py-2 rounded-full shadow-sm active:scale-95 transition-all hover:text-emerald-600 hover:border-emerald-200">Xem thêm cũ hơn <i class="fa-solid fa-chevron-down ml-1"></i></button></div>`;
   }
+  
   container.innerHTML = html;
+};
+
+// --- BỔ SUNG HÀM loadMoreHistory NẾU CHƯA CÓ ---
+// Thêm hàm này vào cuối script.js để nút "Xem thêm cũ hơn" hoạt động
+window.loadMoreHistory = function() {
+    currentHistoryPage++;
+    renderActivityHistory();
 };
 
 // Utils
@@ -1527,3 +1550,4 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
+
