@@ -39,11 +39,7 @@
             <div
               class="w-24 h-24 bg-white/20 backdrop-blur-md rounded-[2rem] mx-auto shadow-2xl border border-white/30 flex items-center justify-center animate-float overflow-hidden"
             >
-              <img
-                src="https://lh3.googleusercontent.com/d/1acMwTDObx0ehpV6oHFM2M-IcyWS9ZHbH"
-                class="w-4/5 h-4/5 object-cover"
-                alt="Logo"
-              />
+              <i class="fa-solid fa-shield-halved text-4xl text-white opacity-90"></i>
             </div>
           </div>
           <h1 class="text-2xl font-black text-white tracking-tight drop-shadow-md">ARMY HRM</h1>
@@ -106,10 +102,15 @@
                 <h2 id="user-name" class="text-2xl font-extrabold text-slate-800 leading-tight truncate w-40">...</h2>
               </div>
             </div>
-            <button onclick="openNotifications('all')" class="w-10 h-10 rounded-full bg-white border border-slate-100 shadow-sm flex items-center justify-center relative active:scale-95 transition-all group">
-                <i class="fa-regular fa-bell text-slate-600 group-hover:text-emerald-600 transition-colors"></i>
-                
-                <span id="noti-dot" class="hidden absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full animate-bounce z-50 shadow-sm"></span>
+            <button
+              onclick="openNotifications('all')"
+              class="w-10 h-10 rounded-full bg-white border border-slate-100 shadow-sm flex items-center justify-center relative active:scale-95 transition-all group"
+            >
+              <i class="fa-regular fa-bell text-slate-600 group-hover:text-emerald-600 transition-colors"></i>
+              <span
+                id="noti-dot"
+                class="hidden absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full animate-bounce z-50 shadow-sm"
+              ></span>
             </button>
           </div>
 
@@ -136,7 +137,7 @@
                         class="w-36 h-36 rounded-full bg-slate-100 border-[4px] border-white shadow-sm flex flex-col items-center justify-center animate-pulse"
                       >
                         <i class="fa-solid fa-circle-notch fa-spin text-xl text-slate-300 mb-1"></i>
-                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">CHẤM CÔNG</span>
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ĐANG TẢI</span>
                       </div>
                     </div>
                   </div>
@@ -227,7 +228,7 @@
                     </div>
                     <div>
                       <div class="flex items-baseline gap-1">
-                        <span id="home-stat-days" class="text-2xl font-black text-slate-800">--</span>
+                        <span id="home-stat-days" class="text-2xl font-black text-slate-800">0</span>
                         <span class="text-[10px] text-slate-400 font-bold">công</span>
                       </div>
                       <div class="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
@@ -255,11 +256,11 @@
                       >
                         <i class="fa-solid fa-umbrella-beach"></i>
                       </div>
-                      <span id="stat-year-label" class="text-[10px] font-black text-emerald-500">Năm ....</span>
+                      <span id="stat-year-label" class="text-[10px] font-black text-emerald-500">Năm ...</span>
                     </div>
                     <div>
                       <div class="flex items-baseline gap-1">
-                        <span id="home-stat-leave" class="text-2xl font-black text-slate-800">--</span>
+                        <span id="home-stat-leave" class="text-2xl font-black text-slate-800">0</span>
                         <span class="text-[10px] text-slate-400 font-bold">ngày phép</span>
                       </div>
 
@@ -287,8 +288,7 @@
                       <i class="fa-solid fa-file-pen"></i>
                     </div>
                     <div class="text-left overflow-hidden">
-                      <p class="text-xs font-black text-slate-800 truncate">Tạo Đề xuất</p>
-                      <p class="text-[9px] text-slate-400 font-bold truncate mt-0.5">Nghỉ phép / CT / Giải trình</p>
+                      <p class="text-xs font-black text-slate-800 truncate">Đề xuất</p>
                     </div>
                   </button>
 
@@ -303,7 +303,6 @@
                     </div>
                     <div class="text-left overflow-hidden">
                       <p class="text-xs font-black text-slate-800 truncate">Danh bạ</p>
-                      <p class="text-[9px] text-slate-400 font-bold truncate mt-0.5">Liên hệ nhân sự</p>
                     </div>
                   </button>
                 </div>
@@ -360,62 +359,76 @@
               </div>
 
               <div id="view-act-history" class="animate-fade-in">
-                <div class="flex justify-between items-end mb-4 px-1 mt-2">
-                  <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Bảng công chi tiết</h3>
-                  <span
-                    id="hist-month-badge"
-                    class="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full shadow-sm"
-                    >--/--</span
-                  >
-                </div>
+                  
+                  <div class="flex justify-between items-center mb-4 mt-2 px-1">
+                      <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
+                          Bảng công chi tiết
+                      </h3>
 
-                <div class="grid grid-cols-3 gap-3 mb-4">
-                  <div
-                    class="bg-emerald-50 p-3 rounded-[18px] border border-emerald-100 flex flex-col items-center justify-center gap-1"
-                  >
-                    <span id="hist-total-days" class="text-lg font-black text-emerald-600">0</span>
-                    <span class="text-[9px] font-bold text-emerald-500 uppercase tracking-wide">Ngày công</span>
-                  </div>
-                  <div
-                    class="bg-orange-50 p-3 rounded-[18px] border border-orange-100 flex flex-col items-center justify-center gap-1"
-                  >
-                    <span id="hist-late-mins" class="text-lg font-black text-orange-600">0</span>
-                    <span class="text-[9px] font-bold text-orange-400 uppercase tracking-wide">Phút trễ</span>
-                  </div>
-                  <div
-                    class="bg-red-50 p-3 rounded-[18px] border border-red-100 flex flex-col items-center justify-center gap-1"
-                  >
-                    <span id="hist-errors" class="text-lg font-black text-red-600">0</span>
-                    <span class="text-[9px] font-bold text-red-400 uppercase tracking-wide">Lỗi chấm</span>
-                  </div>
-                </div>
+                      <div class="bg-white rounded-lg border border-slate-200 shadow-sm flex items-center p-0.5">
+                          <button
+                              onclick="changeHistoryMonth(-1)"
+                              class="w-7 h-7 flex items-center justify-center rounded-md hover:bg-slate-100 text-slate-400 hover:text-emerald-600 transition-colors active:bg-emerald-50"
+                          >
+                              <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                          </button>
+                          
+                          <div class="px-2 min-w-[90px] text-center border-l border-r border-slate-100/50 h-4 flex items-center justify-center">
+                              <span
+                                  id="hist-month-badge"
+                                  class="text-xs font-bold text-slate-700 whitespace-nowrap"
+                              >--/--</span>
+                          </div>
 
-                <div class="flex justify-between items-center mb-3 mt-6">
-                  <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest">Chi tiết chấm công</h3>
-                  <div class="flex items-center bg-white rounded-full p-1 shadow-sm border border-slate-100">
-                    <button
-                      id="btn-hist-next"
-                      onclick="changeHistoryPage(1)"
-                      class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-400 active:text-emerald-600 transition-colors"
-                    >
-                      <i class="fa-solid fa-chevron-left text-[10px]"></i>
-                    </button>
-                    <span
-                      id="hist-pagination-label"
-                      class="text-[9px] font-bold text-slate-600 px-3 min-w-[80px] text-center"
-                      >-- / --</span
-                    >
-                    <button
-                      id="btn-hist-prev"
-                      onclick="changeHistoryPage(-1)"
-                      class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-400 active:text-emerald-600 transition-colors"
-                    >
-                      <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                    </button>
+                          <button
+                              onclick="changeHistoryMonth(1)"
+                              class="w-7 h-7 flex items-center justify-center rounded-md hover:bg-slate-100 text-slate-400 hover:text-emerald-600 transition-colors active:bg-emerald-50"
+                          >
+                              <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                          </button>
+                      </div>
                   </div>
-                </div>
 
-                <div id="activity-history-list" class="space-y-3 pb-24"></div>
+                  <div class="grid grid-cols-3 gap-3 mb-4">
+                      <div class="bg-emerald-50 p-3 rounded-[18px] border border-emerald-100 flex flex-col items-center justify-center gap-1">
+                          <span id="hist-total-days" class="text-lg font-black text-emerald-600">0</span>
+                          <span class="text-[9px] font-bold text-emerald-500 uppercase tracking-wide">Ngày công</span>
+                      </div>
+                      <div class="bg-orange-50 p-3 rounded-[18px] border border-orange-100 flex flex-col items-center justify-center gap-1">
+                          <span id="hist-late-mins" class="text-lg font-black text-orange-600">0</span>
+                          <span class="text-[9px] font-bold text-orange-400 uppercase tracking-wide">Phút trễ</span>
+                      </div>
+                      <div class="bg-red-50 p-3 rounded-[18px] border border-red-100 flex flex-col items-center justify-center gap-1">
+                          <span id="hist-errors" class="text-lg font-black text-red-600">0</span>
+                          <span class="text-[9px] font-bold text-red-400 uppercase tracking-wide">Lỗi chấm</span>
+                      </div>
+                  </div>
+
+                  <div class="flex justify-between items-center mb-3 mt-6 px-1">
+                      <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest">Nhật ký</h3>
+                      <div class="flex items-center bg-white rounded-full p-1 shadow-sm border border-slate-100">
+                          <button
+                              id="btn-hist-next"
+                              onclick="changeHistoryPage(1)"
+                              class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-400 active:text-emerald-600 transition-colors"
+                          >
+                              <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                          </button>
+                          <span
+                              id="hist-pagination-label"
+                              class="text-[9px] font-bold text-slate-600 px-3 min-w-[80px] text-center"
+                          >-- / --</span>
+                          <button
+                              id="btn-hist-prev"
+                              onclick="changeHistoryPage(-1)"
+                              class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-400 active:text-emerald-600 transition-colors"
+                          >
+                              <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                          </button>
+                      </div>
+                  </div>
+
+                  <div id="activity-history-list" class="space-y-3 pb-24"></div>
               </div>
             </div>
           </div>
@@ -502,6 +515,7 @@
                   </div>
                 </div>
               </div>
+
               <div class="space-y-4 mb-10">
                 <button
                   onclick="openProfileModal()"
@@ -518,6 +532,7 @@
                     </div>
                   </div>
                 </button>
+
                 <button
                   id="btn-profile-approval"
                   onclick="openNotifications('approve')"
