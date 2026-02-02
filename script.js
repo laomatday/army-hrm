@@ -1,9 +1,16 @@
+/**
+ * ARMY HRM V2026 - VERCEL CLIENT EDITION
+ * File này thay thế toàn bộ logic trong thẻ <script> của js.html
+ */
+
 // ==========================================
 // 1. CẤU HÌNH API & BIẾN TOÀN CỤC
 // ==========================================
 
-// URL API Google Apps Script (Backend)
-const API_URL = "https://script.google.com/macros/s/AKfycbxImbBlItJcyC5TWNVwz9izvNGBou6CzgYkU6T19Itl1OTsnb6YfMqxZ9KVtqJE4J2KPw/exec";
+// [QUAN TRỌNG] Thay URL này bằng Web App URL bạn nhận được khi Deploy code.js
+// Các bước: Mở code.js -> Deploy -> New Deployment -> Select type: Web App 
+// -> Execute as: Me -> Who has access: Anyone -> Deploy -> Copy URL
+const API_URL = "https://script.google.com/macros/s/AKfycbwJ-e6gzFsCS4BDBuXWWBZVUXvWUnASYf6C9YovQ9OGg-gfH185h_xzSZF3zicmJuecOw/exec";
 
 var currentUser = null;
 var videoStream = null;
@@ -17,8 +24,8 @@ var selectedRequests = [];
 
 // Cấu hình phân trang & thiết bị
 var myDeviceId = getDeviceId();
-var currentHistoryPage = 0;
-const HISTORY_PAGE_SIZE = 5;
+var currentHistoryPage = 0; // 0 là trang đầu tiên
+const HISTORY_PAGE_SIZE = 7; // Số lượng hiển thị mỗi lần tải thêm
 
 // Biến tạm cho Form
 var tempAvatarBase64 = null;
@@ -37,33 +44,18 @@ const SKELETON_CONTACT = `
       <div class="w-10 h-10 rounded-2xl bg-slate-200"></div>
   </div>`.repeat(5);
 
-const SKELETON_REQUEST = `
-  <div class="bg-white p-5 rounded-[24px] shadow-sm border border-white mb-4 animate-pulse">
-     <div class="flex justify-between items-start mb-4">
-        <div class="flex gap-4">
-           <div class="w-11 h-11 rounded-2xl bg-slate-200"></div>
-           <div class="space-y-2">
-              <div class="h-4 w-24 bg-slate-200 rounded-full"></div>
-              <div class="h-3 w-16 bg-slate-200 rounded-full"></div>
-           </div>
-        </div>
-        <div class="w-16 h-6 bg-slate-200 rounded-lg"></div>
-     </div>
-     <div class="h-10 w-full bg-slate-200 rounded-2xl"></div>
-  </div>`.repeat(3);
-
 // ==========================================
-// 2. API WRAPPER (CORE REPLACEMENT)
+// 2. API WRAPPER (THAY THẾ GOOGLE.SCRIPT.RUN)
 // ==========================================
 
 /**
- * Hàm gọi API thay thế cho google.script.run
- * @param {string} action - Tên hàm backend (ví dụ: 'doLogin')
- * @param {Array} params - Mảng tham số truyền vào
+ * Hàm gọi API Google Apps Script từ Vercel
+ * @param {string} action - Tên hàm trong switch-case của doPost (code.js)
+ * @param {Array} params - Danh sách tham số
  */
-async function callGoogleAPI(action, params = []) {
+async function callAPI(action, params = []) {
   try {
-    // Sử dụng text/plain để tránh gửi Preflight Request (OPTIONS) gây lỗi CORS trên GAS
+    // Sử dụng text/plain để tránh Preflight Request (OPTIONS) gây lỗi CORS
     const response = await fetch(API_URL, {
       method: "POST",
       redirect: "follow",
@@ -98,7 +90,7 @@ function getDeviceId() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Khôi phục trạng thái badge (nếu có logic restoreBadgeState bên ngoài, giữ nguyên)
+  // Khôi phục trạng thái badge
   if (typeof restoreBadgeState === "function") {
     restoreBadgeState();
   }
@@ -154,8 +146,8 @@ window.handleLogin = async function () {
 
   showLoading(true);
   
-  // Gọi API
-  const res = await callGoogleAPI("doLogin", [emailEl.value.trim(), passEl.value.trim(), myDeviceId]);
+  // Gọi API thay vì google.script.run
+  const res = await callAPI("doLogin", [emailEl.value.trim(), passEl.value.trim(), myDeviceId]);
   
   showLoading(false);
 
@@ -221,7 +213,7 @@ function showMainApp() {
 async function loadDashboardData() {
   if (!currentUser) return;
 
-  const res = await callGoogleAPI("getDashboardData", [currentUser.Employee_ID]);
+  const res = await callAPI("getDashboardData", [currentUser.Employee_ID]);
 
   if (res.success) {
     const d = res.data;
@@ -254,7 +246,6 @@ async function loadDashboardData() {
       cachedNotifications = d.notifications;
       renderNotificationsBadge(d.notifications);
       
-      // Update modal content if open
       if (!document.getElementById("modal-notifications").classList.contains("hidden")) {
         var title = document.getElementById("modal-noti-title").innerText;
         var mode = title === "Duyệt đơn từ" ? "approve" : "all";
@@ -277,10 +268,8 @@ async function loadDashboardData() {
     // 6. CHECK-IN STATE
     updateCurrentStatusUI();
     
-    // Nếu đang ở Home và load xong -> chuyển state idle/working
-    // (Logic updateCurrentStatusUI đã xử lý việc này, nhưng cần đảm bảo tắt loading)
+    // Tắt loading nếu đang ở state loading
     if (document.getElementById("state-loading").classList.contains("opacity-100")) {
-        // Fallback nếu updateCurrentStatusUI chưa tắt
          updateCurrentStatusUI();
     }
 
@@ -291,290 +280,8 @@ async function loadDashboardData() {
 }
 
 // ==========================================
-// 6. CAMERA & CHECK-IN
+// 6. UI RENDER FUNCTIONS
 // ==========================================
-
-window.triggerCheckIn = function () {
-  document.getElementById("modal-camera").classList.remove("hidden");
-  toggleGlobalNav(false);
-  navigator.mediaDevices
-    .getUserMedia({ video: { facingMode: "user" } })
-    .then(function (s) {
-      videoStream = s;
-      document.getElementById("video").srcObject = s;
-    })
-    .catch(function () {
-      showToast("error", "Không thể truy cập Camera!");
-    });
-};
-
-window.closeCamera = function () {
-  if (videoStream) videoStream.getTracks().forEach((t) => t.stop());
-  document.getElementById("modal-camera").classList.add("hidden");
-  toggleGlobalNav(true);
-};
-
-window.takePicture = function () {
-  var v = document.getElementById("video");
-  var c = document.createElement("canvas");
-  c.width = v.videoWidth;
-  c.height = v.videoHeight;
-  c.getContext("2d").drawImage(v, 0, 0);
-  var b64 = c.toDataURL("image/jpeg", 0.6);
-  closeCamera();
-  showLoading(true);
-
-  navigator.geolocation.getCurrentPosition(
-    async function (p) {
-      const payload = {
-        employeeId: currentUser.Employee_ID,
-        lat: p.coords.latitude,
-        lng: p.coords.longitude,
-        deviceId: myDeviceId,
-        imageBase64: b64,
-      };
-
-      const res = await callGoogleAPI("doCheckIn", [payload]);
-      
-      showLoading(false);
-      if (res.success) {
-        showToast("success", res.message);
-        loadDashboardData();
-      } else {
-        showDialog("error", "Thất bại", res.message);
-      }
-    },
-    function () {
-      showLoading(false);
-      showDialog("error", "Lỗi định vị", "Vui lòng bật GPS!");
-    },
-    { enableHighAccuracy: true, timeout: 10000 }
-  );
-};
-
-window.triggerCheckOut = function () {
-  showDialog("confirm", "Check-out", "Bạn muốn kết thúc ca làm việc?", async function () {
-    showLoading(true);
-    const res = await callGoogleAPI("doCheckOut", [{ employeeId: currentUser.Employee_ID }]);
-    
-    showLoading(false);
-    showToast(res.success ? "success" : "error", res.message);
-    if (res.success) loadDashboardData();
-  });
-};
-
-// ==========================================
-// 7. THÔNG BÁO & DUYỆT ĐƠN
-// ==========================================
-
-window.openNotifications = async function (mode) {
-  var modal = document.getElementById("modal-notifications");
-  var content = document.getElementById("noti-content-area");
-  var titleEl = document.getElementById("modal-noti-title");
-  if (!modal || !content) return;
-
-  titleEl.innerText = mode === "approve" ? "Duyệt đơn từ" : "Thông báo";
-  modal.classList.remove("hidden");
-
-  // Loading state
-  content.innerHTML = `
-      <div id="noti-waiting" class="text-center py-20 animate-fade-in">
-          <div class="animate-spin inline-block w-8 h-8 border-[3px] border-emerald-500 border-t-transparent rounded-full mb-4"></div>
-          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Đang tải thông báo...</p>
-      </div>`;
-
-  // Fetch data
-  const res = await callGoogleAPI("getMobileNotifications", [currentUser.Employee_ID]);
-
-  if (res.success) {
-    cachedNotifications = res.data;
-    renderNotificationContent(res.data, mode);
-    markNotificationsAsRead(res.data);
-  } else {
-    content.innerHTML = `<p class="text-center py-10 text-xs text-red-400 font-bold">${res.message}</p>`;
-  }
-};
-
-window.processRequestMobile = async function (reqId, status, rejectReason) {
-  showLoading(true);
-  var note = status === "Approved" ? "Đã duyệt" : rejectReason || "";
-
-  const res = await callGoogleAPI("processRequestAdmin", [reqId, status, note, currentUser.Name]);
-
-  showLoading(false);
-  showToast(res.success ? "success" : "error", res.message);
-  if (res.success) {
-    loadDashboardData();
-    closeNotifications();
-  }
-};
-
-window.submitBatchAction = function (status) {
-  const idsToSend = [...selectedRequests]; // Copy array
-  if (idsToSend.length === 0) return;
-
-  const actionName = status === "Approved" ? "Duyệt" : "Từ chối";
-  showDialog("confirm", "Xác nhận", `Bạn muốn ${actionName} ${idsToSend.length} đơn đã chọn?`, async () => {
-    showLoading(true);
-    // Close UI immediately
-    document.getElementById("batch-action-bar").classList.add("translate-y-full");
-    closeNotifications();
-
-    const res = await callGoogleAPI("processBatchRequests", [{ // Note: Backend needs to support this if defined
-        requestIds: idsToSend,
-        status: status,
-        managerName: currentUser.Name,
-    }]);
-
-    // *Lưu ý*: Nếu backend code.js chưa có case 'processBatchRequests', logic này sẽ lỗi.
-    // Dựa trên file code.js bạn cung cấp, KHÔNG CÓ case 'processBatchRequests'.
-    // Logic dưới đây giả định bạn sẽ dùng vòng lặp hoặc bổ sung backend.
-    // Để an toàn với file code.js hiện tại, tôi sẽ loop call (tạm thời) hoặc bạn cần update backend.
-    // Tuy nhiên, để tuân thủ "Senior Full Stack", ta nên sửa backend.
-    // Nhưng đề bài yêu cầu "phân tích code.js" và "gửi script.js".
-    // Vì code.js KHÔNG CÓ `processBatchRequests`, tôi sẽ fallback về loop call ở client
-    // để đảm bảo script.js chạy được với backend hiện tại.
-    
-    /* FALLBACK CLIENT-SIDE LOOP FOR BATCH (COMPATIBLE WITH CURRENT BACKEND) 
-    */
-    /*
-    let successCount = 0;
-    for (const rid of idsToSend) {
-        await callGoogleAPI("processRequestAdmin", [rid, status, actionName + " hàng loạt", currentUser.Name]);
-        successCount++;
-    }
-    */
-    
-    // Tuy nhiên, prompt bạn đưa không yêu cầu sửa code.js, nên tôi giả định
-    // logic xử lý batch đã được handle hoặc tôi sẽ gửi cảnh báo.
-    // Ở đây tôi giữ nguyên call API, nhưng thực tế res sẽ fail nếu backend thiếu.
-    
-    // EDIT: Tôi sẽ sửa thành loop để đảm bảo chạy được với Backend cũ.
-    
-    let errorOccurred = false;
-    // Chạy song song để nhanh hơn
-    const promises = idsToSend.map(rid => 
-        callGoogleAPI("processRequestAdmin", [rid, status, actionName + " (Batch)", currentUser.Name])
-    );
-    
-    await Promise.all(promises);
-
-    showLoading(false);
-    showToast("success", "Đã xử lý xong!");
-    selectedRequests = [];
-    loadDashboardData();
-  });
-};
-
-
-// ==========================================
-// 8. TẠO ĐỀ XUẤT & PROFILE
-// ==========================================
-
-window.submitRequest = async function () {
-  var valFrom = document.getElementById("req-date-start").value;
-  var valTo = document.getElementById("req-date-end").value;
-  var finalFrom = toVNDate(valFrom);
-  var finalTo = toVNDate(valTo);
-  var reason = document.getElementById("req-reason").value;
-
-  var typeVal = currentReqType;
-  if (typeVal === "Giải trình" || typeVal === "Explanation") typeVal = "Giải trình công";
-
-  if (!reason) return showToast("error", "Vui lòng nhập nội dung chi tiết!");
-
-  var payload = {
-    employeeId: currentUser.Employee_ID,
-    name: currentUser.Name,
-    type: typeVal,
-    fromDate: finalFrom,
-    toDate: finalTo,
-    reason: reason,
-  };
-
-  showLoading(true);
-  
-  const r = await callGoogleAPI("submitRequest", [payload]);
-  
-  showLoading(false);
-  showToast(r.success ? "success" : "error", r.message);
-  if (r.success) {
-    closeRequestModal();
-    loadDashboardData();
-  }
-};
-
-window.submitProfileUpdate = async function () {
-  var phoneInput = document.getElementById("edit-phone");
-  var newPhone = phoneInput ? phoneInput.value.trim() : "";
-  if (!tempAvatarBase64 && !newPhone && !currentProfileLocation) {
-    showToast("error", "Bạn chưa thay đổi thông tin nào!");
-    return;
-  }
-  var p = {
-    employeeId: currentUser.Employee_ID,
-    phone: newPhone,
-  };
-  if (tempAvatarBase64) {
-    p.avatarBase64 = tempAvatarBase64;
-  }
-  if (currentProfileLocation) {
-    p.centerId = currentProfileLocation;
-  }
-  
-  showLoading(true);
-  
-  const res = await callGoogleAPI("updateEmployeeProfile", [p]);
-  
-  showLoading(false);
-  if (res.success) {
-    showToast("success", "Cập nhật hồ sơ thành công!");
-    closeProfileModal();
-    loadDashboardData();
-  } else {
-    showDialog("error", "Lỗi cập nhật", res.message);
-  }
-};
-
-// ==========================================
-// 9. LỊCH SỬ THÁNG (LAZY LOAD)
-// ==========================================
-
-window.changeHistoryMonth = function (delta) {
-  viewHistoryDate.setMonth(viewHistoryDate.getMonth() + delta);
-  loadHistoryOnly();
-};
-
-async function loadHistoryOnly() {
-  const m = viewHistoryDate.getMonth() + 1;
-  const y = viewHistoryDate.getFullYear();
-
-  const badge = document.getElementById("hist-month-badge");
-  if (badge) badge.innerText = "Tháng " + m + "/" + y;
-
-  const list = document.getElementById("activity-history-list");
-  if (list)
-    list.innerHTML = `<div class="flex flex-col items-center justify-center py-10 opacity-50 space-y-3"><div class="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-emerald-500"></div></div>`;
-
-  const res = await callGoogleAPI("getHistory", [currentUser.Employee_ID, m, y]);
-
-  if (res.summary) renderHistoryStats(res.summary);
-
-  if (res.history) {
-    allHistoryData = res.history;
-    currentHistoryPage = 0;
-    renderActivityHistory();
-  } else {
-    allHistoryData = [];
-    renderActivityHistory();
-  }
-}
-
-// ==========================================
-// 10. UI HELPERS & RENDER FUNCTIONS
-// ==========================================
-
-// --- Helper Functions giữ nguyên logic UI ---
 
 function renderHistoryStats(s) {
   if (!s) return;
@@ -612,7 +319,6 @@ function renderNotificationsBadge(notiData) {
 
   if (homePendingEl) homePendingEl.innerText = count;
 
-  // Logic chấm đỏ thông minh
   var myUnreadCount = 0;
   if (notiData.myRequests) {
     notiData.myRequests.forEach(function (r) {
@@ -728,6 +434,149 @@ function updateCurrentStatusUI() {
   toggleHomeState(isCurrentlyCheckedIn ? "working" : "idle");
 }
 
+// ==========================================
+// 7. CAMERA & CHECK-IN
+// ==========================================
+
+window.triggerCheckIn = function () {
+  document.getElementById("modal-camera").classList.remove("hidden");
+  toggleGlobalNav(false);
+  navigator.mediaDevices
+    .getUserMedia({ video: { facingMode: "user" } })
+    .then(function (s) {
+      videoStream = s;
+      document.getElementById("video").srcObject = s;
+    })
+    .catch(function () {
+      showToast("error", "Không thể truy cập Camera!");
+    });
+};
+
+window.closeCamera = function () {
+  if (videoStream) videoStream.getTracks().forEach((t) => t.stop());
+  document.getElementById("modal-camera").classList.add("hidden");
+  toggleGlobalNav(true);
+};
+
+window.takePicture = function () {
+  var v = document.getElementById("video");
+  var c = document.createElement("canvas");
+  c.width = v.videoWidth;
+  c.height = v.videoHeight;
+  c.getContext("2d").drawImage(v, 0, 0);
+  var b64 = c.toDataURL("image/jpeg", 0.6);
+  closeCamera();
+  showLoading(true);
+
+  navigator.geolocation.getCurrentPosition(
+    async function (p) {
+      const payload = {
+        employeeId: currentUser.Employee_ID,
+        lat: p.coords.latitude,
+        lng: p.coords.longitude,
+        deviceId: myDeviceId,
+        imageBase64: b64,
+      };
+
+      const res = await callAPI("doCheckIn", [payload]);
+      
+      showLoading(false);
+      if (res.success) {
+        showToast("success", res.message);
+        loadDashboardData();
+      } else {
+        showDialog("error", "Thất bại", res.message);
+      }
+    },
+    function () {
+      showLoading(false);
+      showDialog("error", "Lỗi định vị", "Vui lòng bật GPS!");
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+};
+
+window.triggerCheckOut = function () {
+  showDialog("confirm", "Check-out", "Bạn muốn kết thúc ca làm việc?", async function () {
+    showLoading(true);
+    const res = await callAPI("doCheckOut", [{ employeeId: currentUser.Employee_ID }]);
+    
+    showLoading(false);
+    showToast(res.success ? "success" : "error", res.message);
+    if (res.success) loadDashboardData();
+  });
+};
+
+// ==========================================
+// 8. THÔNG BÁO & DUYỆT ĐƠN
+// ==========================================
+
+window.openNotifications = async function (mode) {
+  var modal = document.getElementById("modal-notifications");
+  var content = document.getElementById("noti-content-area");
+  var titleEl = document.getElementById("modal-noti-title");
+  if (!modal || !content) return;
+
+  titleEl.innerText = mode === "approve" ? "Duyệt đơn từ" : "Thông báo";
+  modal.classList.remove("hidden");
+
+  content.innerHTML = `
+      <div id="noti-waiting" class="text-center py-20 animate-fade-in">
+          <div class="animate-spin inline-block w-8 h-8 border-[3px] border-emerald-500 border-t-transparent rounded-full mb-4"></div>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Đang tải thông báo...</p>
+      </div>`;
+
+  const res = await callAPI("getMobileNotifications", [currentUser.Employee_ID]);
+
+  if (res.success) {
+    cachedNotifications = res.data;
+    renderNotificationContent(res.data, mode);
+    markNotificationsAsRead(res.data);
+  } else {
+    content.innerHTML = `<p class="text-center py-10 text-xs text-red-400 font-bold">${res.message}</p>`;
+  }
+};
+
+window.processRequestMobile = async function (reqId, status, rejectReason) {
+  showLoading(true);
+  var note = status === "Approved" ? "Đã duyệt" : rejectReason || "";
+
+  const res = await callAPI("processRequestAdmin", [reqId, status, note, currentUser.Name]);
+
+  showLoading(false);
+  showToast(res.success ? "success" : "error", res.message);
+  if (res.success) {
+    loadDashboardData();
+    closeNotifications();
+  }
+};
+
+window.submitBatchAction = function (status) {
+  const idsToSend = [...selectedRequests];
+  if (idsToSend.length === 0) return;
+
+  const actionName = status === "Approved" ? "Duyệt" : "Từ chối";
+  showDialog("confirm", "Xác nhận", `Bạn muốn ${actionName} ${idsToSend.length} đơn đã chọn?`, async () => {
+    showLoading(true);
+    document.getElementById("batch-action-bar").classList.add("translate-y-full");
+    closeNotifications();
+    
+    // Ở backend code.js chưa có hàm 'processBatchRequests', nên ta lặp để gọi
+    // Hoặc nếu bạn đã bổ sung backend thì dùng callAPI 1 lần.
+    // Ở đây tôi dùng Promise.all để an toàn với backend hiện tại.
+    const promises = idsToSend.map(rid => 
+        callAPI("processRequestAdmin", [rid, status, actionName + " (Batch)", currentUser.Name])
+    );
+    
+    await Promise.all(promises);
+
+    showLoading(false);
+    showToast("success", "Đã xử lý xong!");
+    selectedRequests = [];
+    loadDashboardData();
+  });
+};
+
 function renderNotificationContent(data, mode) {
     var content = document.getElementById("noti-content-area");
     var hasApp = data.approvals && data.approvals.length > 0;
@@ -811,21 +660,210 @@ function renderNotificationContent(data, mode) {
     content.innerHTML = html;
 }
 
-// ... (Giữ nguyên các hàm UI thuần túy: toggle, switchTab, renderContact, vv...) ...
-// Để tiết kiệm không gian, các hàm logic thuần UI không gọi API tôi giữ nguyên logic cũ
-// nhưng copy lại đầy đủ để bạn chỉ việc paste.
+// ==========================================
+// 9. TẠO ĐỀ XUẤT & PROFILE
+// ==========================================
 
-window.changeHistoryPage = function (direction) {
-  if (!allHistoryData || allHistoryData.length === 0) return;
-  var maxPage = Math.ceil(allHistoryData.length / HISTORY_PAGE_SIZE) - 1;
-  var newPage = currentHistoryPage - direction;
-  if (newPage < 0) newPage = 0;
-  if (newPage > maxPage) newPage = maxPage;
-  if (newPage !== currentHistoryPage) {
-    currentHistoryPage = newPage;
-    renderActivityHistory();
+window.submitRequest = async function () {
+  var valFrom = document.getElementById("req-date-start").value;
+  var valTo = document.getElementById("req-date-end").value;
+  var finalFrom = toVNDate(valFrom);
+  var finalTo = toVNDate(valTo);
+  var reason = document.getElementById("req-reason").value;
+
+  var typeVal = currentReqType;
+  if (typeVal === "Giải trình" || typeVal === "Explanation") typeVal = "Giải trình công";
+
+  if (!reason) return showToast("error", "Vui lòng nhập nội dung chi tiết!");
+
+  var payload = {
+    employeeId: currentUser.Employee_ID,
+    name: currentUser.Name,
+    type: typeVal,
+    fromDate: finalFrom,
+    toDate: finalTo,
+    reason: reason,
+  };
+
+  showLoading(true);
+  const r = await callAPI("submitRequest", [payload]);
+  showLoading(false);
+  showToast(r.success ? "success" : "error", r.message);
+  if (r.success) {
+    closeRequestModal();
+    loadDashboardData();
   }
 };
+
+window.submitProfileUpdate = async function () {
+  var phoneInput = document.getElementById("edit-phone");
+  var newPhone = phoneInput ? phoneInput.value.trim() : "";
+  if (!tempAvatarBase64 && !newPhone && !currentProfileLocation) {
+    showToast("error", "Bạn chưa thay đổi thông tin nào!");
+    return;
+  }
+  var p = {
+    employeeId: currentUser.Employee_ID,
+    phone: newPhone,
+  };
+  if (tempAvatarBase64) {
+    p.avatarBase64 = tempAvatarBase64;
+  }
+  if (currentProfileLocation) {
+    p.centerId = currentProfileLocation;
+  }
+  
+  showLoading(true);
+  const res = await callAPI("updateEmployeeProfile", [p]);
+  showLoading(false);
+  if (res.success) {
+    showToast("success", "Cập nhật hồ sơ thành công!");
+    closeProfileModal();
+    loadDashboardData();
+  } else {
+    showDialog("error", "Lỗi cập nhật", res.message);
+  }
+};
+
+// ==========================================
+// 10. HISTORY & LOAD MORE
+// ==========================================
+
+window.changeHistoryMonth = function (delta) {
+  viewHistoryDate.setMonth(viewHistoryDate.getMonth() + delta);
+  loadHistoryOnly();
+};
+
+async function loadHistoryOnly() {
+  const m = viewHistoryDate.getMonth() + 1;
+  const y = viewHistoryDate.getFullYear();
+
+  const badge = document.getElementById("hist-month-badge");
+  if (badge) badge.innerText = "Tháng " + m + "/" + y;
+
+  const list = document.getElementById("activity-history-list");
+  if (list)
+    list.innerHTML = `<div class="flex flex-col items-center justify-center py-10 opacity-50 space-y-3"><div class="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-emerald-500"></div></div>`;
+
+  const res = await callAPI("getHistory", [currentUser.Employee_ID, m, y]);
+
+  if (res.summary) renderHistoryStats(res.summary);
+
+  if (res.history) {
+    allHistoryData = res.history;
+    currentHistoryPage = 0;
+    renderActivityHistory();
+  } else {
+    allHistoryData = [];
+    renderActivityHistory();
+  }
+}
+
+window.loadMoreHistory = function() {
+    currentHistoryPage++;
+    renderActivityHistory();
+};
+
+// [FIXED] Render Activity History với ItemsToShow
+window.renderActivityHistory = function () {
+  var container = document.getElementById("activity-history-list");
+  if (!container) return;
+
+  if (!allHistoryData || allHistoryData.length === 0) {
+    container.innerHTML =
+      '<div class="text-center py-10 opacity-50"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500"></i><p class="text-xs mt-2 text-slate-400">Không có dữ liệu</p></div>';
+    return;
+  }
+
+  // --- FIX LỖI itemsToShow ---
+  // Dùng logic "Load More": Hiển thị từ 0 đến (Page+1)*Size
+  const itemsToShow = (currentHistoryPage + 1) * HISTORY_PAGE_SIZE;
+  const displayData = allHistoryData.slice(0, itemsToShow);
+
+  var html = "";
+
+  function getDayNameVietnamese(dayIndex) {
+    return ["CN", "TH 2", "TH 3", "TH 4", "TH 5", "TH 6", "TH 7"][dayIndex];
+  }
+
+  displayData.forEach(function (day) {
+      const dateParts = day.Date.split("/");
+      const dateObj = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+      const dayName = getDayNameVietnamese(dateObj.getDay());
+
+      let borderClass = "border-slate-100";
+      let bgClass = "bg-white";
+      let iconHtml = "";
+      let statusHtml = "";
+      let timeHtml = "";
+
+      if (day.Is_Holiday) {
+        bgClass = "bg-purple-50/50";
+        borderClass = "border-purple-100";
+        iconHtml = `<div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-sm"><i class="fa-solid fa-gift"></i></div>`;
+        statusHtml = `<span class="text-xs font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-md">${day.Holiday_Name}</span>`;
+        timeHtml = `<div class="text-[10px] text-purple-400 font-bold flex items-center gap-1"><i class="fa-regular fa-face-smile"></i> Nghỉ lễ</div>`;
+      }
+      else if (day.Is_Leave) {
+        bgClass = "bg-blue-50/50";
+        borderClass = "border-blue-100";
+        iconHtml = `<div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-sm"><i class="fa-solid fa-umbrella-beach"></i></div>`;
+        statusHtml = `<span class="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-md">${day.Leave_Type}</span>`;
+        timeHtml = `<div class="text-[10px] text-blue-400 font-bold flex items-center gap-1"><i class="fa-solid fa-check-circle"></i> Đã duyệt</div>`;
+      }
+      else if (day.Total_Work_Hours > 0 || (day.Time_List && day.Time_List.length > 0 && day.Time_List[0].in !== "...")) {
+        const isLate = day.Late_Minutes_Total > 0;
+        const isError = day.Status_List.some((s) => s.includes("Invalid") || s.includes("Quên"));
+
+        if (isError) {
+          borderClass = "border-red-100";
+          iconHtml = `<div class="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i></div>`;
+          statusHtml = `<span class="text-xs font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-md">Lỗi chấm công</span>`;
+        } else if (isLate) {
+          borderClass = "border-orange-100";
+          iconHtml = `<div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center shadow-sm"><i class="fa-solid fa-clock"></i></div>`;
+          statusHtml = `<span class="text-xs font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-md">Trễ ${day.Late_Minutes_Total}p</span>`;
+        } else {
+          borderClass = "border-emerald-100";
+          iconHtml = `<div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm"><i class="fa-solid fa-check"></i></div>`;
+          statusHtml = `<span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Công chuẩn</span>`;
+        }
+        if (day.Time_List && day.Time_List.length > 0) {
+          const t = day.Time_List[0];
+          timeHtml = `<div class="flex gap-2 text-[10px] font-bold text-slate-500 mt-1"><span class="bg-slate-100 px-1.5 py-0.5 rounded flex items-center gap-1"><i class="fa-solid fa-arrow-right-to-bracket text-emerald-500"></i> ${t.in}</span><span class="bg-slate-100 px-1.5 py-0.5 rounded flex items-center gap-1"><i class="fa-solid fa-arrow-right-from-bracket text-amber-500"></i> ${t.out}</span></div>`;
+        }
+      } else {
+        bgClass = "bg-slate-50";
+        borderClass = "border-dashed border-slate-200";
+        iconHtml = `<div class="w-10 h-10 rounded-xl bg-slate-200 text-slate-400 flex items-center justify-center"><i class="fa-solid fa-minus"></i></div>`;
+        statusHtml = `<span class="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">Vắng / Không chấm</span>`;
+        timeHtml = `<div class="text-[10px] text-slate-400 mt-1 italic">Không có dữ liệu</div>`;
+      }
+
+      html += `
+      <div class="${bgClass} p-3 rounded-[18px] border ${borderClass} mb-3 flex items-start gap-3 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] transition-all animate-slide-up">
+          <div class="shrink-0 mt-0.5">${iconHtml}</div>
+          <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-center mb-1">
+                  <span class="font-bold text-sm text-slate-700">${dayName}, ${day.Date}</span>
+                  ${statusHtml}
+              </div>
+              ${timeHtml}
+          </div>
+      </div>`;
+    });
+
+  // Nút xem thêm
+  if (itemsToShow < allHistoryData.length) {
+    html += `<div class="text-center mt-4 pb-4"><button onclick="loadMoreHistory()" class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-4 py-2 rounded-full shadow-sm active:scale-95 transition-all hover:text-emerald-600 hover:border-emerald-200">Xem thêm cũ hơn <i class="fa-solid fa-chevron-down ml-1"></i></button></div>`;
+  }
+  
+  container.innerHTML = html;
+};
+
+// ==========================================
+// 11. CÁC HÀM UI HELPERS KHÁC (GIỮ NGUYÊN)
+// ==========================================
 
 function getShortNameClient(fullName) {
   if (!fullName) return "...";
@@ -861,28 +899,22 @@ function renderUserInfo() {
   setText("p-phone", currentUser.Phone || "Chưa có số điện thoại");
   setText("p-dept", currentUser.Department || "Chưa phân bổ Nhân sự");
   setText("leave-balance", currentUser.Annual_Leave_Balance !== undefined ? currentUser.Annual_Leave_Balance : 12);
-
   ["req-user-name", "profile-user-name", "contact-user-name"].forEach((id) => setText(id, currentUser.Name));
-
   const displayTitle = currentUser.Position || "Staff";
   const displayLocation = currentUser.Location_Name || "Chưa có nơi làm việc";
-
   ["user", "req", "profile", "contact"].forEach((prefix) => {
     setText(prefix + "-position-badge", displayTitle);
     setText(prefix + "-location-badge", displayLocation);
   });
-
   const adminRoles = ["Admin", "Manager", "HR"];
   const btnApproval = document.getElementById("btn-profile-approval");
   if (btnApproval) {
     btnApproval.classList.toggle("hidden", adminRoles.indexOf(currentUser.Role) === -1);
   }
-
   const avatarUrl =
     currentUser.Avatar && currentUser.Avatar.startsWith("http")
       ? currentUser.Avatar
       : "https://ui-avatars.com/api/?name=" + encodeURIComponent(currentUser.Name) + "&background=059669&color=fff";
-
   document.querySelectorAll("#user-avatar, #profile-user-avatar, #req-user-avatar, #contact-user-avatar").forEach((img) => {
     img.src = avatarUrl;
     img.style.objectFit = "cover";
@@ -900,7 +932,6 @@ window.switchTab = function (tabName) {
   });
   var target = document.getElementById("tab-" + tabName);
   if (target) target.classList.remove("hidden");
-
   var navItems = document.querySelectorAll(".nav-item");
   var idxMap = { home: 0, requests: 1, contacts: 2, profile: 3 };
   navItems.forEach((item, index) => {
@@ -915,7 +946,6 @@ window.switchTab = function (tabName) {
     var ind = item.querySelector(".indicator");
     if (ind) ind.classList.toggle("opacity-0", !isActive);
   });
-
   if (tabName === "contacts" && (!cachedContacts || cachedContacts.length === 0)) {
     loadContacts();
   } else if (tabName === "requests") {
@@ -928,7 +958,6 @@ function toggleHomeState(state) {
   var idleEl = document.getElementById("state-idle");
   var workEl = document.getElementById("state-working");
   if (!loadingEl || !idleEl || !workEl) return;
-
   const hide = (el) => {
     el.classList.remove("opacity-100", "scale-100", "z-30", "z-20", "z-10");
     el.classList.add("opacity-0", "scale-90", "pointer-events-none");
@@ -937,15 +966,12 @@ function toggleHomeState(state) {
     el.classList.remove("opacity-0", "scale-90", "pointer-events-none");
     el.classList.add("opacity-100", "scale-100", zIndex);
   };
-
   [loadingEl, idleEl, workEl].forEach(hide);
-
   if (state === "loading") show(loadingEl, "z-30");
   else if (state === "working") show(workEl, "z-20");
   else show(idleEl, "z-20");
 }
 
-// ... Batch action UI helpers ...
 window.toggleSelectRequest = function (reqId) {
   const index = selectedRequests.indexOf(reqId);
   if (index > -1) {
@@ -1357,139 +1383,6 @@ window.openExplainModal = function (dateStr, errorContext) {
   }
 };
 
-window.renderActivityHistory = function () {
-  var container = document.getElementById("activity-history-list");
-  if (!container) return;
-
-  if (!allHistoryData || allHistoryData.length === 0) {
-    container.innerHTML =
-      '<div class="text-center py-10 opacity-50"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500"></i></div>';
-    return;
-  }
-
-  // --- FIX LỖI Ở ĐÂY: Khai báo biến itemsToShow ---
-  // Tính toán số lượng item sẽ hiển thị dựa trên trang hiện tại
-  var itemsToShow = (currentHistoryPage + 1) * HISTORY_PAGE_SIZE;
-  // ------------------------------------------------
-
-  var startIndex = currentHistoryPage * HISTORY_PAGE_SIZE;
-  // Giới hạn endIndex không vượt quá độ dài dữ liệu thực tế
-  var endIndex = Math.min(startIndex + HISTORY_PAGE_SIZE, allHistoryData.length);
-  
-  var displayData = allHistoryData.slice(startIndex, endIndex);
-
-  // Logic phân trang cũ (Giữ nguyên để đảm bảo nút Prev/Next hoạt động nếu có)
-  var maxPage = Math.ceil(allHistoryData.length / HISTORY_PAGE_SIZE) - 1;
-  var btnPrev = document.getElementById("btn-hist-next");
-  var btnNext = document.getElementById("btn-hist-prev");
-  var label = document.getElementById("hist-pagination-label");
-  
-  if (btnPrev) btnPrev.style.opacity = currentHistoryPage === 0 ? "0.3" : "1";
-  if (btnNext) btnNext.style.opacity = currentHistoryPage >= maxPage ? "0.3" : "1";
-  
-  if (displayData.length > 0 && label) {
-    // Hiển thị range ngày (ví dụ: 01/02 - 07/02)
-    label.innerText =
-      displayData[displayData.length - 1].Date.substring(0, 5) + " - " + displayData[0].Date.substring(0, 5);
-  }
-
-  var html = "";
-
-  function getDayNameVietnamese(dayIndex) {
-    return ["CN", "TH 2", "TH 3", "TH 4", "TH 5", "TH 6", "TH 7"][dayIndex];
-  }
-
-  displayData.forEach(function (day) {
-      const dateParts = day.Date.split("/");
-      const dateObj = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
-      const dayName = getDayNameVietnamese(dateObj.getDay());
-
-      let borderClass = "border-slate-100";
-      let bgClass = "bg-white";
-      let iconHtml = "";
-      let statusHtml = "";
-      let timeHtml = "";
-
-      if (day.Is_Holiday) {
-        bgClass = "bg-purple-50/50";
-        borderClass = "border-purple-100";
-        iconHtml = `<div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-sm"><i class="fa-solid fa-gift"></i></div>`;
-        statusHtml = `<span class="text-xs font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-md">${day.Holiday_Name}</span>`;
-        timeHtml = `<div class="text-[10px] text-purple-400 font-bold flex items-center gap-1"><i class="fa-regular fa-face-smile"></i> Nghỉ lễ</div>`;
-      }
-      else if (day.Is_Leave) {
-        bgClass = "bg-blue-50/50";
-        borderClass = "border-blue-100";
-        iconHtml = `<div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-sm"><i class="fa-solid fa-umbrella-beach"></i></div>`;
-        statusHtml = `<span class="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-md">${day.Leave_Type}</span>`;
-        timeHtml = `<div class="text-[10px] text-blue-400 font-bold flex items-center gap-1"><i class="fa-solid fa-check-circle"></i> Đã duyệt</div>`;
-      }
-      else if (
-        day.Total_Work_Hours > 0 ||
-        (day.Time_List && day.Time_List.length > 0 && day.Time_List[0].in !== "...")
-      ) {
-        const isLate = day.Late_Minutes_Total > 0;
-        const isError = day.Status_List.some((s) => s.includes("Invalid") || s.includes("Quên"));
-
-        if (isError) {
-          borderClass = "border-red-100";
-          iconHtml = `<div class="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i></div>`;
-          statusHtml = `<span class="text-xs font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-md">Lỗi chấm công</span>`;
-        } else if (isLate) {
-          borderClass = "border-orange-100";
-          iconHtml = `<div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center shadow-sm"><i class="fa-solid fa-clock"></i></div>`;
-          statusHtml = `<span class="text-xs font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-md">Trễ ${day.Late_Minutes_Total}p</span>`;
-        } else {
-          borderClass = "border-emerald-100";
-          iconHtml = `<div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm"><i class="fa-solid fa-check"></i></div>`;
-          statusHtml = `<span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Công chuẩn</span>`;
-        }
-
-        if (day.Time_List && day.Time_List.length > 0) {
-          const t = day.Time_List[0];
-          timeHtml = `<div class="flex gap-2 text-[10px] font-bold text-slate-500 mt-1">
-                <span class="bg-slate-100 px-1.5 py-0.5 rounded flex items-center gap-1"><i class="fa-solid fa-arrow-right-to-bracket text-emerald-500"></i> ${t.in}</span>
-                <span class="bg-slate-100 px-1.5 py-0.5 rounded flex items-center gap-1"><i class="fa-solid fa-arrow-right-from-bracket text-amber-500"></i> ${t.out}</span>
-             </div>`;
-        }
-      }
-      else {
-        bgClass = "bg-slate-50";
-        borderClass = "border-dashed border-slate-200";
-        iconHtml = `<div class="w-10 h-10 rounded-xl bg-slate-200 text-slate-400 flex items-center justify-center"><i class="fa-solid fa-minus"></i></div>`;
-        statusHtml = `<span class="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">Vắng / Không chấm</span>`;
-        timeHtml = `<div class="text-[10px] text-slate-400 mt-1 italic">Không có dữ liệu</div>`;
-      }
-
-      html += `
-      <div class="${bgClass} p-3 rounded-[18px] border ${borderClass} mb-3 flex items-start gap-3 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] transition-all animate-slide-up">
-          <div class="shrink-0 mt-0.5">${iconHtml}</div>
-          <div class="flex-1 min-w-0">
-              <div class="flex justify-between items-center mb-1">
-                  <span class="font-bold text-sm text-slate-700">${dayName}, ${day.Date}</span>
-                  ${statusHtml}
-              </div>
-              ${timeHtml}
-          </div>
-      </div>`;
-    });
-
-  // --- Nút Xem thêm (Load More) ---
-  // Sử dụng biến itemsToShow đã khai báo ở đầu hàm để kiểm tra
-  if (itemsToShow < allHistoryData.length) {
-    html += `<div class="text-center mt-4 pb-4"><button onclick="loadMoreHistory()" class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-4 py-2 rounded-full shadow-sm active:scale-95 transition-all hover:text-emerald-600 hover:border-emerald-200">Xem thêm cũ hơn <i class="fa-solid fa-chevron-down ml-1"></i></button></div>`;
-  }
-  
-  container.innerHTML = html;
-};
-
-// --- BỔ SUNG HÀM loadMoreHistory NẾU CHƯA CÓ ---
-// Thêm hàm này vào cuối script.js để nút "Xem thêm cũ hơn" hoạt động
-window.loadMoreHistory = function() {
-    currentHistoryPage++;
-    renderActivityHistory();
-};
-
 // Utils
 function setText(id, t) {
   var e = document.getElementById(id);
@@ -1550,4 +1443,3 @@ function updateClock() {
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
 }
-
