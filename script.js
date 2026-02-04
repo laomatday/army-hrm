@@ -1,17 +1,12 @@
-/**
- * ARMY HRM V2026 - VERCEL CLIENT EDITION
- * File này thay thế toàn bộ logic trong thẻ <script> của js.html
- */
+// ==========================================
+// 0. CẤU HÌNH API (QUAN TRỌNG)
+// ==========================================
+// Bạn cần Deploy Google Apps Script dưới dạng Web App và dán URL vào đây
+const API_URL = "https://script.google.com/macros/s/AKfycbwiFCk0UXESXfe3CszO7i22FK29u2q-GxoW6g8WKxqLez1ghuw2rq81PbP1e2k-6EPpGA/exec"; 
 
 // ==========================================
-// 1. CẤU HÌNH API & BIẾN TOÀN CỤC
+// 1. BIẾN TOÀN CỤC & UTILS
 // ==========================================
-
-// [QUAN TRỌNG] Thay URL này bằng Web App URL bạn nhận được khi Deploy code.js
-// Các bước: Mở code.js -> Deploy -> New Deployment -> Select type: Web App 
-// -> Execute as: Me -> Who has access: Anyone -> Deploy -> Copy URL
-const API_URL = "https://script.google.com/macros/s/AKfycbwJ-e6gzFsCS4BDBuXWWBZVUXvWUnASYf6C9YovQ9OGg-gfH185h_xzSZF3zicmJuecOw/exec";
-
 var currentUser = null;
 var videoStream = null;
 var allHistoryData = [];
@@ -24,8 +19,8 @@ var selectedRequests = [];
 
 // Cấu hình phân trang & thiết bị
 var myDeviceId = getDeviceId();
-var currentHistoryPage = 0; // 0 là trang đầu tiên
-const HISTORY_PAGE_SIZE = 7; // Số lượng hiển thị mỗi lần tải thêm
+var currentHistoryPage = 0; 
+const HISTORY_PAGE_SIZE = 5; 
 
 // Biến tạm cho Form
 var tempAvatarBase64 = null;
@@ -33,7 +28,7 @@ var currentReqType = "Nghỉ phép";
 var currentProfileLocation = "";
 var currentRejectId = null;
 
-// --- HTML SKELETONS ---
+// SKELETON LOADERS
 const SKELETON_CONTACT = `
   <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-3 mb-3 animate-pulse">
       <div class="w-12 h-12 rounded-2xl bg-slate-200"></div>
@@ -44,41 +39,43 @@ const SKELETON_CONTACT = `
       <div class="w-10 h-10 rounded-2xl bg-slate-200"></div>
   </div>`.repeat(5);
 
-// ==========================================
-// 2. API WRAPPER (THAY THẾ GOOGLE.SCRIPT.RUN)
-// ==========================================
+const SKELETON_REQUEST = `
+  <div class="bg-white p-5 rounded-[24px] shadow-sm border border-white mb-4 animate-pulse">
+     <div class="flex justify-between items-start mb-4">
+        <div class="flex gap-4">
+           <div class="w-11 h-11 rounded-2xl bg-slate-200"></div>
+           <div class="space-y-2">
+              <div class="h-4 w-24 bg-slate-200 rounded-full"></div>
+              <div class="h-3 w-16 bg-slate-200 rounded-full"></div>
+           </div>
+        </div>
+        <div class="w-16 h-6 bg-slate-200 rounded-lg"></div>
+     </div>
+     <div class="h-10 w-full bg-slate-200 rounded-2xl"></div>
+  </div>`.repeat(3);
 
-/**
- * Hàm gọi API Google Apps Script từ Vercel
- * @param {string} action - Tên hàm trong switch-case của doPost (code.js)
- * @param {Array} params - Danh sách tham số
- */
-async function callAPI(action, params = []) {
+// --- HÀM GỌI API (THAY THẾ GOOGLE.SCRIPT.RUN) ---
+async function callAPI(action, ...params) {
+  if (!API_URL || API_URL.includes("HÃY_DÁN_URL")) {
+    showToast("error", "Chưa cấu hình API URL!");
+    throw new Error("API URL not configured");
+  }
+
   try {
-    // Sử dụng text/plain để tránh Preflight Request (OPTIONS) gây lỗi CORS
+    // Sử dụng 'text/plain' để tránh CORS Preflight request phức tạp với Google Apps Script
     const response = await fetch(API_URL, {
       method: "POST",
-      redirect: "follow",
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8",
-      },
-      body: JSON.stringify({
-        action: action,
-        params: params
-      }),
+      body: JSON.stringify({ action: action, params: params }),
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
     });
 
     const result = await response.json();
     return result;
   } catch (error) {
     console.error("API Error:", error);
-    return { success: false, message: "Lỗi kết nối Server: " + error.message };
+    throw error;
   }
 }
-
-// ==========================================
-// 3. KHỞI TẠO ỨNG DỤNG
-// ==========================================
 
 function getDeviceId() {
   var devId = localStorage.getItem("army_device_id");
@@ -89,13 +86,15 @@ function getDeviceId() {
   return devId;
 }
 
+// ==========================================
+// 2. KHỞI TẠO APP
+// ==========================================
 document.addEventListener("DOMContentLoaded", function () {
-  // Khôi phục trạng thái badge
   if (typeof restoreBadgeState === "function") {
     restoreBadgeState();
   }
 
-  // Kiểm tra session cũ
+  // 1. Kiểm tra session cũ
   var savedUser = localStorage.getItem("army_user_v2026");
   if (savedUser) {
     try {
@@ -115,14 +114,13 @@ document.addEventListener("DOMContentLoaded", function () {
   if (btnReject) {
     btnReject.onclick = handleConfirmReject;
   }
-
   var inputUser = document.getElementById("login-user");
   var inputPass = document.getElementById("login-pass");
 
   function triggerLoginOnEnter(event) {
     if (event.key === "Enter") {
-      event.preventDefault();
-      handleLogin();
+      event.preventDefault(); 
+      handleLogin(); 
     }
   }
 
@@ -131,34 +129,35 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // ==========================================
-// 4. XỬ LÝ ĐĂNG NHẬP & SESSION
+// 3. XỬ LÝ LOGIC CHÍNH
 // ==========================================
 
-window.handleLogin = async function () {
+window.handleLogin = function () {
   var emailEl = document.getElementById("login-user");
   var passEl = document.getElementById("login-pass");
   if (!emailEl || !passEl) return;
-  
   if (!emailEl.value || !passEl.value) {
     showToast("error", "Vui lòng nhập đầy đủ thông tin!");
     return;
   }
-
   showLoading(true);
   
-  // Gọi API thay vì google.script.run
-  const res = await callAPI("doLogin", [emailEl.value.trim(), passEl.value.trim(), myDeviceId]);
-  
-  showLoading(false);
-
-  if (res.success) {
-    currentUser = res.data;
-    localStorage.setItem("army_user_v2026", JSON.stringify(currentUser));
-    showToast("success", "Xin chào, " + getShortNameClient(currentUser.Name));
-    routeUserFlow();
-  } else {
-    showDialog("error", "Đăng nhập thất bại", res.message);
-  }
+  callAPI("doLogin", emailEl.value.trim(), passEl.value.trim(), myDeviceId)
+    .then(function (res) {
+      showLoading(false);
+      if (res.success) {
+        currentUser = res.data;
+        localStorage.setItem("army_user_v2026", JSON.stringify(currentUser));
+        showToast("success", "Xin chào, " + getShortNameClient(currentUser.Name));
+        routeUserFlow();
+      } else {
+        showDialog("error", "Đăng nhập thất bại", res.message);
+      }
+    })
+    .catch(function (err) {
+      showLoading(false);
+      showToast("error", "Lỗi kết nối: " + err);
+    });
 };
 
 window.logout = function () {
@@ -188,10 +187,6 @@ function routeUserFlow() {
   showMainApp();
 }
 
-// ==========================================
-// 5. LOGIC LOAD DATA (SUPER API)
-// ==========================================
-
 function showMainApp() {
   document.getElementById("view-main").classList.remove("hidden");
   toggleGlobalNav(true);
@@ -199,10 +194,8 @@ function showMainApp() {
   switchTab("home");
   toggleHomeState("loading");
 
-  // Gọi lần đầu
   loadDashboardData();
 
-  // Polling dữ liệu mỗi 30s
   if (refreshInterval) clearInterval(refreshInterval);
   refreshInterval = setInterval(function () {
     console.log("Đang tự động cập nhật dữ liệu...");
@@ -210,77 +203,83 @@ function showMainApp() {
   }, 30000);
 }
 
-async function loadDashboardData() {
+// LOAD TOÀN BỘ DỮ LIỆU
+function loadDashboardData() {
   if (!currentUser) return;
 
-  const res = await callAPI("getDashboardData", [currentUser.Employee_ID]);
+  callAPI("getDashboardData", currentUser.Employee_ID)
+    .then(function (res) {
+      if (res.success) {
+        const d = res.data;
 
-  if (res.success) {
-    const d = res.data;
+        if (d.userProfile) {
+          currentUser = { ...currentUser, ...d.userProfile };
+          localStorage.setItem("army_user_v2026", JSON.stringify(currentUser));
+          renderUserInfo();
+        }
 
-    // 1. UPDATE PROFILE
-    if (d.userProfile) {
-      currentUser = { ...currentUser, ...d.userProfile };
-      localStorage.setItem("army_user_v2026", JSON.stringify(currentUser));
-      renderUserInfo();
-    }
+        if (d.history) {
+          const now = new Date();
+          const curM = now.getMonth() + 1;
+          const curY = now.getFullYear();
 
-    // 2. HISTORY & STATS
-    if (d.history) {
-      viewHistoryDate = new Date(); // Reset về ngày hiện tại
-      const m = viewHistoryDate.getMonth() + 1;
-      const y = viewHistoryDate.getFullYear();
-      
-      const badge = document.getElementById("hist-month-badge");
-      if (badge) badge.innerText = "Tháng " + m + "/" + y;
+          const homeBadge = document.getElementById("current-month-badge");
+          if (homeBadge) homeBadge.innerText = curM + "/" + curY;
 
-      allHistoryData = d.history.history || [];
-      renderHistoryStats(d.history.summary);
-      
-      currentHistoryPage = 0;
-      renderActivityHistory();
-    }
+          const isViewingCurrentMonth =
+              viewHistoryDate.getMonth() === now.getMonth() &&
+              viewHistoryDate.getFullYear() === now.getFullYear();
 
-    // 3. NOTIFICATIONS
-    if (d.notifications) {
-      cachedNotifications = d.notifications;
-      renderNotificationsBadge(d.notifications);
-      
-      if (!document.getElementById("modal-notifications").classList.contains("hidden")) {
-        var title = document.getElementById("modal-noti-title").innerText;
-        var mode = title === "Duyệt đơn từ" ? "approve" : "all";
-        renderNotificationContent(cachedNotifications, mode);
+          if (isViewingCurrentMonth) {
+              const histBadge = document.getElementById("hist-month-badge");
+              if (histBadge) histBadge.innerText = "Tháng " + curM + "/" + curY;
+
+              allHistoryData = d.history.history || [];
+              renderHistoryStats(d.history.summary);
+
+              if (currentHistoryPage === 0) {
+                  renderActivityHistory();
+              }
+          }
+        }
+
+        if (d.notifications) {
+          cachedNotifications = d.notifications; 
+          renderNotificationsBadge(d.notifications); 
+
+          if (!document.getElementById("modal-notifications").classList.contains("hidden")) {
+            var title = document.getElementById("modal-noti-title").innerText;
+            var mode = title === "Duyệt đơn từ" ? "approve" : "all";
+            renderNotificationContent(cachedNotifications, mode);
+          }
+        }
+
+        if (d.myRequests) {
+          renderMyRequestsList(d.myRequests);
+        }
+
+        cachedLocations = d.locations || [];
+
+        if (d.contacts) {
+          cachedContacts = d.contacts;
+          renderContactList(cachedContacts);
+        }
+
+        updateCurrentStatusUI();
+        
+      } else {
+        showToast("error", "Lỗi dữ liệu: " + res.message);
       }
-    }
-
-    // 4. MY REQUESTS
-    if (d.myRequests) {
-      renderMyRequestsList(d.myRequests);
-    }
-
-    // 5. LOCATIONS & CONTACTS
-    cachedLocations = d.locations || [];
-    if (d.contacts) {
-      cachedContacts = d.contacts;
-      renderContactList(cachedContacts);
-    }
-
-    // 6. CHECK-IN STATE
-    updateCurrentStatusUI();
-    
-    // Tắt loading nếu đang ở state loading
-    if (document.getElementById("state-loading").classList.contains("opacity-100")) {
-         updateCurrentStatusUI();
-    }
-
-  } else {
-    showToast("error", "Lỗi dữ liệu: " + res.message);
-    toggleHomeState("idle"); 
-  }
+    })
+    .catch(function (err) {
+      // Khi dùng fetch, nếu user reload trang nhanh có thể gây lỗi abort, không cần alert
+      console.log(err);
+      toggleHomeState("idle"); 
+    });
 }
 
 // ==========================================
-// 6. UI RENDER FUNCTIONS
+// 4. UI RENDER FUNCTIONS
 // ==========================================
 
 function renderHistoryStats(s) {
@@ -289,7 +288,7 @@ function renderHistoryStats(s) {
   setText("hist-late-mins", s.lateMins);
   setText("hist-errors", s.errorCount);
 
-  const std = s.standardDays || 26;
+  const std = s.standardDays || 26; 
   setText("home-stat-days", s.workDays);
   setText("home-stat-label", "Công chuẩn: " + std);
 
@@ -334,34 +333,6 @@ function renderNotificationsBadge(notiData) {
   } else {
     if (notiDot) notiDot.classList.add("hidden");
     if (profileDot) profileDot.classList.add("hidden");
-  }
-}
-
-function getReadList() {
-  var s = localStorage.getItem("army_read_ids");
-  return s ? JSON.parse(s) : [];
-}
-
-function checkIsUnread(reqId, status) {
-  if (status === "Pending") return false;
-  var readList = getReadList();
-  return !readList.includes(reqId);
-}
-
-function markNotificationsAsRead(data) {
-  var readList = getReadList();
-  var hasChange = false;
-  if (data.myRequests) {
-    data.myRequests.forEach(function (r) {
-      if (r.Status !== "Pending" && !readList.includes(r.Request_ID)) {
-        readList.push(r.Request_ID);
-        hasChange = true;
-      }
-    });
-  }
-  if (hasChange) {
-    localStorage.setItem("army_read_ids", JSON.stringify(readList));
-    renderNotificationsBadge(data);
   }
 }
 
@@ -422,7 +393,7 @@ function renderMyRequestsList(requests) {
 }
 
 function updateCurrentStatusUI() {
-  var vnDate = new Date().toLocaleDateString("en-GB");
+  var vnDate = new Date().toLocaleDateString("en-GB"); 
   var isCurrentlyCheckedIn = false;
 
   if (allHistoryData.length > 0) {
@@ -434,8 +405,153 @@ function updateCurrentStatusUI() {
   toggleHomeState(isCurrentlyCheckedIn ? "working" : "idle");
 }
 
+window.changeHistoryPage = function (direction) {
+  if (!allHistoryData || allHistoryData.length === 0) return;
+
+  var maxPage = Math.ceil(allHistoryData.length / HISTORY_PAGE_SIZE) - 1;
+  var newPage = currentHistoryPage - direction;
+
+  if (newPage < 0) newPage = 0;
+  if (newPage > maxPage) newPage = maxPage;
+
+  if (newPage !== currentHistoryPage) {
+    currentHistoryPage = newPage;
+    renderActivityHistory();
+  }
+};
+
+function getShortNameClient(fullName) {
+  if (!fullName) return "...";
+  var parts = fullName.trim().split(" ");
+  return parts.length > 0 ? parts[parts.length - 1] : fullName;
+}
+
+function getAvatarHtml(name, url, sizeClass = "w-12 h-12", textSize = "text-sm") {
+  if (url && url.length > 5 && !url.includes("ui-avatars.com")) {
+    return `<img src="${url}" class="${sizeClass} rounded-2xl object-cover border border-slate-100 shadow-sm bg-slate-200">`;
+  }
+  var initials = "--";
+  if (name) {
+    var parts = name.trim().split(" ");
+    initials = parts.length === 1 ? parts[0].substring(0, 2) : parts[0].charAt(0) + parts[parts.length - 1].charAt(0);
+    initials = initials.toUpperCase();
+  }
+  return `<div class="${sizeClass} rounded-2xl bg-slate-100 text-slate-600 border border-slate-200 shadow-sm flex items-center justify-center font-black ${textSize}">${initials}</div>`;
+}
+
+function toggleGlobalNav(show) {
+  var nav = document.getElementById("global-nav");
+  if (!nav) return;
+  if (show) nav.classList.remove("hidden");
+  else nav.classList.add("hidden");
+}
+
+function renderUserInfo() {
+  if (!currentUser) return;
+
+  setText("user-name", getShortNameClient(currentUser.Name));
+  setText("p-id", currentUser.Employee_ID);
+  setText("p-email", currentUser.Email);
+  setText("p-phone", currentUser.Phone || "Chưa có số điện thoại");
+  setText("p-dept", currentUser.Department || "Chưa phân bổ Nhân sự");
+  setText("leave-balance", currentUser.Annual_Leave_Balance !== undefined ? currentUser.Annual_Leave_Balance : 12);
+
+  ["req-user-name", "profile-user-name", "contact-user-name"].forEach((id) => setText(id, currentUser.Name));
+
+  const displayTitle = currentUser.Position || "Staff";
+  const displayLocation = currentUser.Location_Name || "Chưa có nơi làm việc";
+
+  ["user", "req", "profile", "contact"].forEach((prefix) => {
+    setText(prefix + "-position-badge", displayTitle);
+    setText(prefix + "-location-badge", displayLocation);
+  });
+
+  const adminRoles = ["Admin", "Manager", "HR"];
+  const btnApproval = document.getElementById("btn-profile-approval");
+  if (btnApproval) {
+    btnApproval.classList.toggle("hidden", adminRoles.indexOf(currentUser.Role) === -1);
+  }
+
+  const avatarUrl =
+    currentUser.Avatar && currentUser.Avatar.startsWith("http")
+      ? currentUser.Avatar
+      : "https://ui-avatars.com/api/?name=" + encodeURIComponent(currentUser.Name) + "&background=059669&color=fff";
+
+  document
+    .querySelectorAll("#user-avatar, #profile-user-avatar, #req-user-avatar, #contact-user-avatar")
+    .forEach((img) => {
+      img.src = avatarUrl;
+      img.style.objectFit = "cover";
+    });
+}
+
+window.switchTab = function (tabName) {
+  ["modal-notifications", "modal-request", "modal-profile", "modal-contact-detail", "view-approvals"].forEach(
+    (id) => {
+      var el = document.getElementById(id);
+      if (el) el.classList.add("hidden");
+    }
+  );
+
+  toggleGlobalNav(true);
+
+  ["home", "requests", "contacts", "profile"].forEach((t) => {
+    document.getElementById("tab-" + t).classList.add("hidden");
+  });
+
+  var target = document.getElementById("tab-" + tabName);
+  if (target) target.classList.remove("hidden");
+
+  var navItems = document.querySelectorAll(".nav-item");
+  var idxMap = { home: 0, requests: 1, contacts: 2, profile: 3 };
+
+  navItems.forEach((item, index) => {
+    var isActive = index === idxMap[tabName];
+    item.classList.toggle("active", isActive);
+
+    var icon = item.querySelector("i");
+    if (icon) {
+      icon.className = isActive
+        ? icon.className.replace("text-slate-400", "text-emerald-600")
+        : icon.className.replace("text-emerald-600", "text-slate-400");
+    }
+
+    var ind = item.querySelector(".indicator");
+    if (ind) ind.classList.toggle("opacity-0", !isActive);
+  });
+
+  if (tabName === "contacts" && (!cachedContacts || cachedContacts.length === 0)) {
+    loadContacts();
+  }
+  else if (tabName === "requests") {
+    switchActivityMode("history");
+  }
+};
+
+function toggleHomeState(state) {
+  var loadingEl = document.getElementById("state-loading");
+  var idleEl = document.getElementById("state-idle");
+  var workEl = document.getElementById("state-working");
+  if (!loadingEl || !idleEl || !workEl) return;
+
+  const hide = (el) => {
+    el.classList.remove("opacity-100", "scale-100", "z-30", "z-20", "z-10");
+    el.classList.add("opacity-0", "scale-90", "pointer-events-none");
+  };
+  const show = (el, zIndex) => {
+    el.classList.remove("opacity-0", "scale-90", "pointer-events-none");
+    el.classList.add("opacity-100", "scale-100", zIndex);
+  };
+
+  [loadingEl, idleEl, workEl].forEach(hide);
+
+  if (state === "loading") show(loadingEl, "z-30");
+  else if (state === "working") show(workEl, "z-20");
+  else show(idleEl, "z-20");
+}
+
 // ==========================================
-// 7. CAMERA & CHECK-IN
+// 5. CAMERA & CHECK-IN
 // ==========================================
 
 window.triggerCheckIn = function () {
@@ -469,24 +585,27 @@ window.takePicture = function () {
   showLoading(true);
 
   navigator.geolocation.getCurrentPosition(
-    async function (p) {
-      const payload = {
-        employeeId: currentUser.Employee_ID,
-        lat: p.coords.latitude,
-        lng: p.coords.longitude,
-        deviceId: myDeviceId,
-        imageBase64: b64,
-      };
-
-      const res = await callAPI("doCheckIn", [payload]);
-      
-      showLoading(false);
-      if (res.success) {
-        showToast("success", res.message);
-        loadDashboardData();
-      } else {
-        showDialog("error", "Thất bại", res.message);
-      }
+    function (p) {
+      callAPI("doCheckIn", {
+          employeeId: currentUser.Employee_ID,
+          lat: p.coords.latitude,
+          lng: p.coords.longitude,
+          deviceId: myDeviceId,
+          imageBase64: b64,
+        })
+        .then(function (r) {
+          showLoading(false);
+          if (r.success) {
+            showToast("success", r.message);
+            loadDashboardData(); 
+          } else {
+            showDialog("error", "Thất bại", r.message);
+          }
+        })
+        .catch(function(err){
+           showLoading(false);
+           showToast("error", "Lỗi: " + err);
+        });
     },
     function () {
       showLoading(false);
@@ -497,21 +616,26 @@ window.takePicture = function () {
 };
 
 window.triggerCheckOut = function () {
-  showDialog("confirm", "Check-out", "Bạn muốn kết thúc ca làm việc?", async function () {
+  showDialog("confirm", "Check-out", "Bạn muốn kết thúc ca làm việc?", function () {
     showLoading(true);
-    const res = await callAPI("doCheckOut", [{ employeeId: currentUser.Employee_ID }]);
-    
-    showLoading(false);
-    showToast(res.success ? "success" : "error", res.message);
-    if (res.success) loadDashboardData();
+    callAPI("doCheckOut", { employeeId: currentUser.Employee_ID })
+      .then(function (r) {
+        showLoading(false);
+        showToast(r.success ? "success" : "error", r.message);
+        if (r.success) loadDashboardData(); 
+      })
+      .catch(function(err) {
+         showLoading(false);
+         showToast("error", "Lỗi: " + err);
+      });
   });
 };
 
 // ==========================================
-// 8. THÔNG BÁO & DUYỆT ĐƠN
+// 6. THÔNG BÁO & DUYỆT ĐƠN (MOBILE)
 // ==========================================
 
-window.openNotifications = async function (mode) {
+window.openNotifications = function (mode) {
   var modal = document.getElementById("modal-notifications");
   var content = document.getElementById("noti-content-area");
   var titleEl = document.getElementById("modal-noti-title");
@@ -526,145 +650,234 @@ window.openNotifications = async function (mode) {
           <p class="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Đang tải thông báo...</p>
       </div>`;
 
-  const res = await callAPI("getMobileNotifications", [currentUser.Employee_ID]);
-
-  if (res.success) {
-    cachedNotifications = res.data;
-    renderNotificationContent(res.data, mode);
-    markNotificationsAsRead(res.data);
-  } else {
-    content.innerHTML = `<p class="text-center py-10 text-xs text-red-400 font-bold">${res.message}</p>`;
-  }
+  callAPI("getMobileNotifications", currentUser.Employee_ID)
+    .then(function (res) {
+      if (res.success) {
+        cachedNotifications = res.data;
+        renderNotificationContent(res.data, mode);
+        markNotificationsAsRead(res.data);
+      } else {
+        content.innerHTML = `<p class="text-center py-10 text-xs text-red-400 font-bold">${res.message}</p>`;
+      }
+    })
+    .catch(function (err) {
+      content.innerHTML = `<p class="text-center py-10 text-xs text-red-400 font-bold">Lỗi kết nối Server!</p>`;
+    });
 };
 
-window.processRequestMobile = async function (reqId, status, rejectReason) {
+function getReadList() {
+  var s = localStorage.getItem("army_read_ids");
+  return s ? JSON.parse(s) : [];
+}
+
+function checkIsUnread(reqId, status) {
+  if (status === "Pending") return false; 
+  var readList = getReadList();
+  return !readList.includes(reqId);
+}
+
+function markNotificationsAsRead(data) {
+  var readList = getReadList();
+  var hasChange = false;
+
+  if (data.myRequests) {
+    data.myRequests.forEach(function (r) {
+      if (r.Status !== "Pending" && !readList.includes(r.Request_ID)) {
+        readList.push(r.Request_ID);
+        hasChange = true;
+      }
+    });
+  }
+
+  if (hasChange) {
+    localStorage.setItem("army_read_ids", JSON.stringify(readList));
+    renderNotificationsBadge(data); 
+  }
+}
+
+function renderNotificationContent(data, mode) {
+  var content = document.getElementById("noti-content-area");
+  var hasApp = data.approvals && data.approvals.length > 0;
+  var hasMy = data.myRequests && data.myRequests.length > 0;
+
+  var batchBar = document.getElementById("batch-action-bar");
+  if (batchBar) batchBar.classList.add("translate-y-full", "opacity-0");
+
+  if (!hasApp && !hasMy)
+    return (content.innerHTML = `<div class="text-center py-24 opacity-60"><p>Không có thông báo</p></div>`);
+
+  var html = "";
+
+  // --- PHẦN DUYỆT ĐƠN ---
+  if (hasApp) {
+    html += `
+      <div class="mb-6">
+          <h3 class="text-xs font-bold text-slate-400 uppercase mb-3 px-1 flex items-center gap-2">
+              <i class="fa-solid fa-layer-group"></i> Cần duyệt (${data.approvals.length})
+          </h3>
+          <div class="mb-4 flex justify-end">
+               <button onclick="toggleSelectAll(${data.approvals.length})" class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100">Chọn tất cả</button>
+          </div>
+          <div class="space-y-4">`;
+
+    data.approvals.forEach((req) => {
+      html += `
+          <div class="bg-white p-5 rounded-[24px] shadow-sm border border-slate-50 relative overflow-hidden group">
+              <div class="flex justify-between items-start mb-3">
+                 <div class="flex items-start gap-3">
+                     <input type="checkbox" id="chk-req-${req.Request_ID}" onchange="toggleSelectRequest('${req.Request_ID}')" class="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 mt-1">
+                     <div>
+                        <h4 class="font-bold text-slate-800 text-sm leading-tight">${req.Name}</h4>
+                        <p class="text-[11px] font-bold text-slate-500 mt-1 flex items-center gap-1.5">
+                           <span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">${req.Position || "NV"}</span>
+                           <span class="text-slate-300">•</span>
+                           <span>${req.Location_Name || ""}</span>
+                        </p>
+                     </div>
+                 </div>
+                 <span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-purple-50 text-purple-600 border border-purple-100 uppercase tracking-wide">${req.Type}</span>
+              </div>
+              
+              <div class="bg-slate-50/80 rounded-2xl p-3 mb-4 border border-slate-100 ml-8">
+                   <div class="flex items-center gap-2 text-xs font-bold text-slate-700 mb-1">
+                      <i class="fa-regular fa-calendar text-emerald-500"></i> ${req.Dates}
+                   </div>
+                   <p class="text-xs text-slate-500 italic pl-6 border-l-2 border-slate-200">"${req.Reason}"</p>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3 ml-8">
+                  <button onclick="openRejectModal('${req.Request_ID}')" class="py-2.5 rounded-xl bg-white border border-red-100 text-red-500 text-xs font-bold active:scale-95 transition-all shadow-sm">Từ chối</button>
+                  <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" class="py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold active:scale-95 transition-all shadow-md">Duyệt đơn</button>
+              </div>
+          </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // --- PHẦN ĐƠN CỦA TÔI ---
+  if (mode !== "approve" && hasMy) {
+    html += `<div><h3 class="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2"><i class="fa-regular fa-bell"></i> Đơn của tôi</h3><div class="space-y-3">`;
+    data.myRequests.forEach((req) => {
+      var st = req.Status;
+      var col =
+        st === "Approved"
+          ? "text-emerald-500 bg-emerald-50"
+          : st === "Rejected"
+            ? "text-red-500 bg-red-50"
+            : "text-orange-500 bg-orange-50";
+
+      html += `
+           <div class="bg-white p-4 rounded-[20px] border border-slate-100 flex items-center gap-4 shadow-sm relative overflow-hidden">
+              <div class="w-10 h-10 rounded-2xl ${col} flex items-center justify-center text-lg shadow-sm shrink-0"><i class="fa-solid ${st === "Approved" ? "fa-check" : st === "Rejected" ? "fa-xmark" : "fa-hourglass"}"></i></div>
+              <div class="flex-1 min-w-0">
+                  <div class="flex justify-between items-center mb-0.5">
+                      <span class="font-bold text-sm text-slate-800">${req.Type}</span>
+                      <span class="text-[9px] font-extrabold ${col} px-2 py-0.5 rounded border border-current opacity-80">${st}</span>
+                  </div>
+                  <p class="text-[10px] text-slate-400 font-bold">${req.Dates}</p>
+                  ${req.Note ? `<p class="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded mt-1.5 italic line-clamp-1"><i class="fa-solid fa-reply mr-1"></i>${req.Note}</p>` : ""}
+              </div>
+           </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  content.innerHTML = html;
+}
+
+window.closeNotifications = function () {
+  var modal = document.getElementById("modal-notifications");
+  if (modal) modal.classList.add("hidden");
+};
+
+// --- Logic Từ chối ---
+window.openRejectModal = function (reqId) {
+  currentRejectId = reqId;
+  document.getElementById("input-reject-reason").value = "";
+  document.getElementById("modal-reject-reason").classList.remove("hidden");
+};
+
+window.closeRejectModal = function () {
+  currentRejectId = null;
+  document.getElementById("modal-reject-reason").classList.add("hidden");
+};
+
+function handleConfirmReject() {
+  var reason = document.getElementById("input-reject-reason").value.trim();
+  if (!reason) {
+    showToast("error", "Vui lòng nhập lý do từ chối!");
+    return;
+  }
+
+  if (currentRejectId) {
+    var idToProcess = currentRejectId;
+    closeRejectModal();
+    processRequestMobile(idToProcess, "Rejected", reason);
+  }
+}
+
+window.processRequestMobile = function (reqId, status, rejectReason) {
   showLoading(true);
   var note = status === "Approved" ? "Đã duyệt" : rejectReason || "";
 
-  const res = await callAPI("processRequestAdmin", [reqId, status, note, currentUser.Name]);
+  callAPI("processRequestAdmin", reqId, status, note, currentUser.Name)
+    .then(function (res) {
+      showLoading(false);
+      showToast(res.success ? "success" : "error", res.message);
+      if (res.success) {
+        loadDashboardData();
+        closeNotifications();
+      }
+    })
+    .catch(function(err){
+       showLoading(false);
+       showToast("error", "Lỗi: " + err);
+    });
+};
 
-  showLoading(false);
-  showToast(res.success ? "success" : "error", res.message);
-  if (res.success) {
-    loadDashboardData();
-    closeNotifications();
+// ==========================================
+// 7. TẠO ĐỀ XUẤT & PROFILE
+// ==========================================
+
+window.openRequestModal = function (type, targetDate) {
+  var modal = document.getElementById("modal-request");
+  if (!modal) return;
+  toggleGlobalNav(false);
+  document.getElementById("req-reason").value = "";
+  document.getElementById("req-date-start").value = "";
+  document.getElementById("req-date-end").value = "";
+
+  type = type || "Nghỉ phép";
+  selectReqType(type);
+
+  if (type === "Giải trình" && targetDate) {
+    var dateVal = convertDateToISO(targetDate);
+    if (dateVal) {
+      document.getElementById("req-date-start").value = dateVal;
+      document.getElementById("req-date-end").value = dateVal;
+    }
+  } else {
+    var today = new Date().toISOString().split("T")[0];
+    document.getElementById("req-date-start").value = today;
+    document.getElementById("req-date-end").value = today;
   }
+  modal.classList.remove("hidden");
 };
 
-window.submitBatchAction = function (status) {
-  const idsToSend = [...selectedRequests];
-  if (idsToSend.length === 0) return;
-
-  const actionName = status === "Approved" ? "Duyệt" : "Từ chối";
-  showDialog("confirm", "Xác nhận", `Bạn muốn ${actionName} ${idsToSend.length} đơn đã chọn?`, async () => {
-    showLoading(true);
-    document.getElementById("batch-action-bar").classList.add("translate-y-full");
-    closeNotifications();
-    
-    // Ở backend code.js chưa có hàm 'processBatchRequests', nên ta lặp để gọi
-    // Hoặc nếu bạn đã bổ sung backend thì dùng callAPI 1 lần.
-    // Ở đây tôi dùng Promise.all để an toàn với backend hiện tại.
-    const promises = idsToSend.map(rid => 
-        callAPI("processRequestAdmin", [rid, status, actionName + " (Batch)", currentUser.Name])
-    );
-    
-    await Promise.all(promises);
-
-    showLoading(false);
-    showToast("success", "Đã xử lý xong!");
-    selectedRequests = [];
-    loadDashboardData();
-  });
+window.closeRequestModal = function () {
+  document.getElementById("modal-request").classList.add("hidden");
+  toggleGlobalNav(true);
 };
-
-function renderNotificationContent(data, mode) {
-    var content = document.getElementById("noti-content-area");
-    var hasApp = data.approvals && data.approvals.length > 0;
-    var hasMy = data.myRequests && data.myRequests.length > 0;
-    var batchBar = document.getElementById("batch-action-bar");
-    if (batchBar) batchBar.classList.add("translate-y-full", "opacity-0");
-
-    if (!hasApp && !hasMy)
-      return (content.innerHTML = `<div class="text-center py-24 opacity-60"><p>Không có thông báo</p></div>`);
-
-    var html = "";
-
-    if (hasApp) {
-      html += `
-        <div class="mb-6">
-            <h3 class="text-xs font-bold text-slate-400 uppercase mb-3 px-1 flex items-center gap-2">
-                <i class="fa-solid fa-layer-group"></i> Cần duyệt (${data.approvals.length})
-                <button onclick="toggleSelectAll(${data.approvals.length})" class="ml-auto text-[10px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">Chọn tất cả</button>
-            </h3>
-            <div class="space-y-4">`;
-
-      data.approvals.forEach((req) => {
-        const isSelected = selectedRequests.includes(req.Request_ID);
-        html += `
-            <div class="bg-white p-5 rounded-[24px] shadow-sm border ${isSelected ? 'border-emerald-500 ring-1 ring-emerald-500' : 'border-slate-50'} relative overflow-hidden transition-all">
-                 <div class="absolute top-4 right-4 z-20">
-                    <input type="checkbox" id="chk-req-${req.Request_ID}" 
-                        ${isSelected ? 'checked' : ''}
-                        onchange="toggleSelectRequest('${req.Request_ID}')"
-                        class="w-5 h-5 rounded-md border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer">
-                 </div>
-                <div class="flex justify-between items-start mb-3 pr-8">
-                   <div>
-                      <h4 class="font-bold text-slate-800 text-sm leading-tight">${req.Name}</h4>
-                      <p class="text-[11px] font-bold text-slate-500 mt-1 flex items-center gap-1.5">
-                         <span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">${req.Position || "NV"}</span>
-                         <span class="text-slate-300">•</span>
-                         <span>${req.Location_Name || ""}</span>
-                      </p>
-                   </div>
-                   <span class="px-2 py-1 rounded-lg text-[10px] font-bold bg-purple-50 text-purple-600 border border-purple-100 uppercase tracking-wide">${req.Type}</span>
-                </div>
-                
-                <div class="bg-slate-50/80 rounded-2xl p-3 mb-4 border border-slate-100">
-                     <div class="flex items-center gap-2 text-xs font-bold text-slate-700 mb-1">
-                        <i class="fa-regular fa-calendar text-emerald-500"></i> ${req.Dates}
-                     </div>
-                     <p class="text-xs text-slate-500 italic pl-6 border-l-2 border-slate-200">"${req.Reason}"</p>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="openRejectModal('${req.Request_ID}')" class="py-2.5 rounded-xl bg-white border border-red-100 text-red-500 text-xs font-bold active:scale-95 transition-all shadow-sm">Từ chối</button>
-                    <button onclick="processRequestMobile('${req.Request_ID}', 'Approved')" class="py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold active:scale-95 transition-all shadow-md">Duyệt đơn</button>
-                </div>
-            </div>`;
-      });
-      html += `</div></div>`;
-    }
-
-    if (mode !== "approve" && hasMy) {
-      html += `<div><h3 class="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2"><i class="fa-regular fa-bell"></i> Đơn của tôi</h3><div class="space-y-3">`;
-      data.myRequests.forEach((req) => {
-        var st = req.Status;
-        var col = st === "Approved" ? "text-emerald-500 bg-emerald-50" : st === "Rejected" ? "text-red-500 bg-red-50" : "text-orange-500 bg-orange-50";
-
-        html += `
-             <div class="bg-white p-4 rounded-[20px] border border-slate-100 flex items-center gap-4 shadow-sm relative overflow-hidden">
-                <div class="w-10 h-10 rounded-2xl ${col} flex items-center justify-center text-lg shadow-sm shrink-0"><i class="fa-solid ${st === "Approved" ? "fa-check" : st === "Rejected" ? "fa-xmark" : "fa-hourglass"}"></i></div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex justify-between items-center mb-0.5">
-                        <span class="font-bold text-sm text-slate-800">${req.Type}</span>
-                        <span class="text-[9px] font-extrabold ${col} px-2 py-0.5 rounded border border-current opacity-80">${st}</span>
-                    </div>
-                    <p class="text-[10px] text-slate-400 font-bold">${req.Dates}</p>
-                    ${req.Note ? `<p class="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded mt-1.5 italic line-clamp-1"><i class="fa-solid fa-reply mr-1"></i>${req.Note}</p>` : ""}
-                </div>
-             </div>`;
-      });
-      html += `</div></div>`;
-    }
-    content.innerHTML = html;
-}
-
-// ==========================================
-// 9. TẠO ĐỀ XUẤT & PROFILE
-// ==========================================
-
-window.submitRequest = async function () {
+window.toVNDate = function (d) {
+  if (!d) return "";
+  if (d.includes("/") && d.split("/")[0].length == 2) return d;
+  if (d.includes("-")) {
+    var p = d.split("-");
+    return p[2] + "/" + p[1] + "/" + p[0];
+  }
+  return d;
+};
+window.submitRequest = function () {
   var valFrom = document.getElementById("req-date-start").value;
   var valTo = document.getElementById("req-date-end").value;
   var finalFrom = toVNDate(valFrom);
@@ -686,13 +899,62 @@ window.submitRequest = async function () {
   };
 
   showLoading(true);
-  const r = await callAPI("submitRequest", [payload]);
-  showLoading(false);
-  showToast(r.success ? "success" : "error", r.message);
-  if (r.success) {
-    closeRequestModal();
-    loadDashboardData();
+  callAPI("submitRequest", payload)
+    .then(function (r) {
+      showLoading(false);
+      showToast(r.success ? "success" : "error", r.message);
+      if (r.success) {
+        closeRequestModal();
+        loadDashboardData(); 
+      }
+    })
+    .catch(function(err){
+       showLoading(false);
+       showToast("error", "Lỗi: " + err);
+    });
+};
+
+// -- Profile --
+window.openProfileModal = function () {
+  var modal = document.getElementById("modal-profile");
+  modal.classList.remove("hidden");
+  toggleGlobalNav(false);
+
+  if (currentUser) {
+    var avaUrl = currentUser.Avatar;
+    if (avaUrl && avaUrl.length > 5 && !avaUrl.includes("ui-avatars.com")) {
+      document.getElementById("edit-avatar-preview").src = avaUrl;
+    } else {
+      document.getElementById("edit-avatar-preview").src =
+        "https://ui-avatars.com/api/?name=" + encodeURIComponent(currentUser.Name) + "&background=059669&color=fff";
+    }
+
+    var phoneInput = document.getElementById("edit-phone");
+    var emailInput = document.getElementById("edit-email");
+    var deptInput = document.getElementById("edit-dept");
+    var locationInput = document.getElementById("profile-location-display");
+
+    if (phoneInput) phoneInput.value = currentUser.Phone || "";
+    if (emailInput) emailInput.value = currentUser.Email || "";
+    if (deptInput) deptInput.value = currentUser.Department || "";
+
+    if (locationInput) {
+      var userCenterId = currentUser.Center_ID || "";
+      var userCenterName = "Chưa cập nhật";
+      if (cachedLocations.length > 0) {
+        var foundCenter = cachedLocations.find((l) => l.id == userCenterId);
+        if (foundCenter) userCenterName = foundCenter.name;
+      }
+      locationInput.value = userCenterName;
+    }
   }
+
+  tempAvatarBase64 = null;
+};
+
+window.closeProfileModal = function () {
+  document.getElementById("modal-profile").classList.add("hidden");
+  toggleGlobalNav(true);
 };
 
 window.submitProfileUpdate = async function () {
@@ -712,424 +974,24 @@ window.submitProfileUpdate = async function () {
   if (currentProfileLocation) {
     p.centerId = currentProfileLocation;
   }
-  
   showLoading(true);
-  const res = await callAPI("updateEmployeeProfile", [p]);
-  showLoading(false);
-  if (res.success) {
-    showToast("success", "Cập nhật hồ sơ thành công!");
-    closeProfileModal();
-    loadDashboardData();
-  } else {
-    showDialog("error", "Lỗi cập nhật", res.message);
-  }
-};
-
-// ==========================================
-// 10. HISTORY & LOAD MORE
-// ==========================================
-
-window.changeHistoryMonth = function (delta) {
-  viewHistoryDate.setMonth(viewHistoryDate.getMonth() + delta);
-  loadHistoryOnly();
-};
-
-async function loadHistoryOnly() {
-  const m = viewHistoryDate.getMonth() + 1;
-  const y = viewHistoryDate.getFullYear();
-
-  const badge = document.getElementById("hist-month-badge");
-  if (badge) badge.innerText = "Tháng " + m + "/" + y;
-
-  const list = document.getElementById("activity-history-list");
-  if (list)
-    list.innerHTML = `<div class="flex flex-col items-center justify-center py-10 opacity-50 space-y-3"><div class="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-emerald-500"></div></div>`;
-
-  const res = await callAPI("getHistory", [currentUser.Employee_ID, m, y]);
-
-  if (res.summary) renderHistoryStats(res.summary);
-
-  if (res.history) {
-    allHistoryData = res.history;
-    currentHistoryPage = 0;
-    renderActivityHistory();
-  } else {
-    allHistoryData = [];
-    renderActivityHistory();
-  }
-}
-
-window.loadMoreHistory = function() {
-    currentHistoryPage++;
-    renderActivityHistory();
-};
-
-// [FIXED] Render Activity History với ItemsToShow
-window.renderActivityHistory = function () {
-  var container = document.getElementById("activity-history-list");
-  if (!container) return;
-
-  if (!allHistoryData || allHistoryData.length === 0) {
-    container.innerHTML =
-      '<div class="text-center py-10 opacity-50"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500"></i><p class="text-xs mt-2 text-slate-400">Không có dữ liệu</p></div>';
-    return;
-  }
-
-  // --- FIX LỖI itemsToShow ---
-  // Dùng logic "Load More": Hiển thị từ 0 đến (Page+1)*Size
-  const itemsToShow = (currentHistoryPage + 1) * HISTORY_PAGE_SIZE;
-  const displayData = allHistoryData.slice(0, itemsToShow);
-
-  var html = "";
-
-  function getDayNameVietnamese(dayIndex) {
-    return ["CN", "TH 2", "TH 3", "TH 4", "TH 5", "TH 6", "TH 7"][dayIndex];
-  }
-
-  displayData.forEach(function (day) {
-      const dateParts = day.Date.split("/");
-      const dateObj = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
-      const dayName = getDayNameVietnamese(dateObj.getDay());
-
-      let borderClass = "border-slate-100";
-      let bgClass = "bg-white";
-      let iconHtml = "";
-      let statusHtml = "";
-      let timeHtml = "";
-
-      if (day.Is_Holiday) {
-        bgClass = "bg-purple-50/50";
-        borderClass = "border-purple-100";
-        iconHtml = `<div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-sm"><i class="fa-solid fa-gift"></i></div>`;
-        statusHtml = `<span class="text-xs font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-md">${day.Holiday_Name}</span>`;
-        timeHtml = `<div class="text-[10px] text-purple-400 font-bold flex items-center gap-1"><i class="fa-regular fa-face-smile"></i> Nghỉ lễ</div>`;
-      }
-      else if (day.Is_Leave) {
-        bgClass = "bg-blue-50/50";
-        borderClass = "border-blue-100";
-        iconHtml = `<div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-sm"><i class="fa-solid fa-umbrella-beach"></i></div>`;
-        statusHtml = `<span class="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-md">${day.Leave_Type}</span>`;
-        timeHtml = `<div class="text-[10px] text-blue-400 font-bold flex items-center gap-1"><i class="fa-solid fa-check-circle"></i> Đã duyệt</div>`;
-      }
-      else if (day.Total_Work_Hours > 0 || (day.Time_List && day.Time_List.length > 0 && day.Time_List[0].in !== "...")) {
-        const isLate = day.Late_Minutes_Total > 0;
-        const isError = day.Status_List.some((s) => s.includes("Invalid") || s.includes("Quên"));
-
-        if (isError) {
-          borderClass = "border-red-100";
-          iconHtml = `<div class="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i></div>`;
-          statusHtml = `<span class="text-xs font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-md">Lỗi chấm công</span>`;
-        } else if (isLate) {
-          borderClass = "border-orange-100";
-          iconHtml = `<div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center shadow-sm"><i class="fa-solid fa-clock"></i></div>`;
-          statusHtml = `<span class="text-xs font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-md">Trễ ${day.Late_Minutes_Total}p</span>`;
-        } else {
-          borderClass = "border-emerald-100";
-          iconHtml = `<div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm"><i class="fa-solid fa-check"></i></div>`;
-          statusHtml = `<span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Công chuẩn</span>`;
-        }
-        if (day.Time_List && day.Time_List.length > 0) {
-          const t = day.Time_List[0];
-          timeHtml = `<div class="flex gap-2 text-[10px] font-bold text-slate-500 mt-1"><span class="bg-slate-100 px-1.5 py-0.5 rounded flex items-center gap-1"><i class="fa-solid fa-arrow-right-to-bracket text-emerald-500"></i> ${t.in}</span><span class="bg-slate-100 px-1.5 py-0.5 rounded flex items-center gap-1"><i class="fa-solid fa-arrow-right-from-bracket text-amber-500"></i> ${t.out}</span></div>`;
-        }
-      } else {
-        bgClass = "bg-slate-50";
-        borderClass = "border-dashed border-slate-200";
-        iconHtml = `<div class="w-10 h-10 rounded-xl bg-slate-200 text-slate-400 flex items-center justify-center"><i class="fa-solid fa-minus"></i></div>`;
-        statusHtml = `<span class="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">Vắng / Không chấm</span>`;
-        timeHtml = `<div class="text-[10px] text-slate-400 mt-1 italic">Không có dữ liệu</div>`;
-      }
-
-      html += `
-      <div class="${bgClass} p-3 rounded-[18px] border ${borderClass} mb-3 flex items-start gap-3 shadow-[0_2px_8px_-4px_rgba(0,0,0,0.05)] transition-all animate-slide-up">
-          <div class="shrink-0 mt-0.5">${iconHtml}</div>
-          <div class="flex-1 min-w-0">
-              <div class="flex justify-between items-center mb-1">
-                  <span class="font-bold text-sm text-slate-700">${dayName}, ${day.Date}</span>
-                  ${statusHtml}
-              </div>
-              ${timeHtml}
-          </div>
-      </div>`;
-    });
-
-  // Nút xem thêm
-  if (itemsToShow < allHistoryData.length) {
-    html += `<div class="text-center mt-4 pb-4"><button onclick="loadMoreHistory()" class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-4 py-2 rounded-full shadow-sm active:scale-95 transition-all hover:text-emerald-600 hover:border-emerald-200">Xem thêm cũ hơn <i class="fa-solid fa-chevron-down ml-1"></i></button></div>`;
-  }
   
-  container.innerHTML = html;
-};
-
-// ==========================================
-// 11. CÁC HÀM UI HELPERS KHÁC (GIỮ NGUYÊN)
-// ==========================================
-
-function getShortNameClient(fullName) {
-  if (!fullName) return "...";
-  var parts = fullName.trim().split(" ");
-  return parts.length > 0 ? parts[parts.length - 1] : fullName;
-}
-
-function getAvatarHtml(name, url, sizeClass = "w-12 h-12", textSize = "text-sm") {
-  if (url && url.length > 5 && !url.includes("ui-avatars.com")) {
-    return `<img src="${url}" class="${sizeClass} rounded-2xl object-cover border border-slate-100 shadow-sm bg-slate-200">`;
-  }
-  var initials = "--";
-  if (name) {
-    var parts = name.trim().split(" ");
-    initials = parts.length === 1 ? parts[0].substring(0, 2) : parts[0].charAt(0) + parts[parts.length - 1].charAt(0);
-    initials = initials.toUpperCase();
-  }
-  return `<div class="${sizeClass} rounded-2xl bg-slate-100 text-slate-600 border border-slate-200 shadow-sm flex items-center justify-center font-black ${textSize}">${initials}</div>`;
-}
-
-function toggleGlobalNav(show) {
-  var nav = document.getElementById("global-nav");
-  if (!nav) return;
-  if (show) nav.classList.remove("hidden");
-  else nav.classList.add("hidden");
-}
-
-function renderUserInfo() {
-  if (!currentUser) return;
-  setText("user-name", getShortNameClient(currentUser.Name));
-  setText("p-id", currentUser.Employee_ID);
-  setText("p-email", currentUser.Email);
-  setText("p-phone", currentUser.Phone || "Chưa có số điện thoại");
-  setText("p-dept", currentUser.Department || "Chưa phân bổ Nhân sự");
-  setText("leave-balance", currentUser.Annual_Leave_Balance !== undefined ? currentUser.Annual_Leave_Balance : 12);
-  ["req-user-name", "profile-user-name", "contact-user-name"].forEach((id) => setText(id, currentUser.Name));
-  const displayTitle = currentUser.Position || "Staff";
-  const displayLocation = currentUser.Location_Name || "Chưa có nơi làm việc";
-  ["user", "req", "profile", "contact"].forEach((prefix) => {
-    setText(prefix + "-position-badge", displayTitle);
-    setText(prefix + "-location-badge", displayLocation);
-  });
-  const adminRoles = ["Admin", "Manager", "HR"];
-  const btnApproval = document.getElementById("btn-profile-approval");
-  if (btnApproval) {
-    btnApproval.classList.toggle("hidden", adminRoles.indexOf(currentUser.Role) === -1);
-  }
-  const avatarUrl =
-    currentUser.Avatar && currentUser.Avatar.startsWith("http")
-      ? currentUser.Avatar
-      : "https://ui-avatars.com/api/?name=" + encodeURIComponent(currentUser.Name) + "&background=059669&color=fff";
-  document.querySelectorAll("#user-avatar, #profile-user-avatar, #req-user-avatar, #contact-user-avatar").forEach((img) => {
-    img.src = avatarUrl;
-    img.style.objectFit = "cover";
-  });
-}
-
-window.switchTab = function (tabName) {
-  ["modal-notifications", "modal-request", "modal-profile", "modal-contact-detail", "view-approvals"].forEach((id) => {
-    var el = document.getElementById(id);
-    if (el) el.classList.add("hidden");
-  });
-  toggleGlobalNav(true);
-  ["home", "requests", "contacts", "profile"].forEach((t) => {
-    document.getElementById("tab-" + t).classList.add("hidden");
-  });
-  var target = document.getElementById("tab-" + tabName);
-  if (target) target.classList.remove("hidden");
-  var navItems = document.querySelectorAll(".nav-item");
-  var idxMap = { home: 0, requests: 1, contacts: 2, profile: 3 };
-  navItems.forEach((item, index) => {
-    var isActive = index === idxMap[tabName];
-    item.classList.toggle("active", isActive);
-    var icon = item.querySelector("i");
-    if (icon) {
-      icon.className = isActive
-        ? icon.className.replace("text-slate-400", "text-emerald-600")
-        : icon.className.replace("text-emerald-600", "text-slate-400");
-    }
-    var ind = item.querySelector(".indicator");
-    if (ind) ind.classList.toggle("opacity-0", !isActive);
-  });
-  if (tabName === "contacts" && (!cachedContacts || cachedContacts.length === 0)) {
-    loadContacts();
-  } else if (tabName === "requests") {
-    switchActivityMode("history");
-  }
-};
-
-function toggleHomeState(state) {
-  var loadingEl = document.getElementById("state-loading");
-  var idleEl = document.getElementById("state-idle");
-  var workEl = document.getElementById("state-working");
-  if (!loadingEl || !idleEl || !workEl) return;
-  const hide = (el) => {
-    el.classList.remove("opacity-100", "scale-100", "z-30", "z-20", "z-10");
-    el.classList.add("opacity-0", "scale-90", "pointer-events-none");
-  };
-  const show = (el, zIndex) => {
-    el.classList.remove("opacity-0", "scale-90", "pointer-events-none");
-    el.classList.add("opacity-100", "scale-100", zIndex);
-  };
-  [loadingEl, idleEl, workEl].forEach(hide);
-  if (state === "loading") show(loadingEl, "z-30");
-  else if (state === "working") show(workEl, "z-20");
-  else show(idleEl, "z-20");
-}
-
-window.toggleSelectRequest = function (reqId) {
-  const index = selectedRequests.indexOf(reqId);
-  if (index > -1) {
-    selectedRequests.splice(index, 1);
-  } else {
-    selectedRequests.push(reqId);
-  }
-  updateBatchActions();
-};
-
-window.toggleSelectAll = function (totalCount) {
-  if (!cachedNotifications || !cachedNotifications.approvals) return;
-  const allIds = cachedNotifications.approvals.map((r) => r.Request_ID);
-  const checkboxes = document.querySelectorAll('input[type="checkbox"][id^="chk-req-"]');
-  if (selectedRequests.length < allIds.length) {
-    selectedRequests = [...allIds];
-    checkboxes.forEach((cb) => (cb.checked = true));
-  } else {
-    selectedRequests = [];
-    checkboxes.forEach((cb) => (cb.checked = false));
-  }
-  updateBatchActions();
-};
-
-function updateBatchActions() {
-  const bar = document.getElementById("batch-action-bar");
-  const countSpan = document.getElementById("batch-count");
-  if (!bar) {
-    createBatchActionBar();
-    return updateBatchActions();
-  }
-  if (selectedRequests.length > 0) {
-    bar.classList.remove("translate-y-full", "opacity-0");
-    countSpan.innerText = selectedRequests.length;
-  } else {
-    bar.classList.add("translate-y-full", "opacity-0");
-  }
-}
-
-function createBatchActionBar() {
-  const div = document.createElement("div");
-  div.id = "batch-action-bar";
-  div.className =
-    "fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-slate-800 text-white p-4 rounded-2xl shadow-2xl z-[300] flex items-center justify-between transition-all duration-300 transform translate-y-full opacity-0";
-  div.innerHTML = `
-        <div class="font-bold text-sm">Đã chọn <span id="batch-count" class="text-emerald-400">0</span> đơn</div>
-        <div class="flex gap-3">
-            <button onclick="submitBatchAction('Rejected')" class="px-4 py-2 bg-red-500/20 text-red-400 font-bold text-xs rounded-xl border border-red-500/50">Từ chối</button>
-            <button onclick="submitBatchAction('Approved')" class="px-4 py-2 bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/30">Duyệt ngay</button>
-        </div>
-    `;
-  document.body.appendChild(div);
-}
-
-window.closeNotifications = function () {
-  var modal = document.getElementById("modal-notifications");
-  if (modal) modal.classList.add("hidden");
-};
-
-window.openRejectModal = function (reqId) {
-  currentRejectId = reqId;
-  document.getElementById("input-reject-reason").value = "";
-  document.getElementById("modal-reject-reason").classList.remove("hidden");
-};
-
-window.closeRejectModal = function () {
-  currentRejectId = null;
-  document.getElementById("modal-reject-reason").classList.add("hidden");
-};
-
-function handleConfirmReject() {
-  var reason = document.getElementById("input-reject-reason").value.trim();
-  if (!reason) {
-    showToast("error", "Vui lòng nhập lý do từ chối!");
-    return;
-  }
-  if (currentRejectId) {
-    var idToProcess = currentRejectId;
-    closeRejectModal();
-    processRequestMobile(idToProcess, "Rejected", reason);
-  }
-}
-
-window.openRequestModal = function (type, targetDate) {
-  var modal = document.getElementById("modal-request");
-  if (!modal) return;
-  toggleGlobalNav(false);
-  document.getElementById("req-reason").value = "";
-  document.getElementById("req-date-start").value = "";
-  document.getElementById("req-date-end").value = "";
-  type = type || "Nghỉ phép";
-  selectReqType(type);
-  if (type === "Giải trình" && targetDate) {
-    var dateVal = convertDateToISO(targetDate);
-    if (dateVal) {
-      document.getElementById("req-date-start").value = dateVal;
-      document.getElementById("req-date-end").value = dateVal;
-    }
-  } else {
-    var today = new Date().toISOString().split("T")[0];
-    document.getElementById("req-date-start").value = today;
-    document.getElementById("req-date-end").value = today;
-  }
-  modal.classList.remove("hidden");
-};
-
-window.closeRequestModal = function () {
-  document.getElementById("modal-request").classList.add("hidden");
-  toggleGlobalNav(true);
-};
-
-window.toVNDate = function (d) {
-  if (!d) return "";
-  if (d.includes("/") && d.split("/")[0].length == 2) return d;
-  if (d.includes("-")) {
-    var p = d.split("-");
-    return p[2] + "/" + p[1] + "/" + p[0];
-  }
-  return d;
-};
-
-window.openProfileModal = function () {
-  var modal = document.getElementById("modal-profile");
-  modal.classList.remove("hidden");
-  toggleGlobalNav(false);
-  if (currentUser) {
-    var avaUrl = currentUser.Avatar;
-    if (avaUrl && avaUrl.length > 5 && !avaUrl.includes("ui-avatars.com")) {
-      document.getElementById("edit-avatar-preview").src = avaUrl;
-    } else {
-      document.getElementById("edit-avatar-preview").src =
-        "https://ui-avatars.com/api/?name=" + encodeURIComponent(currentUser.Name) + "&background=059669&color=fff";
-    }
-    var phoneInput = document.getElementById("edit-phone");
-    var emailInput = document.getElementById("edit-email");
-    var deptInput = document.getElementById("edit-dept");
-    var locationInput = document.getElementById("profile-location-display");
-    if (phoneInput) phoneInput.value = currentUser.Phone || "";
-    if (emailInput) emailInput.value = currentUser.Email || "";
-    if (deptInput) deptInput.value = currentUser.Department || "";
-    if (locationInput) {
-      var userCenterId = currentUser.Center_ID || "";
-      var userCenterName = "Chưa cập nhật";
-      if (cachedLocations.length > 0) {
-        var foundCenter = cachedLocations.find((l) => l.id == userCenterId);
-        if (foundCenter) userCenterName = foundCenter.name;
+  callAPI("updateEmployeeProfile", p)
+    .then(function (res) {
+      showLoading(false);
+      if (res.success) {
+        showToast("success", "Cập nhật hồ sơ thành công!");
+        closeProfileModal();
+        loadDashboardData();
+      } else {
+        showDialog("error", "Lỗi cập nhật", res.message);
       }
-      locationInput.value = userCenterName;
-    }
-  }
-  tempAvatarBase64 = null;
+    })
+    .catch(function (err) {
+      showLoading(false);
+      showToast("error", "Lỗi kết nối: " + err);
+    });
 };
-
-window.closeProfileModal = function () {
-  document.getElementById("modal-profile").classList.add("hidden");
-  toggleGlobalNav(true);
-};
-
 window.previewAvatarInModal = function (input) {
   if (input.files && input.files[0]) {
     var reader = new FileReader();
@@ -1141,6 +1003,7 @@ window.previewAvatarInModal = function (input) {
   }
 };
 
+// --- LOCATION DROPDOWN ---
 function loadLocations() {
   loadDashboardData();
 }
@@ -1150,11 +1013,13 @@ window.toggleLocationDropdown = function () {
   var arrow = document.getElementById("profile-location-arrow");
   var container = document.getElementById("profile-location-container");
   var isOpening = menu.classList.contains("hidden");
+
   menu.classList.toggle("hidden");
   container.classList.toggle("ring-2", isOpening);
   container.classList.toggle("ring-emerald-100", isOpening);
   container.classList.toggle("bg-white", isOpening);
   if (arrow) arrow.style.transform = isOpening ? "rotate(180deg)" : "rotate(0deg)";
+
   if (isOpening) {
     if (!cachedLocations || cachedLocations.length === 0) loadLocations();
     else renderLocationList();
@@ -1170,6 +1035,7 @@ function renderLocationList() {
     var textClass = isSelected ? "text-emerald-600" : "text-slate-700";
     var checkClass = isSelected ? "opacity-100" : "opacity-0";
     var bgClass = isSelected ? "bg-emerald-50/50" : "hover:bg-slate-50";
+
     html += `
         <div onclick="selectProfileLocation('${loc.id}', '${loc.name}')" class="px-4 py-3.5 rounded-xl text-sm font-bold flex justify-between items-center cursor-pointer transition-all mb-1 ${bgClass}">
             <span class="${textClass}">${loc.name}</span>
@@ -1190,16 +1056,22 @@ window.selectProfileLocation = function (id, name) {
   if (menu && !menu.classList.contains("hidden")) toggleLocationDropdown();
 };
 
+// ==========================================
+// 8. CÁC LOGIC KHÁC (REQUESTS, CONTACTS...)
+// ==========================================
+
 window.toggleReqDropdown = function () {
   const menu = document.getElementById("req-type-menu");
   const arrow = document.getElementById("req-type-arrow");
   const container = document.getElementById("req-type-container");
   const isOpening = menu.classList.contains("hidden");
+
   menu.classList.toggle("hidden");
   container.classList.toggle("ring-2", isOpening);
   container.classList.toggle("ring-emerald-100", isOpening);
   container.classList.toggle("bg-white", isOpening);
   if (arrow) arrow.style.transform = isOpening ? "rotate(180deg)" : "rotate(0deg)";
+
   if (isOpening) renderReqTypeItems();
 };
 
@@ -1234,6 +1106,7 @@ function convertDateToISO(dateStr) {
   return "";
 }
 
+// --- CONTACTS ---
 function loadContacts() {
   var list = document.getElementById("contacts-list");
   if (!list) return;
@@ -1257,6 +1130,7 @@ function renderContactList(data) {
     var phoneBtn = e.Phone
       ? `<a href="tel:${e.Phone}" class="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 active:scale-90 transition-all"><i class="fa-solid fa-phone"></i></a>`
       : "";
+
     html += `
       <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-3 active:scale-[0.98] transition-transform cursor-pointer mb-3" onclick="openContactByIndex(${i})">
           <div class="relative flex-none">${avatarHtml}</div>
@@ -1285,6 +1159,7 @@ window.openContactByIndex = function (index) {
   setText("contact-detail-email", data.Email);
   setText("contact-detail-phone", data.Phone || "N/A");
   setText("contact-detail-dept", data.Department);
+
   var callRow = document.getElementById("contact-detail-call");
   if (callRow) {
     if (data.Phone) {
@@ -1317,19 +1192,23 @@ window.closeContactSearch = function () {
 window.filterContactsPopup = function () {
   var keyword = document.getElementById("popup-search-input").value.toLowerCase().trim();
   var list = document.getElementById("popup-search-results");
+
   if (keyword === "") {
     list.innerHTML =
       '<div class="flex flex-col items-center justify-center h-40 opacity-50"><i class="fa-solid fa-magnifying-glass text-4xl text-slate-200 mb-2"></i><p class="text-xs font-bold text-slate-400">Nhập từ khóa để tìm kiếm</p></div>';
     return;
   }
+
   var filtered = cachedContacts.filter(
     (e) => (e.Name || "").toLowerCase().includes(keyword) || (e.Phone || "").includes(keyword)
   );
+
   if (filtered.length === 0) {
     list.innerHTML =
       '<div class="text-center text-slate-400 py-10 text-xs font-medium">Không tìm thấy kết quả phù hợp.</div>';
     return;
   }
+
   var html = "";
   filtered.forEach(function (e) {
     var originalIndex = cachedContacts.findIndex((c) => c.Employee_ID === e.Employee_ID);
@@ -1337,6 +1216,7 @@ window.filterContactsPopup = function () {
     var centerTag = e.Center_Name
       ? `<span class="px-2 py-0.5 rounded-md text-[9px] font-bold bg-emerald-50 text-emerald-700">${e.Center_Name}</span>`
       : "";
+
     html += `
       <div class="bg-slate-50 hover:bg-emerald-50/50 p-3 rounded-2xl border border-transparent hover:border-emerald-100 flex items-center gap-3 active:scale-[0.98] transition-all cursor-pointer mb-1" onclick="openContactByIndex(${originalIndex})">
         <div class="relative flex-none">${avatarHtml}</div>
@@ -1357,8 +1237,10 @@ window.switchActivityMode = function (mode) {
   var btnHist = document.getElementById("btn-tab-history");
   var viewReq = document.getElementById("view-act-requests");
   var viewHist = document.getElementById("view-act-history");
+
   var activeClass = "bg-emerald-600 text-white shadow-md";
   var inactiveClass = "text-slate-500 hover:text-slate-800 bg-transparent shadow-none";
+
   if (mode === "requests") {
     btnReq.className = "px-4 py-1.5 rounded-full text-[10px] font-bold transition-all " + activeClass;
     btnHist.className = "px-3 py-1.5 rounded-full text-[10px] font-bold transition-all " + inactiveClass;
@@ -1383,7 +1265,202 @@ window.openExplainModal = function (dateStr, errorContext) {
   }
 };
 
-// Utils
+// ==========================================
+// 9. RENDER LỊCH SỬ (PILL STYLE)
+// ==========================================
+window.renderActivityHistory = function () {
+  var container = document.getElementById("activity-history-list");
+  if (!container) return;
+
+  if (!allHistoryData || allHistoryData.length === 0) {
+      container.innerHTML =
+          '<div class="text-center py-10 opacity-50"><i class="fa-solid fa-circle-notch fa-spin text-emerald-500"></i><p class="text-xs mt-2 text-slate-400">Chưa có dữ liệu</p></div>';
+      return;
+  }
+
+  var startIndex = currentHistoryPage * HISTORY_PAGE_SIZE;
+  var endIndex = startIndex + HISTORY_PAGE_SIZE;
+  var displayData = allHistoryData.slice(startIndex, endIndex);
+
+  var maxPage = Math.ceil(allHistoryData.length / HISTORY_PAGE_SIZE) - 1;
+  var btnPrev = document.getElementById("btn-hist-next"); 
+  var btnNext = document.getElementById("btn-hist-prev");
+  var label = document.getElementById("hist-pagination-label");
+
+  if (btnPrev) btnPrev.style.opacity = currentHistoryPage === 0 ? "0.3" : "1";
+  if (btnNext) btnNext.style.opacity = currentHistoryPage >= maxPage ? "0.3" : "1";
+  if (displayData.length > 0 && label) {
+      label.innerText =
+          displayData[displayData.length - 1].Date.substring(0, 5) + " - " + displayData[0].Date.substring(0, 5);
+  }
+
+  var html = "";
+  
+  displayData.forEach(function (item) {
+      var dateParts = (item.Date || "").split("/");
+      var recordDate = new Date(parseInt(dateParts[2]), parseInt(dateParts[1]) - 1, parseInt(dateParts[0]));
+      var dayName = ["CN", "TH 2", "TH 3", "TH 4", "TH 5", "TH 6", "TH 7"][recordDate.getDay()];
+      
+      var timeDetailsHtml =
+          item.Time_List && item.Time_List.length > 0
+              ? item.Time_List.map(
+                  (t) =>
+                      `<div class="inline-flex items-center gap-1.5 bg-slate-50 px-2 py-0.5 rounded border border-slate-100 mr-1 mt-1">
+                          <span class="text-[10px] font-bold text-slate-600">${t.in}</span>
+                          <i class="fa-solid fa-arrow-right text-[8px] text-slate-300"></i>
+                          <span class="text-[10px] font-bold text-slate-600">${t.out}</span>
+                      </div>`
+              ).join("")
+              : `<div class="text-[10px] text-slate-400 italic mt-1">Chưa có dữ liệu</div>`;
+
+      var rightStatus = "";
+      var hasExplained = item.Has_Explained === true; 
+
+      if (item.Is_Holiday) {
+          rightStatus = `
+              <div class="flex flex-col items-center justify-center w-14">
+                  <div class="w-9 h-9 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100 mb-1">
+                      <i class="fa-solid fa-gift"></i>
+                  </div>
+                  <span class="text-[9px] font-bold text-purple-500">Lễ</span>
+              </div>`;
+      }
+      else if (item.Is_Leave) {
+          rightStatus = `
+              <div class="flex flex-col items-center justify-center w-14">
+                  <div class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 mb-1">
+                      <i class="fa-solid fa-umbrella-beach"></i>
+                  </div>
+                  <span class="text-[9px] font-bold text-blue-500">Phép</span>
+              </div>`;
+      }
+      else if (item.Total_Work_Hours > 0 || item.Is_Made_Up) {
+          
+          if (item.Is_Late_Penalty) {
+              if (hasExplained) {
+                   rightStatus = `
+                      <div class="flex flex-col items-end gap-1">
+                          <span class="text-[9px] font-bold text-white bg-red-500 px-2 py-0.5 rounded shadow-sm">Trễ ${item.Late_Minutes_Total}p</span>
+                          <div class="h-7 px-3 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-bold flex items-center gap-1">
+                              <i class="fa-solid fa-check"></i> Đã giải trình
+                          </div>
+                      </div>`;
+              } else {
+                  rightStatus = `
+                      <div class="flex flex-col items-end gap-1">
+                          <span class="text-[9px] font-bold text-white bg-red-500 px-2 py-0.5 rounded shadow-sm">Trễ ${item.Late_Minutes_Total}p</span>
+                          <button onclick="openExplainModal('${item.Date}', 'Đi trễ quá giới hạn')" class="h-7 px-3 rounded-full bg-white border border-red-200 text-red-600 text-[10px] font-bold shadow-sm flex items-center gap-1 active:scale-95 transition-all animate-pulse">
+                              <i class="fa-solid fa-pen"></i> Giải trình
+                          </button>
+                      </div>`;
+              }
+          }
+          else if (item.Is_Late_Allowed) {
+              if (item.Is_Made_Up) {
+                  rightStatus = `
+                      <div class="flex flex-col items-center justify-center w-14">
+                          <div class="w-9 h-9 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center border border-emerald-100 relative mb-1">
+                              <i class="fa-solid fa-check"></i>
+                              <div class="absolute -top-1 -right-1 bg-emerald-600 text-white text-[8px] px-1 rounded-full shadow-sm">Bù</div>
+                          </div>
+                          <span class="text-[9px] font-bold text-emerald-600">Đủ công</span>
+                      </div>`;
+              } else {
+                  rightStatus = `
+                      <div class="flex flex-col items-center justify-center w-14">
+                          <div class="w-9 h-9 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center border border-orange-100 mb-1">
+                              <i class="fa-solid fa-clock-rotate-left"></i>
+                          </div>
+                          <span class="text-[9px] font-bold text-orange-600">Thiếu bù</span>
+                      </div>`;
+              }
+          }
+          else if (item.Day_Point >= 1) {
+              rightStatus = `
+                  <div class="flex flex-col items-center justify-center w-14">
+                      <div class="w-9 h-9 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center border border-emerald-100 shadow-sm mb-1">
+                          <i class="fa-solid fa-check"></i>
+                      </div>
+                      <span class="text-[9px] font-bold text-emerald-600">1.0 Công</span>
+                  </div>`;
+          } 
+
+          else if (item.Day_Point >= 0.5) {
+              if (hasExplained) {
+                  rightStatus = `
+                      <div class="flex flex-col items-end gap-1">
+                          <span class="text-[9px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded shadow-sm">Nửa công</span>
+                          <div class="h-6 px-2 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[9px] font-bold flex items-center gap-1">
+                              <i class="fa-solid fa-check"></i> Đã giải trình
+                          </div>
+                      </div>`;
+              } else {
+                  rightStatus = `
+                      <div class="flex flex-col items-end gap-1">
+                          <span class="text-[9px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded shadow-sm border border-orange-100">Nửa công</span>
+                          <button onclick="openExplainModal('${item.Date}', 'Đi công tác/Đối tác')" class="h-7 px-3 rounded-full bg-white border border-blue-200 text-blue-600 text-[10px] font-bold shadow-sm flex items-center gap-1 active:scale-95 transition-all animate-pulse">
+                              <i class="fa-solid fa-pen"></i> Giải trình
+                          </button>
+                      </div>`;
+              }
+          }
+          else {
+              if (hasExplained) {
+                  rightStatus = `
+                      <div class="flex flex-col items-center justify-center w-14">
+                          <div class="w-9 h-9 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center border border-blue-100 mb-1">
+                              <i class="fa-solid fa-file-signature"></i>
+                          </div>
+                          <span class="text-[9px] font-bold text-blue-600">Đã giải trình</span>
+                      </div>`;
+              } else {
+                  rightStatus = `
+                      <div class="flex flex-col items-end gap-1">
+                          <span class="text-[9px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">Thiếu giờ</span>
+                          <button onclick="openExplainModal('${item.Date}', 'Thiếu giờ làm')" class="h-7 px-3 rounded-full bg-white border border-orange-200 text-orange-600 text-[10px] font-bold shadow-sm flex items-center gap-1 active:scale-95 transition-all">
+                              <i class="fa-solid fa-pen"></i> Giải trình
+                          </button>
+                      </div>`;
+              }
+          }
+      }
+      else {
+          rightStatus = `<div class="w-9 h-9 rounded-full bg-slate-50 text-slate-300 flex items-center justify-center border border-slate-100"><i class="fa-solid fa-minus"></i></div>`;
+      }
+
+      html += `
+      <div class="bg-white p-4 rounded-[24px] shadow-sm border border-slate-100 mb-3 flex items-center justify-between animate-slide-up transition-all">
+          <div class="flex items-start gap-4">
+              <div class="flex flex-col items-center justify-center w-10 shrink-0 mt-1">
+                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">${dayName}</span>
+                  <span class="text-xl font-black text-slate-800 leading-none mt-1">${dateParts[0]}</span>
+              </div>
+              
+              <div class="w-px h-10 bg-slate-100 self-center"></div>
+              
+              <div class="min-w-0">
+                  <div class="flex items-center gap-2 mb-1">
+                      <div class="w-2 h-2 rounded-full ${item.Total_Work_Hours > 0 ? 'bg-emerald-500' : 'bg-slate-300'}"></div>
+                      <span class="text-sm font-bold text-slate-700">
+                           ${item.Total_Work_Hours > 0 ? item.Total_Work_Hours.toFixed(2) + " giờ" : "Không chấm"}
+                      </span>
+                  </div>
+                  <div class="flex flex-wrap items-center">${timeDetailsHtml}</div>
+              </div>
+          </div>
+
+          <div class="shrink-0 ml-2 pl-2 border-l border-slate-50">
+              ${rightStatus}
+          </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+};
+
+// ==========================================
+// 10. UTILS
+// ==========================================
 function setText(id, t) {
   var e = document.getElementById(id);
   if (e) e.innerText = t;
@@ -1399,13 +1476,17 @@ window.showToast = function (type, m) {
   var x = document.getElementById("toast");
   document.getElementById("toast-msg").innerText = m;
   var iconBox = x.querySelector("div");
+
   iconBox.className =
     "w-8 h-8 rounded-full flex items-center justify-center shadow-sm " +
     (type === "error" ? "bg-red-100 text-red-600" : "bg-emerald-100 text-emerald-600");
+
   x.classList.remove("hidden");
   void x.offsetWidth;
+
   x.style.opacity = "1";
   x.style.transform = "translate(-50%, 0)";
+
   setTimeout(function () {
     x.style.opacity = "0";
     x.style.transform = "translate(-50%, -20px)";
@@ -1419,13 +1500,17 @@ window.showDialog = function (t, tl, m, cb) {
   var d = document.getElementById("custom-dialog");
   document.getElementById("dialog-title").innerText = tl;
   document.getElementById("dialog-msg").innerText = m;
+
   var icon = document.getElementById("dialog-icon");
   if (t === "error") icon.className = "fa-solid fa-circle-exclamation text-4xl text-red-500";
   else icon.className = "fa-solid fa-circle-check text-4xl text-emerald-600";
+
   d.classList.remove("hidden");
+
   var oldBtn = document.getElementById("btn-dialog-ok");
   var newBtn = oldBtn.cloneNode(true);
   oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+
   newBtn.onclick = function () {
     d.classList.add("hidden");
     if (cb) cb();
@@ -1440,6 +1525,132 @@ function updateClock() {
   var timeStr = d.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", hour12: false });
   var days = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
   var dateStr = days[d.getDay()] + ", Ngày " + d.getDate() + "/" + (d.getMonth() + 1);
+
   setText("clock-display", timeStr);
   setText("date-display", dateStr);
+}
+
+// --- LOGIC BATCH ACTION ---
+window.toggleSelectRequest = function (reqId) {
+  const index = selectedRequests.indexOf(reqId);
+  if (index > -1) {
+    selectedRequests.splice(index, 1);
+  } else {
+    selectedRequests.push(reqId);
+  }
+  updateBatchActions();
+};
+
+window.toggleSelectAll = function (totalCount) {
+  if (!cachedNotifications || !cachedNotifications.approvals) return;
+
+  const allIds = cachedNotifications.approvals.map((r) => r.Request_ID);
+  const checkboxes = document.querySelectorAll('input[type="checkbox"][id^="chk-req-"]');
+
+  if (selectedRequests.length < allIds.length) {
+    selectedRequests = [...allIds];
+    checkboxes.forEach((cb) => (cb.checked = true));
+  } else {
+    selectedRequests = [];
+    checkboxes.forEach((cb) => (cb.checked = false));
+  }
+  updateBatchActions();
+};
+
+function updateBatchActions() {
+  const bar = document.getElementById("batch-action-bar");
+  const countSpan = document.getElementById("batch-count");
+
+  if (!bar) {
+    createBatchActionBar();
+    return updateBatchActions(); 
+  }
+
+  if (selectedRequests.length > 0) {
+    bar.classList.remove("translate-y-full", "opacity-0");
+    countSpan.innerText = selectedRequests.length;
+  } else {
+    bar.classList.add("translate-y-full", "opacity-0");
+  }
+}
+
+function createBatchActionBar() {
+  const div = document.createElement("div");
+  div.id = "batch-action-bar";
+  div.className =
+    "fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-slate-800 text-white p-4 rounded-2xl shadow-2xl z-[300] flex items-center justify-between transition-all duration-300 transform translate-y-full opacity-0";
+  div.innerHTML = `
+        <div class="font-bold text-sm">Đã chọn <span id="batch-count" class="text-emerald-400">0</span> đơn</div>
+        <div class="flex gap-3">
+            <button onclick="submitBatchAction('Rejected')" class="px-4 py-2 bg-red-500/20 text-red-400 font-bold text-xs rounded-xl border border-red-500/50">Từ chối</button>
+            <button onclick="submitBatchAction('Approved')" class="px-4 py-2 bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/30">Duyệt ngay</button>
+        </div>
+    `;
+  document.body.appendChild(div);
+}
+
+window.submitBatchAction = function (status) {
+  const idsToSend = [...selectedRequests]; 
+  if (idsToSend.length === 0) return;
+
+  const actionName = status === "Approved" ? "Duyệt" : "Từ chối";
+  showDialog("confirm", "Xác nhận", `Bạn muốn ${actionName} ${idsToSend.length} đơn đã chọn?`, () => {
+    showLoading(true);
+    document.getElementById("batch-action-bar").classList.add("translate-y-full");
+    closeNotifications();
+
+    callAPI("processBatchRequests", {
+        requestIds: idsToSend,
+        status: status,
+        managerName: currentUser.Name,
+      })
+      .then((res) => {
+        showLoading(false);
+        showToast(res.success ? "success" : "error", res.message);
+        if (res.success) {
+          selectedRequests = []; 
+          loadDashboardData();
+        }
+      })
+      .catch((err) => {
+        showLoading(false);
+        showToast("error", "Lỗi: " + err);
+      });
+  });
+};
+
+// ==========================================
+// [MỚI] HÀM ĐIỀU KHIỂN LỊCH SỬ THÁNG
+// ==========================================
+
+window.changeHistoryMonth = function (delta) {
+  viewHistoryDate.setMonth(viewHistoryDate.getMonth() + delta);
+  loadHistoryOnly();
+};
+
+function loadHistoryOnly() {
+  const m = viewHistoryDate.getMonth() + 1;
+  const y = viewHistoryDate.getFullYear();
+
+  const badge = document.getElementById("hist-month-badge");
+  if (badge) badge.innerText = "Tháng " + m + "/" + y;
+
+  const list = document.getElementById("activity-history-list");
+  if (list)
+    list.innerHTML = `<div class="flex flex-col items-center justify-center py-10 opacity-50 space-y-3"><div class="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-emerald-500"></div></div>`;
+
+  callAPI("getHistory", currentUser.Employee_ID, m, y)
+    .then((res) => {
+      if (res.summary) renderHistoryStats(res.summary);
+
+      if (res.history) {
+        allHistoryData = res.history;
+        currentHistoryPage = 0;
+        renderActivityHistory();
+      } else {
+        allHistoryData = [];
+        renderActivityHistory();
+      }
+    })
+    .catch((err) => console.log(err));
 }
