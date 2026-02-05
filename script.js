@@ -902,3 +902,4 @@ function animateValue(id, start, end) {
     };
     window.requestAnimationFrame(step);
 }
+
