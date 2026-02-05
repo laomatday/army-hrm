@@ -7,16 +7,22 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>Army HRM V2026</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    
     <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   </head>
 
   <body class="bg-mesh text-slate-800 select-none">
+    
     <div
       id="loader"
       class="fixed inset-0 z-[999] bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center hidden"
@@ -24,1094 +30,300 @@
       <div class="relative">
         <div class="animate-spin rounded-full h-16 w-16 border-[5px] border-slate-100 border-t-emerald-600"></div>
       </div>
-      <p class="mt-6 text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">Đang xử lý...</p>
-    </div>
-
-    <div id="view-login" class="w-full h-full bg-white flex flex-col relative z-[200] transition-all duration-500">
-      <div
-        class="relative h-[45%] bg-gradient-to-br from-emerald-800 via-emerald-600 to-teal-500 flex flex-col items-center justify-center overflow-hidden pt-16"
-      >
-        <div
-          class="absolute top-[-30%] left-[-20%] w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"
-        ></div>
-        <div class="text-center relative z-10 animate-slide-up w-full px-4">
-          <div class="mb-6 relative">
-            <div
-              class="w-24 h-24 bg-white/20 backdrop-blur-md rounded-[2rem] mx-auto shadow-2xl border border-white/30 flex items-center justify-center animate-float overflow-hidden"
-            >
-              <i class="fa-solid fa-shield-halved text-4xl text-white opacity-90"></i>
-            </div>
-          </div>
-          <h1 class="text-2xl font-black text-white tracking-tight drop-shadow-md">ARMY HRM</h1>
-          <p class="text-emerald-100 text-[10px] font-bold uppercase tracking-[0.2em] mt-2 opacity-90">
-            Hệ thống chấm công
-          </p>
-        </div>
-      </div>
-
-      <div class="flex-1 px-8 py-10 flex flex-col animate-slide-up" style="animation-delay: 0.1s">
-        <div class="space-y-5">
-          <div class="group">
-            <label class="text-[10px] font-extrabold text-slate-400 uppercase ml-3 block mb-2 tracking-wider"
-              >Tài khoản</label
-            >
-            <div class="input-group">
-              <div class="input-group-icon"><i class="fa-solid fa-user"></i></div>
-              <input type="text" id="login-user" class="form-input" placeholder="Email hoặc Mã NV" />
-            </div>
-          </div>
-          <div class="group">
-            <label class="text-[10px] font-extrabold text-slate-400 uppercase ml-3 block mb-2 tracking-wider"
-              >Mật khẩu</label
-            >
-            <div class="input-group">
-              <div class="input-group-icon"><i class="fa-solid fa-lock"></i></div>
-              <input type="password" id="login-pass" class="form-input" placeholder="••••••" />
-            </div>
-          </div>
-        </div>
-        <button onclick="handleLogin()" class="btn-primary w-full mt-10">
-          <span>Đăng Nhập</span> <i class="fa-solid fa-arrow-right"></i>
-        </button>
-      </div>
-    </div>
-
-    <div id="view-main" class="hidden h-full w-full bg-slate-50 relative flex flex-col transition-all">
-      <div id="tab-home" class="animate-fade-in absolute inset-0 w-full h-full z-10">
-        <div class="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-slate-50 z-0 pointer-events-none"></div>
-
-        <div class="absolute inset-0 overflow-hidden z-10">
-          <div
-            class="absolute top-0 left-0 w-full z-50 pt-safe px-6 pt-6 pb-2 flex justify-between items-center bg-transparent"
-          >
-            <div class="flex items-center gap-3">
-              <div class="relative">
-                <img
-                  id="user-avatar"
-                  src=""
-                  class="w-11 h-11 rounded-full object-cover border-2 border-white shadow-md bg-slate-200"
-                />
-                <div
-                  class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center text-[8px] text-white"
-                >
-                  <i class="fa-solid fa-check"></i>
-                </div>
-              </div>
-              <div class="flex flex-col justify-center">
-                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">XIN CHÀO</p>
-                <h2 id="user-name" class="text-2xl font-extrabold text-slate-800 leading-tight truncate w-40">...</h2>
-              </div>
-            </div>
-            <button
-              onclick="openNotifications('all')"
-              class="w-10 h-10 rounded-full bg-white border border-slate-100 shadow-sm flex items-center justify-center relative active:scale-95 transition-all group"
-            >
-              <i class="fa-regular fa-bell text-slate-600 group-hover:text-emerald-600 transition-colors"></i>
-              <span
-                id="noti-dot"
-                class="hidden absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full animate-bounce z-50 shadow-sm"
-              ></span>
-            </button>
-          </div>
-
-          <div
-            class="absolute left-0 right-0 bottom-0 overflow-y-auto no-scrollbar z-10"
-            style="top: calc(env(safe-area-inset-top, 20px) + 96px)"
-          >
-            <div class="px-6 pb-48">
-              <div class="flex flex-col items-center mb-8">
-                <div class="text-center mb-8 h-24 flex flex-col justify-center">
-                  <div id="clock-display" class="text-[4rem] leading-none font-black text-slate-800 tracking-tighter">
-                    --:--
-                  </div>
-                  <div id="date-display" class="text-slate-400 font-bold text-sm mt-2">...</div>
-                </div>
-
-                <div class="relative w-full h-[200px] flex justify-center items-start mt-4">
-                  <div
-                    id="state-loading"
-                    class="absolute top-0 w-full flex justify-center transition-all duration-500 ease-out z-30"
-                  >
-                    <div class="relative w-48 h-48 flex items-center justify-center">
-                      <div
-                        class="w-36 h-36 rounded-full bg-slate-100 border-[4px] border-white shadow-sm flex flex-col items-center justify-center animate-pulse"
-                      >
-                        <i class="fa-solid fa-circle-notch fa-spin text-xl text-slate-300 mb-1"></i>
-                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ĐANG TẢI</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    id="state-idle"
-                    class="absolute top-0 w-full flex justify-center transition-all duration-500 ease-out opacity-0 scale-90 pointer-events-none z-20"
-                  >
-                    <div class="relative w-48 h-48 flex items-center justify-center">
-                      <div
-                        class="absolute inset-0 rounded-full border-[20px] border-emerald-400/10 animate-pulse pointer-events-none"
-                      ></div>
-                      <button
-                        onclick="triggerCheckIn()"
-                        class="relative w-36 h-36 rounded-full bg-gradient-to-b from-emerald-400 to-emerald-600 shadow-[0_15px_30px_-5px_rgba(16,185,129,0.4)] flex flex-col items-center justify-center text-white active:scale-95 transition-all border-[4px] border-white z-20"
-                      >
-                        <i class="fa-solid fa-fingerprint text-4xl mb-1 opacity-100"></i>
-                        <span class="text-[10px] font-black uppercase tracking-widest mt-1">Chấm công</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div
-                    id="state-working"
-                    class="absolute top-0 w-full flex flex-col items-center transition-all duration-500 ease-out opacity-0 scale-90 pointer-events-none z-10"
-                  >
-                    <div
-                      class="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100 mb-6"
-                    >
-                      <span class="relative flex h-2 w-2">
-                        <span
-                          class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"
-                        ></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                      </span>
-                      <span class="text-[9px] font-extrabold text-slate-600 uppercase tracking-widest"
-                        >Đang làm việc</span
-                      >
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 w-full max-w-[280px] px-2">
-                      <div class="card-dark flex flex-col items-center justify-center gap-2 h-32 rounded-[20px]">
-                        <div
-                          class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/5"
-                        >
-                          <i class="fa-solid fa-location-dot text-lg"></i>
-                        </div>
-                        <span class="text-xs font-bold mt-1">Văn phòng</span>
-                      </div>
-                      <button
-                        onclick="triggerCheckOut()"
-                        class="card hover:bg-slate-50 flex flex-col items-center justify-center gap-2 h-32 active:scale-95 transition-all group rounded-[20px]"
-                      >
-                        <div
-                          class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center group-hover:bg-red-100 transition-colors"
-                        >
-                          <i class="fa-solid fa-person-walking-arrow-right text-lg"></i>
-                        </div>
-                        <span class="text-xs group-hover:text-red-600 transition-colors font-bold mt-1">Ra về</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mt-2">
-                <div class="flex justify-between items-center mb-4 px-1">
-                  <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Tổng quan tháng</h3>
-                  <span
-                    id="current-month-badge"
-                    class="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full shadow-sm"
-                    >--/--</span
-                  >
-                </div>
-
-                <div class="grid grid-cols-2 gap-3 mb-6">
-                  <div
-                    class="bg-white p-4 rounded-[20px] shadow-sm border border-slate-100 flex flex-col justify-between relative overflow-hidden"
-                  >
-                    <div
-                      class="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-full -translate-y-1/2 translate-x-1/2 blur-xl"
-                    ></div>
-                    <div class="flex items-start justify-between mb-2 relative z-10">
-                      <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
-                        <i class="fa-solid fa-briefcase"></i>
-                      </div>
-                      <span id="work-percentage" class="text-[10px] font-black text-blue-500">0%</span>
-                    </div>
-                    <div>
-                      <div class="flex items-baseline gap-1">
-                        <span id="home-stat-days" class="text-2xl font-black text-slate-800">0</span>
-                        <span class="text-[10px] text-slate-400 font-bold">công</span>
-                      </div>
-                      <div class="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
-                        <div
-                          id="work-progress-bar"
-                          class="h-full bg-blue-500 rounded-full transition-all duration-1000"
-                          style="width: 0%"
-                        ></div>
-                      </div>
-                      <p id="home-stat-label" class="text-[10px] text-slate-400 font-bold mt-1.5 truncate">
-                        Công chuẩn: --
-                      </p>
-                    </div>
-                  </div>
-
-                  <div
-                    class="bg-white p-4 rounded-[20px] shadow-sm border border-slate-100 flex flex-col justify-between relative overflow-hidden"
-                  >
-                    <div
-                      class="absolute top-0 right-0 w-16 h-16 bg-emerald-50 rounded-full -translate-y-1/2 translate-x-1/2 blur-xl"
-                    ></div>
-                    <div class="flex items-start justify-between mb-2 relative z-10">
-                      <div
-                        class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs"
-                      >
-                        <i class="fa-solid fa-umbrella-beach"></i>
-                      </div>
-                      <span id="stat-year-label" class="text-[10px] font-black text-emerald-500">Năm ...</span>
-                    </div>
-                    <div>
-                      <div class="flex items-baseline gap-1">
-                        <span id="home-stat-leave" class="text-2xl font-black text-slate-800">0</span>
-                        <span class="text-[10px] text-slate-400 font-bold">ngày phép</span>
-                      </div>
-
-                      <div class="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
-                        <div
-                          id="leave-progress-bar"
-                          class="bg-emerald-500 h-full rounded-full transition-all duration-1000"
-                          style="width: 0%"
-                        ></div>
-                      </div>
-
-                      <p id="leave-stat-label" class="text-[10px] text-slate-400 font-bold mt-1.5">Ngày phép còn: --</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                  <button
-                    onclick="openRequestModal('Nghỉ phép')"
-                    class="card flex items-center gap-3.5 active:scale-[0.98] transition-all p-4"
-                  >
-                    <div
-                      class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-sm flex-shrink-0"
-                    >
-                      <i class="fa-solid fa-file-pen"></i>
-                    </div>
-                    <div class="text-left overflow-hidden">
-                      <p class="text-xs font-black text-slate-800 truncate">Đề xuất</p>
-                    </div>
-                  </button>
-
-                  <button
-                    onclick="switchTab('contacts')"
-                    class="card flex items-center gap-3.5 active:scale-[0.98] transition-all p-4"
-                  >
-                    <div
-                      class="w-10 h-10 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-sm flex-shrink-0"
-                    >
-                      <i class="fa-solid fa-users"></i>
-                    </div>
-                    <div class="text-left overflow-hidden">
-                      <p class="text-xs font-black text-slate-800 truncate">Danh bạ</p>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="tab-requests" class="hidden animate-fade-in absolute inset-0 w-full h-full z-10">
-        <div class="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-slate-50 z-0 pointer-events-none"></div>
-        <div class="absolute inset-0 overflow-hidden z-10">
-          <div
-            class="absolute top-0 left-0 w-full z-50 pt-safe px-6 pt-6 pb-2 flex items-center justify-between bg-transparent"
-          >
-            <h2 class="text-2xl font-black text-slate-800 tracking-tight">Hoạt động</h2>
-            <div class="bg-slate-200 p-1 rounded-full shadow-sm flex items-center">
-              <button
-                id="btn-tab-history"
-                onclick="switchActivityMode('history')"
-                class="px-4 py-1.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white shadow-md transition-all"
-              >
-                Ngày giờ công
-              </button>
-              <button
-                id="btn-tab-requests"
-                onclick="switchActivityMode('requests')"
-                class="px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-all"
-              >
-                Đề xuất
-              </button>
-            </div>
-          </div>
-
-          <div
-            class="absolute left-0 right-0 bottom-0 overflow-y-auto no-scrollbar z-10"
-            style="top: calc(env(safe-area-inset-top, 20px) + 96px)"
-          >
-            <div class="px-6 pb-48">
-              <div id="view-act-requests" class="hidden animate-fade-in">
-                <button
-                  onclick="openRequestModal('Nghỉ phép')"
-                  class="fixed bottom-[110px] right-5 z-40 w-14 h-14 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full shadow-[0_8px_20px_-5px_rgba(16,185,129,0.4)] flex items-center justify-center text-white active:scale-90 transition-transform group border-2 border-white/20"
-                >
-                  <i
-                    class="fa-solid fa-plus text-xl group-hover:rotate-90 transition-transform duration-300 drop-shadow-sm"
-                  ></i>
-                </button>
-                <div id="request-list-container" class="space-y-4 min-h-[200px]">
-                  <div class="text-center py-10 opacity-50">
-                    <i class="fa-solid fa-circle-notch fa-spin text-emerald-500"></i>
-                  </div>
-                </div>
-              </div>
-
-              <div id="view-act-history" class="animate-fade-in">
-                  
-                  <div class="flex justify-between items-center mb-4 mt-2 px-1">
-                      <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
-                          Bảng công chi tiết
-                      </h3>
-
-                      <div class="bg-white rounded-lg border border-slate-200 shadow-sm flex items-center p-0.5">
-                          <button
-                              onclick="changeHistoryMonth(-1)"
-                              class="w-7 h-7 flex items-center justify-center rounded-md hover:bg-slate-100 text-slate-400 hover:text-emerald-600 transition-colors active:bg-emerald-50"
-                          >
-                              <i class="fa-solid fa-chevron-left text-[10px]"></i>
-                          </button>
-                          
-                          <div class="px-2 min-w-[90px] text-center border-l border-r border-slate-100/50 h-4 flex items-center justify-center">
-                              <span
-                                  id="hist-month-badge"
-                                  class="text-xs font-bold text-slate-700 whitespace-nowrap"
-                              >--/--</span>
-                          </div>
-
-                          <button
-                              onclick="changeHistoryMonth(1)"
-                              class="w-7 h-7 flex items-center justify-center rounded-md hover:bg-slate-100 text-slate-400 hover:text-emerald-600 transition-colors active:bg-emerald-50"
-                          >
-                              <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                          </button>
-                      </div>
-                  </div>
-
-                  <div class="grid grid-cols-3 gap-3 mb-4">
-                      <div class="bg-emerald-50 p-3 rounded-[18px] border border-emerald-100 flex flex-col items-center justify-center gap-1">
-                          <span id="hist-total-days" class="text-lg font-black text-emerald-600">0</span>
-                          <span class="text-[9px] font-bold text-emerald-500 uppercase tracking-wide">Ngày công</span>
-                      </div>
-                      <div class="bg-orange-50 p-3 rounded-[18px] border border-orange-100 flex flex-col items-center justify-center gap-1">
-                          <span id="hist-late-mins" class="text-lg font-black text-orange-600">0</span>
-                          <span class="text-[9px] font-bold text-orange-400 uppercase tracking-wide">Phút trễ</span>
-                      </div>
-                      <div class="bg-red-50 p-3 rounded-[18px] border border-red-100 flex flex-col items-center justify-center gap-1">
-                          <span id="hist-errors" class="text-lg font-black text-red-600">0</span>
-                          <span class="text-[9px] font-bold text-red-400 uppercase tracking-wide">Lỗi chấm</span>
-                      </div>
-                  </div>
-
-                  <div class="flex justify-between items-center mb-3 mt-6 px-1">
-                      <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest">Nhật ký</h3>
-                      <div class="flex items-center bg-white rounded-full p-1 shadow-sm border border-slate-100">
-                          <button
-                              id="btn-hist-next"
-                              onclick="changeHistoryPage(1)"
-                              class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-400 active:text-emerald-600 transition-colors"
-                          >
-                              <i class="fa-solid fa-chevron-left text-[10px]"></i>
-                          </button>
-                          <span
-                              id="hist-pagination-label"
-                              class="text-[9px] font-bold text-slate-600 px-3 min-w-[80px] text-center"
-                          >-- / --</span>
-                          <button
-                              id="btn-hist-prev"
-                              onclick="changeHistoryPage(-1)"
-                              class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-50 text-slate-400 active:text-emerald-600 transition-colors"
-                          >
-                              <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                          </button>
-                      </div>
-                  </div>
-
-                  <div id="activity-history-list" class="space-y-3 pb-24"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="tab-contacts" class="hidden animate-fade-in absolute inset-0 w-full h-full z-10">
-        <div class="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-slate-50 z-0 pointer-events-none"></div>
-        <div class="absolute inset-0 overflow-hidden z-10">
-          <div
-            class="absolute top-0 left-0 w-full z-50 pt-safe px-6 pt-6 pb-2 flex justify-between items-center bg-transparent"
-          >
-            <h2 class="text-2xl font-black text-slate-800 tracking-tight">Danh bạ</h2>
-            <button onclick="openContactSearch()" class="btn-icon"><i class="fa-solid fa-magnifying-glass"></i></button>
-          </div>
-          <div
-            class="absolute left-0 right-0 bottom-0 overflow-y-auto no-scrollbar z-10"
-            style="top: calc(env(safe-area-inset-top, 20px) + 96px)"
-          >
-            <div class="px-6 pb-48">
-              <div id="contacts-list" class="space-y-2 min-h-[300px]">
-                <div class="text-center py-12 text-slate-400">
-                  <i class="fa-solid fa-circle-notch fa-spin text-2xl mb-2 text-emerald-500"></i>
-                  <p class="text-xs font-medium">Đang đồng bộ dữ liệu...</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="tab-profile" class="hidden animate-fade-in absolute inset-0 w-full h-full z-10">
-        <div class="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-slate-50 z-0 pointer-events-none"></div>
-        <div class="absolute inset-0 overflow-hidden z-10">
-          <div
-            class="absolute top-0 left-0 w-full z-50 pt-safe px-6 pt-6 pb-2 flex justify-between items-center bg-transparent"
-          >
-            <h2 class="text-2xl font-black text-slate-800 tracking-tight">Hồ sơ</h2>
-          </div>
-
-          <div
-            class="absolute left-0 right-0 bottom-0 overflow-y-auto no-scrollbar z-10"
-            style="top: calc(env(safe-area-inset-top, 20px) + 96px)"
-          >
-            <div class="px-6 pb-48">
-              <div
-                class="relative w-full bg-[#1e293b] rounded-[24px] p-6 mb-6 shadow-xl shadow-slate-200 overflow-hidden flex items-center gap-5"
-              >
-                <div
-                  class="absolute top-0 right-0 w-48 h-48 bg-emerald-500/20 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/3 pointer-events-none"
-                ></div>
-                <div class="relative z-10 shrink-0">
-                  <img
-                    id="profile-user-avatar"
-                    src=""
-                    class="w-20 h-20 rounded-[20px] object-cover border-2 border-slate-600 shadow-md bg-slate-700"
-                  />
-                </div>
-                <div class="flex-1 min-w-0 relative z-10">
-                  <h2
-                    id="profile-user-name"
-                    class="text-white font-black text-lg uppercase leading-tight truncate mb-2"
-                  >
-                    ...
-                  </h2>
-                  <div class="flex flex-wrap gap-2">
-                    <span
-                      id="profile-position-badge"
-                      class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-700/50 text-slate-300 border border-slate-600 backdrop-blur-md"
-                      >...</span
-                    >
-                    <span
-                      id="profile-location-badge"
-                      class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-900/30 text-emerald-400 border border-emerald-800/50 backdrop-blur-md flex items-center gap-1.5"
-                    >
-                      <span class="relative flex h-1.5 w-1.5">
-                        <span
-                          class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
-                        ></span>
-                        <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-                      </span>
-                      ...
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="space-y-4 mb-10">
-                <button
-                  onclick="openProfileModal()"
-                  class="w-full bg-white p-4 rounded-[20px] shadow-sm border border-slate-100 flex justify-between items-center active:scale-[0.98] transition-all group hover:border-emerald-100"
-                >
-                  <div class="flex gap-4 items-center">
-                    <div
-                      class="w-12 h-12 rounded-[18px] bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 group-hover:bg-emerald-100 transition-colors"
-                    >
-                      <i class="fa-regular fa-pen-to-square text-xs"></i>
-                    </div>
-                    <div class="flex flex-col items-start">
-                      <span class="font-black text-slate-800 text-sm">Cập nhật thông tin</span>
-                    </div>
-                  </div>
-                </button>
-
-                <button
-                  id="btn-profile-approval"
-                  onclick="openNotifications('approve')"
-                  class="w-full bg-white p-4 rounded-[20px] shadow-sm border border-slate-100 flex justify-between items-center active:scale-[0.98] transition-all hidden group hover:border-emerald-100"
-                >
-                  <div class="flex gap-4 items-center">
-                    <div
-                      class="w-12 h-12 rounded-[18px] bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 group-hover:bg-emerald-100 transition-colors"
-                    >
-                      <i class="fa-solid fa-gavel text-lg"></i>
-                    </div>
-                    <div class="flex flex-col items-start">
-                      <span class="font-black text-slate-800 text-sm">Duyệt giải trình</span>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-3">
-                    <span
-                      id="profile-noti-dot"
-                      class="hidden w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white shadow-sm animate-pulse"
-                    ></span>
-                  </div>
-                </button>
-
-                <button
-                  onclick="alert('Tính năng đang phát triển')"
-                  class="w-full bg-white p-4 rounded-[20px] shadow-sm border border-slate-100 flex justify-between items-center active:scale-[0.98] transition-all group"
-                >
-                  <div class="flex gap-4 items-center">
-                    <div
-                      class="w-12 h-12 rounded-[18px] bg-slate-50 text-slate-400 flex items-center justify-center border border-slate-100 group-hover:bg-slate-100 transition-colors"
-                    >
-                      <i class="fa-solid fa-lock text-lg"></i>
-                    </div>
-                    <span class="font-bold text-slate-700 text-sm">Đổi mật khẩu</span>
-                  </div>
-                </button>
-              </div>
-
-              <button
-                onclick="logout()"
-                class="w-full py-4 rounded-[20px] bg-red-50 text-red-500 font-bold text-sm border border-red-100 flex items-center justify-center gap-2 active:scale-[0.98] transition-all hover:bg-red-100"
-              >
-                <i class="fa-solid fa-power-off"></i>
-                <span>Đăng xuất</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="modal-camera" class="fixed inset-0 z-[100] bg-black hidden">
-      <video id="video" class="w-full h-full object-cover" autoplay playsinline></video>
-      <div class="absolute bottom-10 left-0 w-full flex justify-center gap-10">
-        <button
-          onclick="closeCamera()"
-          class="w-16 h-16 rounded-full bg-white/20 text-white flex items-center justify-center backdrop-blur-md"
-        >
-          <i class="fa-solid fa-xmark text-2xl"></i>
-        </button>
-        <button
-          onclick="takePicture()"
-          class="w-20 h-20 rounded-full bg-white border-4 border-emerald-500 shadow-xl flex items-center justify-center"
-        >
-          <div class="w-16 h-16 bg-emerald-500 rounded-full"></div>
-        </button>
-      </div>
-    </div>
-
-    <div
-      id="modal-request"
-      class="fixed inset-0 z-[200] bg-slate-50 hidden flex flex-col animate-slide-up h-full w-full"
-    >
-      <div class="pt-safe px-6 pt-6 pb-2 shrink-0 flex items-center justify-between">
-        <h2 class="text-2xl font-black text-slate-800 tracking-tight">Tạo đề xuất</h2>
-        <button
-          onclick="closeRequestModal()"
-          class="btn-icon bg-transparent border-none shadow-none text-slate-400 hover:text-slate-600"
-        >
-          <i class="fa-solid fa-arrow-right text-xl"></i>
-        </button>
-      </div>
-
-      <div class="flex-1 overflow-y-auto no-scrollbar px-6 pb-32 space-y-4 pt-4">
-        <div class="card relative z-20">
-          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-3 tracking-wider pl-1"
-            >LOẠI ĐỀ XUẤT</label
-          >
-          <div class="relative">
-            <div
-              class="bg-slate-50 rounded-2xl border border-transparent transition-all duration-300 overflow-hidden"
-              id="req-type-container"
-            >
-              <button
-                onclick="toggleReqDropdown()"
-                id="req-type-trigger"
-                class="w-full flex justify-between items-center px-4 py-3.5 bg-slate-50 active:bg-white transition-colors"
-              >
-                <span id="req-type-label" class="text-sm font-bold text-slate-800">Nghỉ phép</span>
-                <i
-                  id="req-type-arrow"
-                  class="fa-solid fa-chevron-down text-slate-400 text-[10px] transition-transform duration-300"
-                ></i>
-              </button>
-              <div id="req-type-menu" class="hidden border-t border-slate-200/50 bg-white animate-fade-in">
-                <div class="p-2 space-y-1">
-                  <div
-                    onclick="selectReqType('Nghỉ phép')"
-                    class="req-item px-4 py-3.5 rounded-xl text-sm font-bold flex justify-between items-center cursor-pointer transition-all mb-1"
-                    data-val="Nghỉ phép"
-                  >
-                    <span>Nghỉ phép</span>
-                    <i class="fa-solid fa-check text-emerald-500 opacity-0 check-icon-req" data-val="Nghỉ phép"></i>
-                  </div>
-                  <div
-                    onclick="selectReqType('Công tác')"
-                    class="req-item px-4 py-3.5 rounded-xl text-sm font-bold flex justify-between items-center cursor-pointer transition-all mb-1"
-                    data-val="Công tác"
-                  >
-                    <span>Công tác</span>
-                    <i class="fa-solid fa-check text-emerald-500 opacity-0 check-icon-req" data-val="Công tác"></i>
-                  </div>
-                  <div
-                    onclick="selectReqType('Giải trình')"
-                    class="req-item px-4 py-3.5 rounded-xl text-sm font-bold flex justify-between items-center cursor-pointer transition-all mb-1"
-                    data-val="Giải trình"
-                  >
-                    <span>Giải trình công</span>
-                    <i class="fa-solid fa-check text-emerald-500 opacity-0 check-icon-req" data-val="Giải trình"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-3 tracking-wider pl-1"
-            >THỜI GIAN ÁP DỤNG</label
-          >
-          <div class="flex items-center gap-3">
-            <div
-              class="flex-1 bg-slate-50 rounded-2xl px-3 py-3 flex items-center gap-2 border border-transparent focus-within:bg-white focus-within:shadow-sm transition-all"
-              onclick="document.getElementById('req-date-start').showPicker()"
-            >
-              <i class="fa-regular fa-calendar text-slate-400 text-sm ml-1"></i>
-              <input
-                type="date"
-                id="req-date-start"
-                class="input-clean"
-                onchange="autoFillEndDate()"
-                onclick="this.showPicker()"
-              />
-            </div>
-            <div
-              class="flex-1 bg-slate-50 rounded-2xl px-3 py-3 flex items-center gap-2 border border-transparent focus-within:bg-white focus-within:shadow-sm transition-all"
-              id="req-date-end-container"
-              onclick="document.getElementById('req-date-end').showPicker()"
-            >
-              <i class="fa-regular fa-calendar-check text-slate-400 text-sm ml-1"></i>
-              <input type="date" id="req-date-end" class="input-clean" onclick="this.showPicker()" />
-            </div>
-          </div>
-        </div>
-
-        <div class="card flex-1 flex flex-col min-h-[200px]">
-          <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2 tracking-wider pl-1"
-            >NỘI DUNG CHI TIẾT</label
-          >
-          <div class="flex items-start gap-3 mt-2 h-full">
-            <i class="fa-solid fa-align-left text-slate-300 mt-1.5 text-sm"></i>
-            <textarea
-              id="req-reason"
-              class="flex-1 w-full h-full input-clean resize-none leading-relaxed"
-              placeholder="Nhập lý do..."
-            ></textarea>
-          </div>
-        </div>
-      </div>
-
-      <div class="fixed bottom-0 left-0 w-full p-6 flex gap-4 pb-safe z-50 pointer-events-none">
-        <button
-          onclick="closeRequestModal()"
-          class="w-1/3 py-3.5 rounded-[20px] pointer-events-auto w-1/3 btn-white rounded-[30px] font-bold text-sm"
-        >
-          Hủy
-        </button>
-        <button
-          onclick="submitRequest()"
-          class="w-1/3 py-3.5 rounded-[20px] pointer-events-auto flex-1 btn-gradient flex items-center justify-center gap-2"
-        >
-          Gửi đề xuất <i class="fa-solid fa-paper-plane text-xs"></i>
-        </button>
-      </div>
-    </div>
-
-    <div
-      id="modal-notifications"
-      class="fixed inset-0 z-[260] bg-slate-50 hidden flex flex-col animate-slide-up h-full w-full"
-    >
-      <div class="pt-safe px-6 pt-6 pb-2 shrink-0 flex items-center justify-between">
-        <h2 id="modal-noti-title" class="text-2xl font-black text-slate-800 tracking-tight">Thông báo</h2>
-        <button
-          onclick="closeNotifications()"
-          class="btn-icon bg-transparent border-none shadow-none text-slate-400 hover:text-slate-600"
-        >
-          <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
-      </div>
-
-      <div class="flex-1 overflow-y-auto no-scrollbar px-6 pb-40 space-y-6 pt-4" id="noti-content-area">
-        <div class="text-center py-20 text-slate-400">
-          <i class="fa-solid fa-circle-notch fa-spin text-2xl text-emerald-500 mb-2"></i>
-          <p class="text-xs font-bold uppercase">Đang tải dữ liệu...</p>
-        </div>
-      </div>
-    </div>
-
-    <div
-      id="modal-profile"
-      class="fixed inset-0 z-[250] bg-slate-50 hidden flex flex-col animate-slide-up h-full w-full"
-    >
-      <div class="pt-safe px-6 pt-6 pb-2 shrink-0 flex items-center justify-between">
-        <h2 id="profile-modal-title" class="text-2xl font-black text-slate-800 tracking-tight drop-shadow-sm">
-          Hồ sơ cá nhân
-        </h2>
-        <button
-          onclick="closeProfileModal()"
-          class="btn-icon bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-slate-600 w-10 h-10 rounded-full flex items-center justify-center"
-        >
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-
-      <div class="flex-1 overflow-y-auto no-scrollbar px-6 pb-32 space-y-6 pt-4">
-        <div class="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 flex flex-col items-center">
-          <div class="relative group cursor-pointer" onclick="document.getElementById('input-edit-avatar').click()">
-            <div class="p-1.5 rounded-full border-2 border-emerald-50 bg-emerald-50/50">
-              <img id="edit-avatar-preview" src="" class="w-24 h-24 rounded-full object-cover shadow-sm bg-white" />
-            </div>
-            <div
-              class="absolute bottom-0 right-0 w-8 h-8 bg-slate-800 text-white rounded-full flex items-center justify-center border-2 border-white shadow-lg active:scale-90 transition-transform"
-            >
-              <i class="fa-solid fa-camera text-xs"></i>
-            </div>
-          </div>
-          <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-3">Chạm để đổi ảnh</p>
-          <input
-            type="file"
-            id="input-edit-avatar"
-            class="hidden"
-            accept="image/*"
-            onchange="previewAvatarInModal(this)"
-          />
-        </div>
-
-        <div>
-          <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-3 tracking-widest pl-2"
-            >Liên hệ</label
-          >
-          <div class="space-y-3">
-            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
-              <div
-                class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"
-              >
-                <i class="fa-solid fa-phone text-sm"></i>
-              </div>
-              <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Điện thoại</span>
-              <input
-                type="tel"
-                id="edit-phone"
-                disabled
-                class="input-clean flex-1 text-right bg-transparent text-sm font-bold text-slate-800 outline-none cursor-not-allowed truncate"
-                placeholder="..."
-              />
-            </div>
-
-            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
-              <div
-                class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shrink-0"
-              >
-                <i class="fa-solid fa-envelope text-sm"></i>
-              </div>
-              <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Email</span>
-              <input
-                type="text"
-                id="edit-email"
-                disabled
-                class="input-clean flex-1 text-right bg-transparent text-sm font-bold text-slate-800 outline-none cursor-not-allowed truncate"
-                placeholder="..."
-              />
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-3 tracking-widest pl-2"
-            >Công việc</label
-          >
-          <div class="space-y-3">
-            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
-              <div
-                class="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 text-purple-600 flex items-center justify-center shrink-0"
-              >
-                <i class="fa-solid fa-location-dot text-sm"></i>
-              </div>
-              <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Chi nhánh</span>
-              <input
-                type="text"
-                id="profile-location-display"
-                disabled
-                class="input-clean flex-1 text-right bg-transparent text-sm font-bold text-slate-800 outline-none cursor-not-allowed truncate"
-                placeholder="..."
-              />
-            </div>
-
-            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
-              <div
-                class="w-10 h-10 rounded-xl bg-orange-50 border border-orange-100 text-orange-600 flex items-center justify-center shrink-0"
-              >
-                <i class="fa-solid fa-briefcase text-sm"></i>
-              </div>
-              <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Phòng ban</span>
-              <input
-                type="text"
-                id="edit-dept"
-                disabled
-                class="input-clean flex-1 text-right bg-transparent text-sm font-bold text-slate-800 outline-none cursor-not-allowed truncate"
-                placeholder="..."
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="fixed bottom-0 left-0 w-full p-6 pb-safe z-50 pointer-events-none bg-gradient-to-t from-white via-white/90 to-transparent"
-      >
-        <div class="flex gap-4 pointer-events-auto">
-          <button
-            onclick="closeProfileModal()"
-            class="w-1/3 py-3.5 rounded-[20px] font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
-          >
-            Đóng
-          </button>
-          <button
-            onclick="submitProfileUpdate()"
-            class="w-1/3 py-3.5 rounded-[20px] pointer-events-auto flex-1 btn-gradient flex items-center justify-center gap-2"
-          >
-            <i class="fa-solid fa-check"></i> Lưu ảnh
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div
-      id="modal-contact-detail"
-      class="fixed inset-0 z-[260] bg-slate-50 hidden flex flex-col animate-slide-up h-full w-full"
-    >
-      <div class="pt-safe px-6 pt-6 pb-2 shrink-0 flex items-center justify-between">
-        <h2 class="text-2xl font-black text-slate-800 tracking-tight drop-shadow-sm">Thông tin nhân sự</h2>
-        <button
-          onclick="closeContactDetail()"
-          class="btn-icon bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-slate-600 w-10 h-10 rounded-full flex items-center justify-center"
-        >
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-
-      <div class="flex-1 overflow-y-auto no-scrollbar px-6 pb-32 space-y-6 pt-4">
-        <div
-          class="relative w-full bg-[#1e293b] rounded-[24px] p-6 mb-6 shadow-xl shadow-slate-200 overflow-hidden flex items-center gap-5"
-        >
-          <div
-            class="absolute top-0 right-0 w-48 h-48 bg-emerald-500/20 rounded-full blur-[50px] -translate-y-1/2 translate-x-1/3 pointer-events-none"
-          ></div>
-          <div class="relative z-10 shrink-0">
-            <img
-              id="contact-detail-avatar"
-              src=""
-              class="w-20 h-20 rounded-[20px] object-cover border-2 border-slate-600 shadow-md bg-slate-700"
-            />
-          </div>
-          <div class="flex-1 min-w-0 relative z-10">
-            <h2 id="contact-detail-name" class="text-white font-black text-lg uppercase leading-tight truncate mb-2">
-              ...
-            </h2>
-            <div class="flex flex-wrap gap-2">
-              <span
-                id="contact-detail-position"
-                class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-700/50 text-slate-300 border border-slate-600 backdrop-blur-md"
-                >...</span
-              >
-              <span
-                id="contact-detail-center"
-                class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-900/30 text-emerald-400 border border-emerald-800/50 backdrop-blur-md flex items-center gap-1.5"
-              >
-                <span class="relative flex h-1.5 w-1.5">
-                  <span
-                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
-                  ></span>
-                  <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-                </span>
-                Trung tâm
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-3 tracking-widest pl-2"
-            >Liên hệ</label
-          >
-          <div class="space-y-3">
-            <a
-              id="contact-detail-call"
-              href="#"
-              class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3 active:scale-[0.98] transition-transform"
-            >
-              <div
-                class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"
-              >
-                <i class="fa-solid fa-phone text-sm"></i>
-              </div>
-              <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Điện thoại</span>
-              <p id="contact-detail-phone" class="flex-1 text-right text-sm font-bold text-emerald-600 truncate">...</p>
-            </a>
-
-            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
-              <div
-                class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shrink-0"
-              >
-                <i class="fa-solid fa-envelope text-sm"></i>
-              </div>
-              <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Email</span>
-              <p id="contact-detail-email" class="flex-1 text-right text-sm font-bold text-slate-800 truncate">...</p>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-[10px] font-extrabold text-slate-400 uppercase mb-3 tracking-widest pl-2"
-            >Công việc</label
-          >
-          <div class="space-y-3">
-            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
-              <div
-                class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 text-slate-500 flex items-center justify-center shrink-0"
-              >
-                <i class="fa-solid fa-id-card text-sm"></i>
-              </div>
-              <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Mã NV</span>
-              <p id="contact-detail-id" class="flex-1 text-right text-sm font-bold text-slate-800 truncate">...</p>
-            </div>
-
-            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
-              <div
-                class="w-10 h-10 rounded-xl bg-orange-50 border border-orange-100 text-orange-600 flex items-center justify-center shrink-0"
-              >
-                <i class="fa-solid fa-briefcase text-sm"></i>
-              </div>
-              <span class="text-[10px] font-bold text-slate-400 uppercase shrink-0 w-16">Phòng ban</span>
-              <p id="contact-detail-dept" class="flex-1 text-right text-sm font-bold text-slate-800 truncate">...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div
-        class="fixed bottom-0 left-0 w-full p-6 pb-safe z-50 pointer-events-none bg-gradient-to-t from-white via-white/90 to-transparent"
-      >
-        <button
-          onclick="closeContactDetail()"
-          class="pointer-events-auto w-full py-3.5 rounded-[20px] font-bold text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors shadow-sm"
-        >
-          Đóng
-        </button>
-      </div>
-    </div>
-
-    <div
-      id="modal-search-contact"
-      class="hidden fixed inset-0 z-[200] bg-slate-900/40 backdrop-blur-[2px] flex items-end justify-center animate-fade-in"
-    >
-      <div class="absolute inset-0" onclick="closeContactSearch()"></div>
-      <div
-        class="bg-white w-full rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] relative z-10 flex flex-col max-h-[85vh] animate-slide-up overflow-hidden"
-      >
-        <div class="w-full flex justify-center pt-3 pb-1" onclick="closeContactSearch()">
-          <div class="w-12 h-1.5 bg-slate-200 rounded-full"></div>
-        </div>
-        <div class="px-5 pb-2 pt-2 bg-white shrink-0 z-20">
-          <div class="input-group">
-            <div class="input-group-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
-            <input
-              type="text"
-              id="popup-search-input"
-              placeholder="Tìm kiếm nhân sự..."
-              onkeyup="filterContactsPopup()"
-              class="form-input rounded-2xl"
-            />
-            <button
-              onclick="closeContactSearch()"
-              class="absolute inset-y-0 right-2 px-3 text-slate-400 hover:text-slate-600 active:scale-90 transition-transform"
-            >
-              <span class="text-xs font-bold bg-slate-200 px-2 py-1 rounded-full">ESC</span>
-            </button>
-          </div>
-        </div>
-        <div
-          id="popup-search-results"
-          class="flex-1 overflow-y-auto px-5 py-4 space-y-3 bg-white min-h-[300px] no-scrollbar pb-safe"
-        >
-          <div class="flex flex-col items-center justify-center h-48 opacity-50">
-            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
-              <i class="fa-solid fa-magnifying-glass text-2xl text-slate-300"></i>
-            </div>
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Nhập từ khóa để tìm</p>
-          </div>
-        </div>
-      </div>
+      <p class="mt-6 text-xs font-bold text-slate-400 uppercase tracking-widest">Đang xử lý...</p>
     </div>
 
     <div
       id="toast"
-      class="fixed top-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-slate-800 pl-4 pr-6 py-3 rounded-full shadow-lg border border-white/50 text-sm font-bold transition-all duration-300 opacity-0 pointer-events-none z-[400] whitespace-nowrap flex items-center gap-3 translate-y-[-20px]"
+      class="fixed top-5 left-1/2 -translate-x-1/2 z-[1000] opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-3 px-5 py-3 rounded-full shadow-xl border"
     >
-      <div class="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 shadow-sm">
-        <i class="fa-solid fa-bell"></i>
-      </div>
-      <span id="toast-msg">Thông báo</span>
+      <i class="fa-solid fa-circle-check text-xl"></i>
+      <span class="text-sm font-bold">Thông báo hệ thống</span>
     </div>
 
-    <div
-      id="custom-dialog"
-      class="fixed inset-0 z-[400] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-6 animate-fade-in"
-    >
-      <div class="card w-full max-w-sm flex flex-col items-center text-center animate-slide-up">
-        <div
-          id="dialog-icon-bg"
-          class="w-20 h-20 mx-auto bg-emerald-50 rounded-full flex items-center justify-center mb-6 shadow-inner"
-        >
-          <i id="dialog-icon" class="fa-solid fa-circle-check text-4xl text-emerald-600"></i>
+    <div id="view-login" class="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-emerald-50 to-slate-100 -z-10"></div>
+      
+      <div class="mb-10 text-center animate-slideUp">
+        <div class="w-20 h-20 bg-emerald-600 rounded-3xl mx-auto flex items-center justify-center shadow-lg shadow-emerald-200 mb-4 rotate-3">
+          <i class="fa-solid fa-shield-halved text-4xl text-white"></i>
         </div>
-        <div class="mb-8">
-          <h3 id="dialog-title" class="text-xl font-black text-slate-800 mb-2">Thông báo</h3>
-          <p id="dialog-msg" class="text-sm text-slate-500 font-medium leading-relaxed">Nội dung thông báo...</p>
-        </div>
-        <div id="dialog-buttons" class="grid grid-cols-2 gap-4 w-full">
-          <button id="btn-dialog-cancel" class="btn-white w-full rounded-2xl">Hủy</button>
-          <button id="btn-dialog-ok" class="btn-success w-full rounded-2xl shadow-lg">Xác nhận</button>
-        </div>
+        <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Army <span class="text-emerald-600">HRM</span></h1>
+        <p class="text-slate-400 text-sm font-medium mt-1">Hệ thống quản lý nhân sự tập trung</p>
       </div>
-    </div>
 
-    <div
-      id="modal-reject-reason"
-      class="fixed inset-0 z-[500] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-6 animate-fade-in"
-    >
-      <div class="bg-white w-full max-w-sm rounded-[32px] p-6 shadow-2xl relative animate-slide-up">
-        <div class="text-center mb-6">
-          <div class="w-16 h-16 mx-auto bg-red-50 rounded-full flex items-center justify-center mb-4 shadow-inner">
-            <i class="fa-solid fa-triangle-exclamation text-2xl text-red-500"></i>
+      <div class="w-full max-w-sm bg-white p-8 rounded-[32px] shadow-xl border border-slate-100 animate-slideUp" style="animation-delay: 100ms;">
+        <div class="space-y-5">
+          <div>
+            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Email / Tài khoản</label>
+            <div class="relative group">
+              <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <input
+                type="text"
+                id="login-user"
+                class="w-full bg-slate-50 border border-slate-100 text-slate-800 text-sm rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 block pl-11 p-4 outline-none transition-all font-semibold placeholder:text-slate-300"
+                placeholder="Nhập email..."
+              />
+            </div>
           </div>
-          <h3 class="text-xl font-black text-slate-800">Từ chối đề xuất</h3>
-          <p class="text-sm text-slate-500 font-medium mt-1">Vui lòng nhập lý do để nhân viên được biết.</p>
+          <div>
+            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Mật khẩu</label>
+            <div class="relative group">
+              <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors">
+                <i class="fa-solid fa-lock"></i>
+              </div>
+              <input
+                type="password"
+                id="login-pass"
+                class="w-full bg-slate-50 border border-slate-100 text-slate-800 text-sm rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 block pl-11 p-4 outline-none transition-all font-semibold placeholder:text-slate-300"
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+          
+          <button
+            onclick="handleLogin()"
+            class="w-full text-white bg-slate-800 hover:bg-emerald-600 focus:ring-4 focus:ring-emerald-300 font-bold rounded-2xl text-sm px-5 py-4 text-center shadow-lg shadow-slate-200 active:scale-95 transition-all duration-200 mt-4"
+          >
+            Đăng nhập hệ thống <i class="fa-solid fa-arrow-right ml-2"></i>
+          </button>
+        </div>
+      </div>
+      
+      <p class="mt-8 text-xs text-slate-400 font-medium">Phiên bản V2026.1.0 • Powered by Supabase</p>
+    </div>
+
+    <div id="view-main" class="pb-24 hidden min-h-screen">
+      
+      <div class="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 px-6 py-4 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-3" onclick="switchTab('profile')">
+          <div class="relative">
+            <img id="sidebar-avatar" src="" class="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover bg-slate-200">
+            <div class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></div>
+          </div>
+          <div>
+            <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">Xin chào,</div>
+            <div id="user-name" class="text-sm font-bold text-slate-800 leading-tight">...</div>
+          </div>
+        </div>
+        <div class="flex gap-3">
+            <div class="relative">
+                <button onclick="openNotifications('all')" class="w-10 h-10 rounded-full bg-slate-50 text-slate-600 flex items-center justify-center active:bg-slate-100 transition-colors relative">
+                  <i class="fa-solid fa-bell"></i>
+                  <div id="noti-badge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white scale-0 transition-transform">0</div>
+                </button>
+            </div>
+        </div>
+      </div>
+
+      <div id="view-home" class="view-section px-6 py-6 space-y-6 animate-fadeIn">
+        
+        <div class="bg-slate-800 rounded-[32px] p-6 text-white shadow-xl shadow-slate-200 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
+            
+            <div class="flex justify-between items-start mb-6 relative">
+                <div>
+                    <div id="clock-time" class="text-4xl font-extrabold tracking-tight">--:--</div>
+                    <div id="clock-date" class="text-sm text-slate-300 font-medium mt-1">...</div>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-bold border border-white/10 flex items-center gap-2">
+                    <span id="user-role">...</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 relative">
+                <div id="state-loading" class="col-span-2 py-4 flex justify-center">
+                    <div class="animate-spin rounded-full h-6 w-6 border-2 border-white/20 border-t-white"></div>
+                </div>
+
+                <div id="state-idle" class="col-span-2 hidden">
+                    <button onclick="triggerCheckIn()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-white p-4 rounded-2xl flex items-center justify-center gap-3 font-bold shadow-lg shadow-emerald-900/20 active:scale-95 transition-all">
+                        <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"><i class="fa-solid fa-fingerprint"></i></div>
+                        <span>BẮT ĐẦU CA LÀM</span>
+                    </button>
+                </div>
+
+                <div id="state-working" class="col-span-2 grid grid-cols-2 gap-4 hidden">
+                    <div class="bg-emerald-500/20 border border-emerald-500/30 rounded-2xl p-3 flex items-center gap-3">
+                         <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                         <span class="text-xs font-bold text-emerald-100">Đang làm việc</span>
+                    </div>
+                    <button onclick="triggerCheckOut()" class="bg-red-500 hover:bg-red-400 text-white rounded-2xl flex items-center justify-center gap-2 font-bold text-sm shadow-lg shadow-red-900/20 active:scale-95 transition-all">
+                        Kết thúc ca
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <textarea
-          id="input-reject-reason"
-          rows="3"
-          class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-700 outline-none focus:border-red-500 focus:bg-white transition-all resize-none mb-6"
-          placeholder="Nhập lý do tại đây..."
-        ></textarea>
+        <div class="grid grid-cols-3 gap-3">
+            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-1">
+                <span id="stat-workdays" class="text-2xl font-extrabold text-slate-800">0</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Công tháng</span>
+            </div>
+            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-1">
+                <span id="stat-late" class="text-2xl font-extrabold text-orange-500">0</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Phút trễ</span>
+            </div>
+            <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-col items-center justify-center gap-1">
+                <span id="stat-leave" class="text-xl font-extrabold text-emerald-600">0</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Nghỉ phép</span>
+            </div>
+        </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="flex justify-between items-end mt-2">
+            <h3 class="font-bold text-slate-800 text-lg">Hoạt động gần đây</h3>
+            <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-100 shadow-sm">
+                <button onclick="changeHistoryMonth(-1)" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-slate-800"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+                <span id="hist-month-badge" class="text-xs font-bold text-slate-600 w-20 text-center">...</span>
+                <button onclick="changeHistoryMonth(1)" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-slate-800"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+            </div>
+        </div>
+
+        <div id="activity-history-list" class="space-y-3 pb-4">
+             </div>
+        <button id="btn-load-more-history" onclick="loadMoreHistory()" class="w-full py-3 text-xs font-bold text-slate-400 hover:text-emerald-600 hidden">Xem thêm cũ hơn <i class="fa-solid fa-chevron-down ml-1"></i></button>
+      </div>
+
+      <div id="view-requests" class="view-section px-6 py-6 space-y-4 hidden animate-fadeIn">
+         <h3 class="font-bold text-slate-800 text-lg mb-2">Đơn từ & Đề xuất</h3>
+         
+         <div class="grid grid-cols-2 gap-4 mb-6">
+             <button onclick="openRequestModal('Nghỉ phép')" class="bg-blue-50 p-4 rounded-3xl flex flex-col items-center gap-2 active:scale-95 transition-all">
+                 <div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-200"><i class="fa-solid fa-umbrella-beach"></i></div>
+                 <span class="text-xs font-bold text-blue-800">Xin nghỉ phép</span>
+             </button>
+             <button onclick="openRequestModal('Giải trình')" class="bg-orange-50 p-4 rounded-3xl flex flex-col items-center gap-2 active:scale-95 transition-all">
+                 <div class="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg shadow-orange-200"><i class="fa-solid fa-clipboard-check"></i></div>
+                 <span class="text-xs font-bold text-orange-800">Giải trình công</span>
+             </button>
+         </div>
+
+         <h3 class="font-bold text-slate-800 text-lg mb-2">Địa điểm chấm công</h3>
+         <div id="location-list"></div>
+      </div>
+
+      <div id="view-contacts" class="view-section px-6 py-6 hidden animate-fadeIn">
+        <div class="sticky top-20 z-10 bg-mesh pb-4">
+            <h3 class="font-bold text-slate-800 text-lg mb-4">Danh bạ nhân sự</h3>
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input onkeyup="filterContacts(this.value)" type="text" placeholder="Tìm kiếm đồng nghiệp..." class="w-full bg-white border border-slate-100 rounded-2xl py-3.5 pl-11 pr-4 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+        </div>
+        <div id="contact-list" class="space-y-3 pb-20"></div>
+      </div>
+
+      <div id="view-profile" class="view-section px-6 py-6 hidden animate-fadeIn">
+         <div class="bg-white rounded-[40px] p-8 text-center shadow-xl shadow-slate-100 border border-slate-50 relative overflow-hidden mb-6">
+             <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-emerald-500 to-teal-600"></div>
+             <div class="relative mt-4">
+                 <img id="profile-avatar" src="" class="w-24 h-24 rounded-full border-4 border-white shadow-lg mx-auto object-cover bg-slate-200">
+                 <h2 id="profile-name" class="text-xl font-extrabold text-slate-800 mt-4">...</h2>
+                 <p id="profile-role" class="text-sm font-bold text-emerald-600">...</p>
+                 <p id="profile-id" class="text-xs text-slate-400 font-mono mt-1 mb-4">ID: ...</p>
+                 
+                 <div class="grid grid-cols-2 gap-2 text-left bg-slate-50 p-4 rounded-2xl">
+                     <div>
+                         <div class="text-[10px] uppercase font-bold text-slate-400">Phòng ban</div>
+                         <div id="profile-dept" class="text-sm font-bold text-slate-700 truncate">...</div>
+                     </div>
+                     <div>
+                         <div class="text-[10px] uppercase font-bold text-slate-400">Địa điểm</div>
+                         <div id="profile-location" class="text-sm font-bold text-slate-700 truncate">...</div>
+                     </div>
+                     <div class="col-span-2 mt-2 pt-2 border-t border-slate-200">
+                         <div class="text-[10px] uppercase font-bold text-slate-400">Email</div>
+                         <div id="profile-email" class="text-sm font-bold text-slate-700 truncate">...</div>
+                     </div>
+                     <div class="col-span-2 mt-2">
+                        <div class="text-[10px] uppercase font-bold text-slate-400">Device ID</div>
+                        <div id="profile-device" class="text-[10px] font-mono text-slate-500 break-all">...</div>
+                    </div>
+                 </div>
+             </div>
+         </div>
+
+         <button onclick="logout()" class="w-full bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl active:scale-95 transition-all">
+             <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Đăng xuất
+         </button>
+      </div>
+
+    </div>
+
+    <div id="modal-camera" class="fixed inset-0 z-[500] bg-black hidden flex flex-col">
+        <video id="video" class="flex-1 w-full object-cover" autoplay playsinline></video>
+        <div class="absolute bottom-0 w-full p-8 pb-12 flex justify-between items-center bg-gradient-to-t from-black/80 to-transparent">
+            <button onclick="closeCamera()" class="text-white p-4"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <button onclick="takePicture()" class="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center bg-white/20 active:scale-90 transition-all">
+                <div class="w-16 h-16 bg-white rounded-full"></div>
+            </button>
+            <button class="text-white p-4 opacity-0"><i class="fa-solid fa-rotate"></i></button>
+        </div>
+    </div>
+
+    <div id="modal-request-form" class="fixed inset-0 z-[400] bg-slate-900/50 backdrop-blur-sm hidden flex items-end sm:items-center justify-center">
+        <div class="bg-white w-full sm:w-[400px] rounded-t-[32px] sm:rounded-[32px] p-6 animate-slideUp">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="req-form-title" class="text-lg font-bold text-slate-800">Tạo đơn</h3>
+                <button onclick="closeRequestModal()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase mb-1 block">Từ ngày</label>
+                        <input id="req-date-start" type="date" class="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-400 uppercase mb-1 block">Đến ngày</label>
+                        <input id="req-date-end" type="date" class="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase mb-1 block">Lý do</label>
+                    <textarea id="req-reason" rows="3" class="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-sm font-medium outline-none focus:ring-2 focus:ring-emerald-500" placeholder="Nhập lý do chi tiết..."></textarea>
+                </div>
+                
+                <button onclick="submitRequest()" class="w-full bg-emerald-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 active:scale-95 transition-all mt-2">
+                    Gửi đơn <i class="fa-solid fa-paper-plane ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-notifications" class="fixed inset-0 z-[400] bg-slate-900/50 backdrop-blur-sm hidden flex items-end sm:items-center justify-center">
+        <div class="bg-white w-full sm:w-[400px] h-[80vh] rounded-t-[32px] sm:rounded-[32px] flex flex-col animate-slideUp">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white rounded-t-[32px]">
+                <h3 id="modal-noti-title" class="text-lg font-bold text-slate-800">Thông báo</h3>
+                <button onclick="closeNotifications()" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div id="noti-list" class="flex-1 overflow-y-auto p-6 bg-slate-50">
+                </div>
+            
+            <div id="action-approve-bar" class="p-4 bg-white border-t border-slate-100 hidden">
+                <button onclick="confirmApprove()" id="btn-approve-selected" disabled class="w-full bg-emerald-500 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-emerald-200 active:scale-95 transition-all opacity-50">
+                    Chọn đơn để duyệt
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-reject-reason" class="fixed inset-0 z-[450] bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-6">
+      <div class="bg-white w-full max-w-xs rounded-3xl p-6 animate-zoomIn">
+        <h3 class="text-lg font-bold text-slate-800 mb-4">Lý do từ chối</h3>
+        <textarea
+          id="reject-reason"
+          rows="3"
+          class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-red-500 mb-4"
+          placeholder="Nhập lý do..."
+        ></textarea>
+        <div class="flex gap-3">
           <button
-            onclick="closeRejectModal()"
-            class="w-full bg-slate-100 text-slate-600 font-bold py-3.5 rounded-2xl transition-all active:scale-95"
+            onclick="document.getElementById('modal-reject-reason').classList.add('hidden')"
+            class="flex-1 bg-slate-100 text-slate-600 font-bold py-3.5 rounded-2xl transition-all active:scale-95"
           >
             Hủy
           </button>
@@ -1150,5 +362,6 @@
     </div>
 
     <script src="script.js"></script>
+
   </body>
 </html>
