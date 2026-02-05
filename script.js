@@ -5,7 +5,8 @@
 const SUPABASE_URL = "https://gfeeafeqpirlppugieib.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_K65r6aBo5DG2kY0ZptgCeg_3FGfQRuU"; 
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// [FIX LỖI] Đổi tên biến thành 'sb' để không trùng với thư viện 'supabase' gốc
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ==========================================
 // 1. BIẾN TOÀN CỤC & UTILS
@@ -27,12 +28,12 @@ const HISTORY_PAGE_SIZE = 5;
 
 // Biến tạm cho Form
 var tempAvatarBase64 = null;
-var tempAvatarFile = null; // [Mới] Lưu file để upload Storage
+var tempAvatarFile = null; 
 var currentReqType = "Nghỉ phép";
 var currentProfileLocation = "";
 var currentRejectId = null;
 
-// SKELETON LOADERS (Giữ nguyên UI cũ)
+// SKELETON LOADERS
 const SKELETON_CONTACT = `
   <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-3 mb-3 animate-pulse">
       <div class="w-12 h-12 rounded-2xl bg-slate-200"></div>
@@ -47,7 +48,6 @@ const SKELETON_CONTACT = `
 // 2. KHỞI TẠO APP
 // ==========================================
 
-// Hàm tạo/lấy ID thiết bị (Giữ nguyên logic)
 function getDeviceId() {
   var devId = localStorage.getItem("army_device_id");
   if (!devId) {
@@ -58,22 +58,20 @@ function getDeviceId() {
 }
 
 document.addEventListener("DOMContentLoaded", async function () {
-  // [Mới] Kiểm tra Session Supabase
-  const { data: { session } } = await supabase.auth.getSession();
+  // Kiểm tra Session Supabase
+  // [FIX] Dùng biến 'sb' thay vì 'supabase'
+  const { data: { session } } = await sb.auth.getSession();
   
   if (session) {
-    // Đã đăng nhập -> Lấy thông tin NV và vào App
     await initAppByAuthId(session.user.id);
   } else {
-    // Chưa đăng nhập -> Hiện màn hình Login
     showLoginScreen();
   }
 
-  // Chạy đồng hồ
   setInterval(updateClock, 1000);
   updateClock();
 
-  // Bind Events (Giữ nguyên)
+  // Bind Events
   var btnReject = document.getElementById("btn-confirm-reject");
   if (btnReject) btnReject.onclick = handleConfirmReject;
   
@@ -86,32 +84,23 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (inputPass) inputPass.addEventListener("keydown", triggerLoginOnEnter);
 });
 
-// [Mới] Hàm khởi tạo App từ Auth ID
 async function initAppByAuthId(authId) {
     try {
-        // Lấy mã nhân viên từ bảng employees
-        const { data: emp, error } = await supabase
+        const { data: emp, error } = await sb
             .from('employees')
             .select('employee_code')
             .eq('auth_user_id', authId)
             .single();
 
         if (error || !emp) throw new Error("Không tìm thấy hồ sơ nhân viên");
-
-        // Lưu thông tin tạm
-        // currentUser sẽ được load đầy đủ trong hàm loadDashboardData
-        // Nhưng ta cần employee_code để gọi RPC get_dashboard_data
         
-        // Gọi hàm load dữ liệu chính
         await loadDashboardData(emp.employee_code);
         
-        // Vào màn hình chính
         document.getElementById("view-login").classList.add("hidden");
         document.getElementById("view-main").classList.remove("hidden");
         toggleGlobalNav(true);
         switchTab("home");
 
-        // Auto refresh
         if (refreshInterval) clearInterval(refreshInterval);
         refreshInterval = setInterval(() => loadDashboardData(emp.employee_code), 30000);
 
@@ -125,6 +114,7 @@ async function initAppByAuthId(authId) {
 // 3. XỬ LÝ ĐĂNG NHẬP & LOGOUT
 // ==========================================
 
+// Gán trực tiếp vào window để tránh lỗi 'handleLogin is not defined'
 window.handleLogin = async function () {
   var email = document.getElementById("login-user").value.trim();
   var pass = document.getElementById("login-pass").value.trim();
@@ -133,15 +123,13 @@ window.handleLogin = async function () {
 
   showLoading(true);
   try {
-      // 1. Đăng nhập qua Supabase Auth
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await sb.auth.signInWithPassword({
           email: email,
           password: pass
       });
 
       if (error) throw new Error("Email hoặc mật khẩu không đúng!");
 
-      // 2. Vào App
       await initAppByAuthId(data.user.id);
       showToast("success", "Đăng nhập thành công!");
 
@@ -153,11 +141,10 @@ window.handleLogin = async function () {
 };
 
 window.logout = async function () {
-  await supabase.auth.signOut();
+  await sb.auth.signOut();
   currentUser = null;
   if (refreshInterval) clearInterval(refreshInterval);
   showLoginScreen();
-  // Reset UI
   document.getElementById("login-pass").value = "";
 };
 
@@ -172,16 +159,14 @@ function showLoginScreen() {
 // ==========================================
 
 async function loadDashboardData(forceEmpCode = null) {
-  // Lấy mã NV từ tham số hoặc từ currentUser hiện tại
   const empCode = forceEmpCode || (currentUser ? currentUser.Employee_ID : null);
   if (!empCode) return;
 
-  // Hiệu ứng loading nhẹ ở Home
   toggleHomeState("loading");
 
   try {
-      // GỌI RPC (Hàm SQL Backend)
-      const { data, error } = await supabase.rpc('get_dashboard_data', { 
+      // Gọi RPC qua biến 'sb'
+      const { data, error } = await sb.rpc('get_dashboard_data', { 
           p_employee_code: empCode 
       });
 
@@ -190,12 +175,10 @@ async function loadDashboardData(forceEmpCode = null) {
 
       const res = data.data;
 
-      // 1. Cập nhật Current User
       currentUser = res.userProfile;
-      currentUser.UUID = currentUser.Auth_ID; // Map thêm ID để dùng nội bộ nếu cần
+      currentUser.UUID = currentUser.Auth_ID; 
       renderUserInfo();
 
-      // 2. Cập nhật Thống kê & Lịch sử
       const stats = res.history.summary || { work_days: 0, late_mins: 0, error_count: 0, leave_days: 0, standard_days: 26 };
       renderHistoryStats({
           workDays: stats.work_days,
@@ -203,7 +186,7 @@ async function loadDashboardData(forceEmpCode = null) {
           errorCount: stats.error_count,
           leaveDays: stats.leave_days,
           standardDays: stats.standard_days,
-          remainingLeave: stats.remaining_leave || currentUser.Annual_Leave_Balance // Fallback
+          remainingLeave: stats.remaining_leave || currentUser.Annual_Leave_Balance
       });
 
       allHistoryData = (res.history.history || []).map(h => ({
@@ -217,22 +200,18 @@ async function loadDashboardData(forceEmpCode = null) {
       
       if (currentHistoryPage === 0) renderActivityHistory();
 
-      // 3. Cập nhật Thông báo & Đơn từ
       cachedNotifications = res.notifications;
       renderNotificationsBadge(res.notifications);
       
-      // Update UI Modal nếu đang mở
       if (!document.getElementById("modal-notifications").classList.contains("hidden")) {
           const title = document.getElementById("modal-noti-title").innerText;
           renderNotificationContent(res.notifications, title === "Duyệt đơn từ" ? "approve" : "all");
       }
 
-      // 4. Update Trạng thái (Idle/Working)
       checkCurrentStatus(res.history.history);
 
   } catch (err) {
       console.error("Dashboard Error:", err);
-      // Không show toast lỗi liên tục để tránh phiền
   }
 }
 
@@ -254,7 +233,6 @@ window.takePicture = function () {
   canvas.width = v.videoWidth; canvas.height = v.videoHeight;
   canvas.getContext("2d").drawImage(v, 0, 0);
   
-  // Chuyển sang Blob để upload Supabase
   canvas.toBlob(async function(blob) {
       closeCamera();
       showLoading(true);
@@ -264,9 +242,8 @@ window.takePicture = function () {
               const lat = pos.coords.latitude;
               const lng = pos.coords.longitude;
               
-              // 1. Upload Ảnh lên Storage
               const fileName = `${currentUser.Employee_ID}_${Date.now()}.jpg`;
-              const { data: imgData, error: imgErr } = await supabase.storage
+              const { data: imgData, error: imgErr } = await sb.storage
                   .from('attendance_photos')
                   .upload(fileName, blob);
               
@@ -274,19 +251,18 @@ window.takePicture = function () {
 
               const imgUrl = `${SUPABASE_URL}/storage/v1/object/public/attendance_photos/${fileName}`;
 
-              // 2. Insert vào DB (Trigger Backend sẽ lo tính toán)
-              const { error } = await supabase
+              const { error } = await sb
                   .from('attendance_logs')
                   .insert({
-                      employee_id: await getEmployeeUUID(), // Hàm tiện ích lấy UUID
-                      location_id: await getLocationID(),   // Hàm tiện ích
-                      work_date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+                      employee_id: await getEmployeeUUID(),
+                      location_id: await getLocationID(),
+                      work_date: new Date().toISOString().split('T')[0],
                       time_in: new Date().toISOString(),
                       checkin_lat: lat,
                       checkin_lng: lng,
                       selfie_url: imgUrl,
                       device_id: myDeviceId,
-                      checkin_type: 'GPS' // Mặc định
+                      checkin_type: 'GPS'
                   });
 
               if (error) throw error;
@@ -313,12 +289,10 @@ window.triggerCheckOut = function () {
           const empUuid = await getEmployeeUUID();
           const today = new Date().toISOString().split('T')[0];
 
-          // Update dòng chấm công gần nhất của hôm nay chưa checkout
-          const { error } = await supabase
+          const { error } = await sb
               .from('attendance_logs')
               .update({ 
                   time_out: new Date().toISOString()
-                  // Trigger sẽ tự tính work_hours
               })
               .eq('employee_id', empUuid)
               .eq('work_date', today)
@@ -349,7 +323,7 @@ window.submitRequest = async function () {
 
   showLoading(true);
   try {
-      const { error } = await supabase
+      const { error } = await sb
           .from('leave_requests')
           .insert({
               request_code: `REQ_${Date.now()}`,
@@ -377,9 +351,8 @@ window.confirmApprove = async function () {
   if (selectedRequests.length === 0) return;
   showLoading(true);
   try {
-      // Duyệt từng đơn
       for (let reqId of selectedRequests) {
-          const { error } = await supabase
+          const { error } = await sb
               .from('leave_requests')
               .update({ 
                   status: 'Approved',
@@ -401,7 +374,6 @@ window.confirmApprove = async function () {
   }
 };
 
-// Hàm xử lý Từ chối (Logic cũ gọi processRequestAdmin)
 window.handleConfirmReject = async function () {
   if (!currentRejectId) return;
   var reason = document.getElementById("reject-reason").value;
@@ -409,7 +381,7 @@ window.handleConfirmReject = async function () {
 
   showLoading(true);
   try {
-      const { error } = await supabase
+      const { error } = await sb
           .from('leave_requests')
           .update({
               status: 'Rejected',
@@ -434,7 +406,7 @@ window.handleConfirmReject = async function () {
 };
 
 // ==========================================
-// 7. CÁC HÀM UI/UX (GIỮ NGUYÊN 100%)
+// 7. CÁC HÀM UI/UX (GIỮ NGUYÊN)
 // ==========================================
 
 function updateClock() {
@@ -461,7 +433,6 @@ function renderUserInfo() {
   document.getElementById("profile-dept").innerText = currentUser.Department || "Chưa cập nhật";
   document.getElementById("profile-email").innerText = currentUser.Email || "Chưa cập nhật";
   
-  // Hiển thị Device ID hiện tại (Thay vì Trusted Device ID từ DB vì đã xóa)
   document.getElementById("profile-device").innerText = myDeviceId; 
   currentProfileLocation = currentUser.Location_Name;
   document.getElementById("profile-location").innerText = currentUser.Location_Name;
@@ -474,92 +445,10 @@ function renderHistoryStats(stats) {
   
   const leaveEl = document.getElementById("stat-leave");
   if(leaveEl) {
-      // Hiển thị: Đã nghỉ / Tổng phép (Còn lại)
-      // Ví dụ: 1.0 / 12 (11.0)
       leaveEl.innerHTML = `<span class="text-emerald-600">${stats.leaveDays}</span> <span class="text-slate-400 text-xs">/ ${stats.remainingLeave}</span>`;
   }
 }
 
-function renderActivityHistory() {
-  const list = document.getElementById("activity-history-list");
-  list.innerHTML = "";
-  
-  const start = currentHistoryPage * HISTORY_PAGE_SIZE;
-  const pageData = allHistoryData.slice(start, start + HISTORY_PAGE_SIZE);
-
-  if (pageData.length === 0 && currentHistoryPage === 0) {
-      list.innerHTML = `<div class="text-center text-slate-400 py-4 text-sm">Chưa có dữ liệu chấm công tháng này</div>`;
-      return;
-  }
-
-  pageData.forEach((item, index) => {
-      const delay = index * 100;
-      const isLate = item.Is_Late_Penalty;
-      const statusColor = isLate ? "text-red-500 bg-red-50" : "text-emerald-600 bg-emerald-50";
-      const icon = isLate ? "fa-exclamation-circle" : "fa-check-circle";
-
-      let timeHtml = "";
-      if (item.Time_List && item.Time_List.length > 0) {
-          item.Time_List.forEach(t => {
-              timeHtml += `<div class="text-xs font-mono text-slate-600 bg-slate-100 px-2 py-1 rounded mb-1 last:mb-0 text-center">
-                  ${t.in} - ${t.out || "..."}
-              </div>`;
-          });
-      }
-
-      const html = `
-      <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between animate-slideUp" style="animation-delay: ${delay}ms">
-          <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-2xl ${statusColor} flex items-center justify-center text-xl shadow-sm">
-                  <i class="fa-solid ${icon}"></i>
-              </div>
-              <div>
-                  <div class="font-bold text-slate-800">${item.Date}</div>
-                  <div class="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
-                     ${isLate ? `<span class="text-red-500 font-bold">Đi trễ ${item.Late_Minutes_Total}p</span>` : 
-                     `<span class="text-emerald-600">Công: ${item.Total_Work_Hours}h</span>`}
-                  </div>
-              </div>
-          </div>
-          <div class="flex flex-col items-end gap-1">
-              ${timeHtml}
-          </div>
-      </div>`;
-      list.insertAdjacentHTML("beforeend", html);
-  });
-
-  // Nút xem thêm
-  const btnMore = document.getElementById("btn-load-more-history");
-  if (allHistoryData.length > (currentHistoryPage + 1) * HISTORY_PAGE_SIZE) {
-      btnMore.classList.remove("hidden");
-  } else {
-      btnMore.classList.add("hidden");
-  }
-}
-
-window.loadMoreHistory = function() {
-    currentHistoryPage++;
-    renderActivityHistory(); // Append logic handled by full re-render of slice? No, logic above overwrites.
-    // Fix: renderActivityHistory clears list. We should APPEND.
-    // Let's fix UI logic slightly to support Append mode or simple Pagination
-    // Original logic seemed to overwrite. Let's keep it simple: Expand page size?
-    // Actually, let's just re-render with larger slice or append.
-    // To respect "100% UI", I will modify renderActivityHistory slightly to NOT clear if page > 0
-    // But above I wrote list.innerHTML = "".
-    // Correct approach for Load More:
-    const list = document.getElementById("activity-history-list");
-    const start = currentHistoryPage * HISTORY_PAGE_SIZE;
-    const pageData = allHistoryData.slice(start, start + HISTORY_PAGE_SIZE);
-    
-    pageData.forEach((item, index) => {
-       // ... same render logic ...
-       // Duplicate code warning. Better to refactor renderActivityHistory to take 'append' flag.
-    });
-    // RE-WRITE renderActivityHistory below to support this correctly
-    renderActivityHistory(true);
-};
-
-// Override hàm trên để hỗ trợ Load More đúng
 function renderActivityHistory(isAppend = false) {
     const list = document.getElementById("activity-history-list");
     if (!isAppend) list.innerHTML = "";
@@ -612,7 +501,11 @@ function renderActivityHistory(isAppend = false) {
     }
 }
 
-// History Month Control (Logic Query DB trực tiếp)
+window.loadMoreHistory = function() {
+    currentHistoryPage++;
+    renderActivityHistory(true);
+};
+
 window.changeHistoryMonth = function (delta) {
   viewHistoryDate.setMonth(viewHistoryDate.getMonth() + delta);
   loadHistoryOnly();
@@ -629,8 +522,7 @@ async function loadHistoryOnly() {
   list.innerHTML = `<div class="flex flex-col items-center justify-center py-10 opacity-50 space-y-3"><div class="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-emerald-500"></div></div>`;
 
   try {
-      // Query bảng attendance_logs
-      const { data, error } = await supabase
+      const { data, error } = await sb
           .from('attendance_logs')
           .select('*')
           .eq('employee_id', await getEmployeeUUID())
@@ -645,6 +537,7 @@ async function loadHistoryOnly() {
           Time_List: [{ in: formatTime(h.time_in), out: formatTime(h.time_out) }],
           Total_Work_Hours: h.work_hours,
           Late_Minutes_Total: h.late_minutes,
+          Status: h.status,
           Is_Late_Penalty: h.status === 'Late'
       }));
 
@@ -656,13 +549,12 @@ async function loadHistoryOnly() {
   }
 }
 
-// Contacts Tab (Lấy từ bảng employees)
 async function loadContacts() {
     const list = document.getElementById("contact-list");
     list.innerHTML = SKELETON_CONTACT;
     
     try {
-        const { data, error } = await supabase
+        const { data, error } = await sb
             .from('employees')
             .select('full_name, position, phone, department, avatar_url, locations(location_name)')
             .eq('status', 'Active')
@@ -719,12 +611,11 @@ window.filterContacts = function(keyword) {
     renderContacts(filtered);
 };
 
-// Locations Tab
 async function loadLocations() {
     const list = document.getElementById("location-list");
-    list.innerHTML = SKELETON_CONTACT; // Reuse skeleton
+    list.innerHTML = SKELETON_CONTACT; 
     try {
-        const { data, error } = await supabase.from('locations').select('*');
+        const { data, error } = await sb.from('locations').select('*');
         if (error) throw error;
         
         list.innerHTML = "";
@@ -749,7 +640,6 @@ async function loadLocations() {
     }
 }
 
-// Notifications logic
 function renderNotificationsBadge(notiData) {
     const total = (notiData.approvals || []).length + (notiData.myRequests || []).length;
     const badge = document.getElementById("noti-badge");
@@ -777,7 +667,6 @@ function renderNotificationContent(data, type) {
     const list = document.getElementById("noti-list");
     list.innerHTML = "";
     
-    // 1. Tab Duyệt đơn (Cho Manager/Admin)
     if(type === 'approve' || type === 'all') {
         const apps = data.approvals || [];
         if(apps.length > 0) {
@@ -800,7 +689,6 @@ function renderNotificationContent(data, type) {
                 </div>`;
                 list.insertAdjacentHTML("beforeend", html);
             });
-            // Show nút duyệt hàng loạt
             document.getElementById("action-approve-bar").classList.remove("hidden");
         } else if (type === 'approve') {
             list.innerHTML = `<div class="text-center text-slate-400 py-10">Không có đơn cần duyệt</div>`;
@@ -808,7 +696,6 @@ function renderNotificationContent(data, type) {
         }
     }
 
-    // 2. Tab Đơn của tôi
     if(type === 'all') {
         const my = data.myRequests || [];
         if(my.length > 0) {
@@ -848,7 +735,6 @@ window.toggleSelectRequest = function(id, btn) {
         btn.classList.add("bg-emerald-500", "text-white", "border-emerald-500");
         btn.innerText = "Đã chọn";
     }
-    // Update nút tổng
     const btnApproveAll = document.getElementById("btn-approve-selected");
     if(selectedRequests.length > 0) {
         btnApproveAll.innerHTML = `Duyệt ${selectedRequests.length} đơn <i class="fa-solid fa-check ml-2"></i>`;
@@ -872,30 +758,24 @@ window.openRejectModal = function(id) {
 
 async function getEmployeeUUID() {
     if (currentUser && currentUser.UUID) return currentUser.UUID;
-    // Fallback: Tìm lại từ Auth
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await sb.auth.getUser();
     if (!user) throw new Error("Chưa đăng nhập");
-    const { data } = await supabase.from('employees').select('id').eq('auth_user_id', user.id).single();
+    const { data } = await sb.from('employees').select('id').eq('auth_user_id', user.id).single();
     return data.id;
 }
 
 async function getLocationID() {
-    // Trả về ID địa điểm (nếu có trong profile), ngược lại tìm theo location_code
-    if(currentUser.Location_ID) return currentUser.Location_ID; // Nếu backend trả về
-    // Nếu chỉ có Code/Name, query lại (Nhưng hàm get_dashboard_data ở SQL nên trả về Location ID để tối ưu)
-    // Tạm thời fallback sang bảng employees query lại
+    if(currentUser.Location_ID) return currentUser.Location_ID;
     const uuid = await getEmployeeUUID();
-    const { data } = await supabase.from('employees').select('location_id').eq('id', uuid).single();
+    const { data } = await sb.from('employees').select('location_id').eq('id', uuid).single();
     return data.location_id;
 }
 
 function checkCurrentStatus(history) {
     if (!history || history.length === 0) return toggleHomeState("idle");
     const todayStr = new Date().toISOString().split('T')[0];
-    // Tìm log check-in hôm nay
     const todayLog = history.find(h => h.work_date === todayStr);
     
-    // Logic: Có Check-in nhưng CHƯA Check-out -> Working
     if (todayLog && todayLog.time_in && !todayLog.time_out) {
         toggleHomeState("working");
     } else {
@@ -910,18 +790,15 @@ function toggleHomeState(state) {
 }
 
 function switchTab(tabName) {
-    // Hide all views
     document.querySelectorAll(".view-section").forEach(el => el.classList.add("hidden"));
     document.getElementById(`view-${tabName}`).classList.remove("hidden");
     
-    // Update Nav
     document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
     const activeBtn = document.querySelector(`button[onclick="switchTab('${tabName}')"]`);
     if(activeBtn) activeBtn.classList.add("active");
 
-    // Load data specific
     if(tabName === 'contacts') loadContacts();
-    if(tabName === 'requests') loadLocations(); // Tận dụng tab Requests để show thêm info nếu cần
+    if(tabName === 'requests') loadLocations(); 
 }
 
 function toggleGlobalNav(show) {
@@ -942,7 +819,7 @@ function showToast(type, msg) {
     const text = toast.querySelector("span");
     
     text.innerText = msg;
-    toast.className = ""; // Reset
+    toast.className = ""; 
     
     if (type === "success") {
         icon.className = "fa-solid fa-check-circle text-emerald-500 text-xl";
@@ -974,8 +851,6 @@ function openRequestModal(type) {
     currentReqType = type;
     document.getElementById("modal-request-form").classList.remove("hidden");
     document.getElementById("req-form-title").innerText = "Tạo đơn " + type;
-    
-    // Reset form
     document.getElementById("req-reason").value = "";
     document.getElementById("req-date-start").valueAsDate = new Date();
     document.getElementById("req-date-end").valueAsDate = new Date();
@@ -999,12 +874,10 @@ function formatDateVN(isoDate) {
 
 function formatTime(isoTime) {
     if(!isoTime) return "";
-    // Xử lý chuỗi thời gian PostgreSQL (HH:MM:SS hoặc ISO)
     if(isoTime.includes('T')) {
         const d = new Date(isoTime);
         return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
     } else {
-        // Cắt giây nếu có
         return isoTime.substring(0, 5);
     }
 }
@@ -1014,7 +887,6 @@ function animateValue(id, start, end) {
     if(!obj) return;
     if (start === end) return;
     
-    // Nếu là số thập phân
     const isFloat = end % 1 !== 0;
     const duration = 1000;
     let startTimestamp = null;
