@@ -417,25 +417,20 @@ function updateClock() {
   document.getElementById("clock-date").innerText = dateStr;
 }
 
-function renderUserInfo() {
-  if (!currentUser) return;
-  document.getElementById("user-name").innerText = currentUser.Name;
-  document.getElementById("user-role").innerText = currentUser.Position || currentUser.Role;
-  
-  const avaUrl = currentUser.Avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(currentUser.Name) + "&background=random";
-  document.getElementById("user-avatar").src = avaUrl;
-  document.getElementById("profile-avatar").src = avaUrl;
-  document.getElementById("sidebar-avatar").src = avaUrl;
+// Thay thế hàm updateClock cũ bằng hàm này
+function updateClock() {
+  const timeEl = document.getElementById("clock-time");
+  const dateEl = document.getElementById("clock-date");
 
-  document.getElementById("profile-name").innerText = currentUser.Name;
-  document.getElementById("profile-id").innerText = "ID: " + currentUser.Employee_ID;
-  document.getElementById("profile-role").innerText = currentUser.Role;
-  document.getElementById("profile-dept").innerText = currentUser.Department || "Chưa cập nhật";
-  document.getElementById("profile-email").innerText = currentUser.Email || "Chưa cập nhật";
+  // Nếu không tìm thấy thẻ (do đang ở màn hình login hoặc HTML cũ) thì dừng lại, không báo lỗi nữa
+  if (!timeEl || !dateEl) return;
+
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+  const dateStr = now.toLocaleDateString("vi-VN", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
   
-  document.getElementById("profile-device").innerText = myDeviceId; 
-  currentProfileLocation = currentUser.Location_Name;
-  document.getElementById("profile-location").innerText = currentUser.Location_Name;
+  timeEl.innerText = timeStr;
+  dateEl.innerText = dateStr;
 }
 
 function renderHistoryStats(stats) {
@@ -902,4 +897,5 @@ function animateValue(id, start, end) {
     };
     window.requestAnimationFrame(step);
 }
+
 
