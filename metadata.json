@@ -1,0 +1,8 @@
+{
+  "name": "Army HRM V2026",
+  "description": "Human Resource Management System with Geolocation Attendance, Leave Requests, and Employee Directory.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
