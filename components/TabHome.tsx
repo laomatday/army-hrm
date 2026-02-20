@@ -12,6 +12,7 @@ interface Props {
   loading: boolean;
   onCheckIn: () => void;
   onCheckOut: () => void;
+  onScanKiosk: () => void;
   onChangeTab: (t: any) => void;
   onCreateRequest: () => void;
   onRefresh: () => Promise<void>;
@@ -62,7 +63,7 @@ const StatCard = ({
     );
 };
 
-const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onChangeTab, onCreateRequest, onRefresh, onAlert }) => {
+const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onScanKiosk, onChangeTab, onCreateRequest, onRefresh, onAlert }) => {
   // Initialize with current time/date to prevent "00:00" flash on mount
   const [timeStr, setTimeStr] = useState(() => {
     return new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", hour12: false });
@@ -180,7 +181,7 @@ const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onChan
   const handleCheckInClick = () => {
       triggerHaptic('medium');
       if (!data) {
-          onCheckIn();
+          onScanKiosk();
           return;
       }
 
@@ -195,7 +196,7 @@ const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onChan
       if (holiday) {
           setHolidayConfirm({ isOpen: true, name: holiday.name });
       } else {
-          onCheckIn();
+          onScanKiosk();
       }
   };
 
@@ -215,7 +216,7 @@ const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onChan
 
   const confirmHolidayWork = () => {
       setHolidayConfirm({ isOpen: false, name: '' });
-      onCheckIn();
+      onScanKiosk();
   };
 
   // --- DYNAMIC STATISTICS CALCULATION ---
@@ -452,7 +453,7 @@ const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onChan
                             <div className="relative">
                                 <div className="absolute top-0 left-0 w-full h-full rounded-full border border-emerald-500/10 animate-ping opacity-20"></div>
                                 <button onClick={handleCheckInClick} className="w-44 h-44 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-[0_25px_60px_-12px_rgba(5,150,105,0.4)] flex flex-col items-center justify-center text-white relative z-10 active:scale-95 transition-all group border-[6px] border-white dark:border-slate-800 ring-1 ring-slate-100 dark:ring-slate-700">
-                                    <i className="fa-solid fa-fingerprint text-6xl mb-3"></i>
+                                    <i className="fa-solid fa-qrcode text-6xl mb-3"></i>
                                     <span className="text-base font-extrabold uppercase tracking-widest">Chấm công</span>
                                 </button>
                             </div>

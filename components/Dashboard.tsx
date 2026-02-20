@@ -6,6 +6,7 @@ import { getDeviceId, triggerHaptic, calculateDistance } from '../utils/helpers'
 import { useDashboardData } from '../hooks/useDashboardData';
 import { useScrollControl } from '../hooks/useScrollControl';
 
+import { db } from '../services/firebase';
 import TabHome from './TabHome';
 import TabHistory from './TabHistory';
 import TabRequests from './TabRequests';
@@ -13,6 +14,7 @@ import TabContacts from './TabContacts';
 import TabProfile from './TabProfile';
 import TabManager from './TabManager'; 
 import ModalCamera from './ModalCamera';
+import ModalQRScanner from './ModalQRScanner';
 import NotificationsModal from './NotificationsModal';
 import ModalCreateRequest from './ModalCreateRequest';
 import BottomNav, { TabType } from './BottomNav';
@@ -51,6 +53,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [showCamera, setShowCamera] = useState(false);
+  const [showQRScanner, setShowQRScanner] = useState(false);
   const [checkingIn, setCheckingIn] = useState(false);
   const [showCheckoutConfirm, setShowCheckoutConfirm] = useState(false);
   
@@ -111,6 +114,48 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
     if(res.success) await refresh();
     setCheckingIn(false);
     handleShowAlert(res.success ? "Thành công" : "Lỗi", res.message, res.success ? 'success' : 'error');
+  };
+
+  const handleQRScan = async (data: string) => {
+      setShowQRScanner(false);
+      try {
+          const qrData = JSON.parse(data);
+          if (!qrData.kiosk_id || !qrData.token) {
+              handleShowAlert("Lỗi", "Mã QR không hợp lệ", "error");
+              return;
+          }
+
+          setCheckingIn(true);
+          // Create session in Firestore
+          const sessionRef = await db.collection('kiosk_sessions').add({
+              kiosk_id: qrData.kiosk_id,
+              token: qrData.token,
+              employee_id: currentUser.employee_id,
+              employee_name: currentUser.full_name,
+              status: 'pending',
+              created_at: new Date().toISOString()
+          });
+
+          // Listen for completion
+          const unsubscribe = db.collection('kiosk_sessions').doc(sessionRef.id)
+              .onSnapshot(async (doc) => {
+                  const session = doc.data();
+                  if (session?.status === 'completed') {
+                      unsubscribe();
+                      setCheckingIn(false);
+                      triggerHaptic('success');
+                      handleShowAlert("Thành công", "Đã ghi nhận chấm công từ Kiosk", "success");
+                      await refresh();
+                  } else if (session?.status === 'failed') {
+                      unsubscribe();
+                      setCheckingIn(false);
+                      handleShowAlert("Lỗi", session.error || "Chấm công thất bại", "error");
+                  }
+              });
+
+      } catch (e) {
+          handleShowAlert("Lỗi", "Không thể đọc mã QR", "error");
+      }
   };
 
   const processCheckOut = async () => {
@@ -198,6 +243,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
               {activeTab === 'home' && (
                 <TabHome 
                     data={data} loading={loading} onCheckIn={() => setShowCamera(true)} onCheckOut={() => setShowCheckoutConfirm(true)} 
+                    onScanKiosk={() => setShowQRScanner(true)}
                     onChangeTab={handleTabChange} onCreateRequest={() => setShowCreateRequestModal(true)} onRefresh={refresh}
                     onAlert={handleShowAlert}
                 />
@@ -249,6 +295,8 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
        )}
 
        {showCamera && <ModalCamera onClose={() => setShowCamera(false)} onCapture={handleCheckIn} onError={(msg) => handleShowAlert("Lỗi thiết bị", msg, 'error')} />}
+       
+       {showQRScanner && <ModalQRScanner onClose={() => setShowQRScanner(false)} onScan={handleQRScan} onError={(msg) => handleShowAlert("Lỗi thiết bị", msg, 'error')} />}
        
        <ConfirmDialog 
           isOpen={showCheckoutConfirm} title="Kết thúc ca làm việc?" message="Hệ thống sẽ ghi nhận giờ ra (Check-out)."

@@ -2,7 +2,7 @@
 import React from 'react';
 
 interface Props {
-  onSelectMode: (mode: 'app' | 'admin') => void;
+  onSelectMode: (mode: 'app' | 'admin' | 'kiosk') => void;
   onLogout: () => void;
 }
 
@@ -29,6 +29,19 @@ const AdminModeSelection: React.FC<Props> = ({ onSelectMode, onLogout }) => {
                      <div className="text-left">
                          <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1 group-hover:text-emerald-700 dark:group-hover:text-emerald-400">Ứng dụng Chấm công</h3>
                          <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Giao diện mobile cho việc check-in, check-out và xem báo cáo cá nhân.</p>
+                     </div>
+                 </button>
+
+                 <button 
+                    onClick={() => onSelectMode('kiosk')}
+                    className="w-full bg-white dark:bg-slate-800 p-6 rounded-[24px] shadow-lg shadow-blue-500/5 border border-slate-100 dark:border-slate-700 flex items-center gap-6 group hover:border-blue-500/50 transition-all active:scale-[0.98]"
+                 >
+                     <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-2xl group-hover:bg-blue-500 group-hover:text-white transition-colors shadow-sm">
+                         <i className="fa-solid fa-display"></i>
+                     </div>
+                     <div className="text-left">
+                         <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1 group-hover:text-blue-700 dark:group-hover:text-blue-400">Trạm Kiosk</h3>
+                         <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Chế độ đặt tại quầy lễ tân để nhân viên quét QR và chụp ảnh bằng chứng.</p>
                      </div>
                  </button>
 

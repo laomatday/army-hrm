@@ -4,12 +4,13 @@ import LoginView from './components/LoginView';
 import Dashboard from './components/Dashboard';
 import AdminPanel from './components/AdminPanel';
 import AdminModeSelection from './components/AdminModeSelection';
+import KioskMode from './components/KioskMode';
 import { Employee } from './types';
 import { messaging, db } from './services/firebase';
 import { saveDeviceToken } from './services/api';
 import { ToastProvider, useToast } from './contexts/ToastContext';
 
-type AppMode = 'selection' | 'app' | 'admin';
+type AppMode = 'selection' | 'app' | 'admin' | 'kiosk';
 
 function AppContent() {
   const [user, setUser] = useState<Employee | null>(() => {
@@ -181,6 +182,10 @@ function AppContent() {
 
   if (appMode === 'admin' && user.role === 'Admin') {
       return <AdminPanel user={user} onLogout={handleLogout} onBackToApp={() => handleModeSelect('app')} />;
+  }
+
+  if (appMode === 'kiosk' && user.role === 'Admin') {
+      return <KioskMode onExit={() => handleModeSelect('selection')} />;
   }
 
   return <Dashboard user={user} onLogout={handleLogout} />;
