@@ -6,7 +6,7 @@ export interface Employee {
   password?: string | number;
   role: string; // "Manager", "Staff", "Admin"
   center_id: string; // Chi nhánh quản lý chính
-  allowed_locations?: string[]; // Danh sách mã các chi nhánh được phép đến chấm công (MỚI)
+  allowed_locations?: string[]; // Danh sách mã các chi nhánh được phép đến chấm công
   position: string;
   department: string;
   phone: string | number;
@@ -16,7 +16,6 @@ export interface Employee {
   status: 'Active' | 'Inactive';
   direct_manager_id?: string;
   join_date?: string;
-  theme_color?: string;
   fcm_tokens?: string[];
 }
 
@@ -25,7 +24,7 @@ export interface Attendance {
   date: string; // YYYY-MM-DD
   employee_id: string;
   name: string;
-  center_id: string; // Mã chi nhánh thực tế tại thời điểm chấm công (CẬP NHẬT LOGIC)
+  center_id: string; // Mã chi nhánh thực tế tại thời điểm chấm công
   shift_name?: string;
   shift_start?: string;
   shift_end?: string;
@@ -43,30 +42,29 @@ export interface Attendance {
   status: 'Valid' | 'Late' | 'Invalid';
   is_valid: 'Yes' | 'No';
   note: string;
-  timestamp: number; // Dùng để sort client-side nếu cần
+  timestamp: number; 
   last_updated?: string;
   checkout_lat?: number;
   checkout_lng?: number;
   checkout_distance?: number;
   
-  // New fields for Pause/Resume logic
-  break_start?: string | null; // ISO string timestamp when pause started
-  total_break_mins?: number; // Total minutes accumulated in breaks
+  break_start?: string | null; 
+  total_break_mins?: number; 
 }
 
 export interface LeaveRequest {
-  id?: string; // Firestore Doc ID
+  id?: string; 
   request_id: string;
   employee_id: string;
   name: string;
-  created_at: string; // ISO String
+  created_at: string; 
   type: string;
   from_date: string; // YYYY-MM-DD
   to_date: string; // YYYY-MM-DD
   expiration_date?: string; // YYYY-MM-DD
   reason: string;
   status: 'Pending' | 'Approved' | 'Rejected';
-  note?: string; // Ghi chú của quản lý
+  note?: string; 
   manager_note?: string;
 }
 
@@ -74,7 +72,7 @@ export interface Explanation {
   id?: string;
   employee_id: string;
   name: string;
-  date: string; // The date being explained (YYYY-MM-DD)
+  date: string; // YYYY-MM-DD
   reason: string;
   status: 'Pending' | 'Approved' | 'Rejected';
   created_at: string;
@@ -94,9 +92,9 @@ export interface UserNotification {
 
 export interface LocationConfig {
   id?: string;
-  center_id: string; // Changed from location_id to match DB schema
-  location_name: string; // name
-  name?: string; // alias for location_name in code
+  center_id: string; 
+  location_name: string; 
+  name?: string; 
   latitude: number;
   longitude: number;
   radius_meters: number;
@@ -104,9 +102,9 @@ export interface LocationConfig {
 
 export interface ShiftConfig {
     name: string;
-    start: string; // start_time in DB
-    end: string;   // end_time in DB
-    break_point: string; // logic point to determine shift
+    start: string; 
+    end: string;   
+    break_point: string; 
 }
 
 export interface HolidayConfig {
@@ -121,44 +119,33 @@ export interface SystemConfig {
     MIN_HOURS_HALF: number;
     LUNCH_START: string;
     LUNCH_END: string;
-    OFF_DAYS: number[]; // 0=Sun, 6=Sat
+    OFF_DAYS: number[]; 
     MAX_DISTANCE_METERS: number;
     LOCK_DATE?: number;
 }
 
-// Cấu trúc bảng thống kê tháng (Updated to match api.ts implementation)
 export interface MonthlyStats {
-  key_id: string;        // ID định danh: NV001_2023-10
-  employee_id: string;   // Mã nhân viên
-  
-  // --- THÔNG TIN THỜI GIAN ---
+  key_id: string;        
+  employee_id: string;   
   month: number;         
   year: number;          
-  
-  // --- SỐ LIỆU SỐ NGÀY CÔNG HÀNG THÁNG ---
-  standard_days: number;   // Công chuẩn (Không tính ngày nghỉ tuần)
-  work_days: number;  // Tổng công thực tế (Work + Paid Leave + Holiday)
-
-  // --- CHI TIẾT ---
-  late_mins: number;   // Tổng phút trễ
-  late_count: number;           // Số lần trễ
-  early_mins: number;  // Tổng phút về sớm (used for backward compatibility)
-  early_leave_minutes?: number; // Explicit field for early leave minutes
+  standard_days: number;   
+  work_days: number;  
+  late_mins: number;   
+  late_count: number;           
+  early_mins: number;  
   early_count: number;
-  error_count: number;          // Số lỗi check-in/out (thiếu checkout)
-  
-  leave_days: number;      // Số ngày nghỉ phép có lương
+  error_count: number;          
+  leave_days: number;      
   remaining_leave: number;
-
-  // --- META DATA ---
   last_updated: string; 
 }
 
 export interface Kiosk {
   id?: string;
   name: string;
-  kiosk_id: string; // Unique identifier (e.g., KIOSK_01)
-  center_id: string; // Location associated with this Kiosk
+  kiosk_id: string; 
+  center_id: string; 
   status: 'Active' | 'Inactive';
   created_at: string;
   description?: string;
@@ -167,14 +154,14 @@ export interface Kiosk {
 export interface DashboardData {
   userProfile: Employee;
   history: {
-    history: Attendance[]; // Raw list for calendar view
+    history: Attendance[]; 
     summary: {
-        workDays: number;     // Mapped from work_days
-        lateMins: number;     // Mapped from late_mins
-        leaveDays: number;    // Mapped from leave_days
+        workDays: number;     
+        lateMins: number;     
+        leaveDays: number;    
         remainingLeave: number;
-        standardDays: number; // Mapped from standard_days
-        errorCount: number;   // Mapped from error_count
+        standardDays: number; 
+        errorCount: number;   
     };
   };
   notifications: {

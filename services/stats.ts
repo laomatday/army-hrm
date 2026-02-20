@@ -24,15 +24,12 @@ export async function calculateAndSaveMonthlyStats(employeeId: string, dateStr: 
         const offDays = sysConfig.OFF_DAYS || [0]; 
 
         // 2. Fetch Data (Attendance, Leaves, Explanations)
-        const startTs = new Date(year, month - 1, 1).getTime(); 
-        const endTs = new Date(year, month + 1, 1).getTime();   
-        const startId = `${employeeId}_${startTs}`;
-        const endId = `${employeeId}_${endTs}`;
-
         const attRef = db.collection(COLLECTIONS.ATTENDANCE);
+        
         const qAtt = attRef
-            .where(firebase.firestore.FieldPath.documentId(), ">=", startId)
-            .where(firebase.firestore.FieldPath.documentId(), "<", endId);
+            .where("employee_id", "==", employeeId)
+            .where("date", ">=", startStr)
+            .where("date", "<=", endStr);
         
         const [attSnap, leaveSnap, explainSnap, userSnap] = await Promise.all([
             qAtt.get(),
@@ -47,11 +44,14 @@ export async function calculateAndSaveMonthlyStats(employeeId: string, dateStr: 
             db.collection(COLLECTIONS.EMPLOYEES).doc(employeeId).get()
         ]);
         
-        const monthAtt = attSnap.docs
-            .map(d => d.data() as Attendance)
-            .filter(a => a.date >= startStr && a.date <= endStr);
+        const monthAtt = attSnap.docs.map(d => d.data() as Attendance);
         
-        const leaves = leaveSnap.docs.map(d => d.data() as LeaveRequest);
+        const leaves = leaveSnap.docs
+            .map(d => d.data() as LeaveRequest)
+            .filter(req => {
+                return (req.from_date >= startStr && req.from_date <= endStr) || 
+                       (req.to_date >= startStr && req.to_date <= endStr);
+            });
         
         const explanations = explainSnap.docs
             .map(d => d.data() as Explanation)
@@ -78,19 +78,26 @@ export async function calculateAndSaveMonthlyStats(employeeId: string, dateStr: 
         }
 
         // 4. Calculate Stats
-        const dailyMap: Record<string, { hours: number, late: number, early: number, error: number, isExcused: boolean }> = {};
-        let leave_days = 0;
+        const dailyMap: Record<string, { 
+            hours: number, 
+            late: number, 
+            early: number, 
+            error: number, 
+            isLeave: boolean,
+            isExplained: boolean,
+            isHoliday: boolean 
+        }> = {};
 
         // A. Process Attendance
         monthAtt.forEach(att => {
              const dStr = att.date;
-             if (!dailyMap[dStr]) dailyMap[dStr] = { hours: 0, late: 0, early: 0, error: 0, isExcused: false };
+             if (!dailyMap[dStr]) dailyMap[dStr] = { hours: 0, late: 0, early: 0, error: 0, isLeave: false, isExplained: false, isHoliday: false };
              
              let hours = 0;
              if (att.time_in && att.time_out) {
                  hours = att.work_hours || 0;
              } 
-             // Error if no checkout by end of day (and date is in past)
+             
              if (!att.time_out && dStr < todayStr) {
                  dailyMap[dStr].error = 1;
              }
@@ -101,22 +108,18 @@ export async function calculateAndSaveMonthlyStats(employeeId: string, dateStr: 
         });
 
         // B. Process Leaves
+        let leave_days = 0;
         leaves.forEach(req => {
-            const fromDate = new Date(req.from_date);
+            let loop = new Date(req.from_date);
             const toDate = new Date(req.to_date);
-            const type = req.type;
 
-            let loop = new Date(fromDate);
             while (loop <= toDate) {
-                if (loop.getMonth() + 1 === month && loop.getFullYear() === year) {
-                    const dStr = loop.toISOString().split('T')[0];
-                    if (!dailyMap[dStr]) dailyMap[dStr] = { hours: 0, late: 0, early: 0, error: 0, isExcused: false };
-
-                    dailyMap[dStr].isExcused = true;
-                    // Reset errors if excused
-                    dailyMap[dStr].error = 0;
-
-                    if (type.includes("Nghỉ phép")) {
+                const dStr = loop.toISOString().split('T')[0];
+                if (dStr >= startStr && dStr <= endStr) {
+                    if (!dailyMap[dStr]) dailyMap[dStr] = { hours: 0, late: 0, early: 0, error: 0, isLeave: false, isExplained: false, isHoliday: false };
+                    
+                    dailyMap[dStr].isLeave = true;
+                    if (req.type.includes("Nghỉ phép")) {
                          leave_days++;
                     }
                 }
@@ -127,13 +130,8 @@ export async function calculateAndSaveMonthlyStats(employeeId: string, dateStr: 
         // C. Process Explanations
         explanations.forEach(exp => {
             const dStr = exp.date;
-            if (dailyMap[dStr]) {
-                dailyMap[dStr].isExcused = true;
-                dailyMap[dStr].error = 0; 
-            } else {
-                // If explanation approved but no attendance record (e.g., completely forgot), treat as excused working day
-                dailyMap[dStr] = { hours: 0, late: 0, early: 0, error: 0, isExcused: true };
-            }
+            if (!dailyMap[dStr]) dailyMap[dStr] = { hours: 0, late: 0, early: 0, error: 0, isLeave: false, isExplained: false, isHoliday: false };
+            dailyMap[dStr].isExplained = true;
         });
 
         // D. Final Aggregation
@@ -144,20 +142,28 @@ export async function calculateAndSaveMonthlyStats(employeeId: string, dateStr: 
         let late_count = 0;
         let early_count = 0;
 
+        holidaySet.forEach(dStr => {
+            if (dStr >= startStr && dStr <= endStr) {
+                if (!dailyMap[dStr]) dailyMap[dStr] = { hours: 0, late: 0, early: 0, error: 0, isLeave: false, isExplained: false, isHoliday: false };
+                dailyMap[dStr].isHoliday = true;
+            }
+        });
+
         Object.keys(dailyMap).forEach(d => {
             const day = dailyMap[d];
+            const isExcused = day.isLeave || day.isExplained || day.isHoliday;
             
-            if (day.isExcused) {
-                work_days += 1.0; 
-            } else {
-                let dayCredit = 0;
-                if (day.hours >= sysConfig.MIN_HOURS_FULL) {
-                    dayCredit = 1.0;
-                } else if (day.hours >= sysConfig.MIN_HOURS_HALF) {
-                    dayCredit = 0.5;
-                }
-                work_days += dayCredit;
+            let dayCredit = 0;
+            if (day.hours >= sysConfig.MIN_HOURS_FULL) {
+                dayCredit = 1.0;
+            } else if (day.hours >= sysConfig.MIN_HOURS_HALF) {
+                dayCredit = 0.5;
+            }
 
+            if (isExcused) {
+                work_days += Math.max(dayCredit, 1.0);
+            } else {
+                work_days += dayCredit;
                 total_late_minutes += day.late;
                 total_early_minutes += day.early;
                 error_count += day.error;
@@ -167,23 +173,9 @@ export async function calculateAndSaveMonthlyStats(employeeId: string, dateStr: 
             }
         });
 
-        // Add holidays to work_days (Paid holidays)
-        holidaySet.forEach(dStr => {
-            const dDate = new Date(dStr);
-            if (dDate.getMonth() + 1 === month && dDate.getFullYear() === year) {
-                 const dayOfWeek = dDate.getDay();
-                 if (!offDays.includes(dayOfWeek)) {
-                     // If no work/leave recorded on holiday, count it as paid work day
-                     if (!dailyMap[dStr]) {
-                         work_days += 1.0;
-                     }
-                 }
-            }
-        });
-
         // 5. Update Stats
-        const userData = userSnap.data() as Employee;
-        const currentBalance = userData?.annual_leave_balance || 12;
+        const userData = userSnap.exists ? (userSnap.data() as Employee) : null;
+        const currentBalance = userData?.annual_leave_balance ?? 12;
 
         const statsData: MonthlyStats = {
             key_id: keyId,
@@ -195,7 +187,6 @@ export async function calculateAndSaveMonthlyStats(employeeId: string, dateStr: 
             late_mins: total_late_minutes,
             late_count,
             early_mins: total_early_minutes, 
-            early_leave_minutes: total_early_minutes,
             early_count,
             error_count,
             leave_days,
@@ -205,13 +196,12 @@ export async function calculateAndSaveMonthlyStats(employeeId: string, dateStr: 
 
         await db.collection(COLLECTIONS.MONTHLY_STATS).doc(keyId).set(statsData, { merge: true });
         
-        // Notify if month is locked
         const now = new Date();
         if (now.getDate() === (sysConfig.LOCK_DATE || 5)) {
              await sendSystemNotification(
                  employeeId, 
                  "Chốt công tháng", 
-                 `Bảng công tháng ${month - 1} đã được chốt. Vui lòng kiểm tra lại.`,
+                 `Bảng công tháng ${month} đã được cập nhật. Vui lòng kiểm tra lại.`,
                  "info"
              );
         }
