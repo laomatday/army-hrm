@@ -105,6 +105,14 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
   const takePictureAndSubmit = async () => {
     if (!videoRef.current || !session) return;
     
+    // Ensure video is ready
+    if (videoRef.current.videoWidth === 0 || videoRef.current.videoHeight === 0) {
+        console.error("Video not ready for capture");
+        db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: 'Camera chưa sẵn sàng' });
+        setTimeout(resetSession, 3000);
+        return;
+    }
+
     const canvas = document.createElement('canvas');
     canvas.width = 640;
     const scale = 640 / videoRef.current.videoWidth;
@@ -129,21 +137,26 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
           role: 'Employee'
       } as Employee;
       
-      // Use Kiosk's location (dummy valid location)
-      const res = await doCheckIn({
-          employeeId: session.employee_id,
-          lat: 10.762622,
-          lng: 106.660172,
-          deviceId: KIOSK_ID,
-          imageBase64: base64
-      }, mockEmployee);
-      
-      if (res.success) {
-          await db.collection('kiosk_sessions').doc(session.id).update({ status: 'completed' });
-          setSession(prev => ({ ...prev, status: 'completed' }));
-      } else {
-          await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: res.message });
-          setSession(prev => ({ ...prev, status: 'failed', error: res.message }));
+      try {
+          // Use Kiosk's location (dummy valid location)
+          const res = await doCheckIn({
+              employeeId: session.employee_id,
+              lat: 10.762622,
+              lng: 106.660172,
+              deviceId: KIOSK_ID,
+              imageBase64: base64
+          }, mockEmployee);
+          
+          if (res.success) {
+              await db.collection('kiosk_sessions').doc(session.id).update({ status: 'completed' });
+              setSession(prev => ({ ...prev, status: 'completed' }));
+          } else {
+              await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: res.message });
+              setSession(prev => ({ ...prev, status: 'failed', error: res.message }));
+          }
+      } catch (err: any) {
+          await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: err.message || "Lỗi hệ thống" });
+          setSession(prev => ({ ...prev, status: 'failed', error: err.message || "Lỗi hệ thống" }));
       }
       
       setTimeout(() => {

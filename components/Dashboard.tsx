@@ -55,6 +55,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
   const [showCamera, setShowCamera] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [checkingIn, setCheckingIn] = useState(false);
+  const [checkInStatus, setCheckInStatus] = useState("");
   const [showCheckoutConfirm, setShowCheckoutConfirm] = useState(false);
   
   // --- FEATURE STATE ---
@@ -107,6 +108,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
 
   const handleCheckIn = async (base64: string, lat: number, lng: number) => {
     setCheckingIn(true);
+    setCheckInStatus("Đang xử lý dữ liệu chấm công...");
     setShowCamera(false);
     const res = await doCheckIn({
         employeeId: currentUser.employee_id, lat, lng, deviceId: getDeviceId(), imageBase64: base64
@@ -126,6 +128,8 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
           }
 
           setCheckingIn(true);
+          setCheckInStatus("Đang kết nối với Kiosk...");
+
           // Create session in Firestore
           const sessionRef = await db.collection('kiosk_sessions').add({
               kiosk_id: qrData.kiosk_id,
@@ -136,17 +140,29 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
               created_at: new Date().toISOString()
           });
 
+          // Timeout for safety
+          const timeoutId = setTimeout(() => {
+              setCheckingIn(false);
+              handleShowAlert("Hết thời gian", "Kiosk không phản hồi. Vui lòng thử lại.", "error");
+          }, 45000);
+
           // Listen for completion
           const unsubscribe = db.collection('kiosk_sessions').doc(sessionRef.id)
               .onSnapshot(async (doc) => {
                   const session = doc.data();
-                  if (session?.status === 'completed') {
+                  if (!session) return;
+
+                  if (session.status === 'camera_ready') {
+                      setCheckInStatus("Kiosk đã sẵn sàng. Vui lòng nhìn vào camera trên Kiosk!");
+                  } else if (session.status === 'completed') {
+                      clearTimeout(timeoutId);
                       unsubscribe();
                       setCheckingIn(false);
                       triggerHaptic('success');
                       handleShowAlert("Thành công", "Đã ghi nhận chấm công từ Kiosk", "success");
                       await refresh();
-                  } else if (session?.status === 'failed') {
+                  } else if (session.status === 'failed') {
+                      clearTimeout(timeoutId);
                       unsubscribe();
                       setCheckingIn(false);
                       handleShowAlert("Lỗi", session.error || "Chấm công thất bại", "error");
@@ -162,6 +178,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
       triggerHaptic('medium');
       setShowCheckoutConfirm(false);
       setCheckingIn(true);
+      setCheckInStatus("Đang xác thực vị trí...");
       navigator.geolocation.getCurrentPosition(async (pos) => {
           if (data && data.locations) {
               const userLoc = data.locations.find(l => l.center_id === currentUser.center_id);
@@ -175,6 +192,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
                   }
               }
           }
+          setCheckInStatus("Đang gửi yêu cầu Check-out...");
           const res = await doCheckOut(currentUser.employee_id, pos.coords.latitude, pos.coords.longitude);
           if(res.success) await refresh(); 
           setCheckingIn(false);
@@ -218,9 +236,23 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
   return (
     <div className="h-full w-full bg-slate-50 dark:bg-slate-900 relative flex flex-col font-sans transition-colors duration-300">
        {checkingIn && (
-         <div className="fixed inset-0 z-[3000] bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex flex-col items-center justify-center">
-             <Spinner size="lg" />
-             <p className="mt-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest animate-pulse">Đang đồng bộ...</p>
+         <div className="fixed inset-0 z-[5000] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-6 text-center">
+           <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 max-w-sm w-full shadow-2xl">
+             <div className="relative w-20 h-20 mx-auto mb-6">
+               <div className="absolute inset-0 border-4 border-slate-100 dark:border-slate-700 rounded-full"></div>
+               <div className="absolute inset-0 border-4 border-emerald-500 rounded-full border-t-transparent animate-spin"></div>
+             </div>
+             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Đang xử lý...</h3>
+             <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+               {checkInStatus || "Vui lòng đợi trong giây lát"}
+             </p>
+             <button 
+               onClick={() => setCheckingIn(false)}
+               className="mt-8 text-slate-400 text-xs font-bold uppercase tracking-widest hover:text-slate-600 transition-colors"
+             >
+               Hủy bỏ
+             </button>
+           </div>
          </div>
        )}
 
