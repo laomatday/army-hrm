@@ -5,7 +5,6 @@ import { triggerHaptic, timeToMinutes, getCurrentTimeStr } from '../utils/helper
 import { togglePause, determineShift } from '../services/api';
 import PullToRefresh from './PullToRefresh';
 import Spinner from './Spinner';
-import StatsCharts from './StatsCharts';
 
 interface Props {
   data: DashboardData | null;
@@ -513,9 +512,6 @@ const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onScan
                         color="orange"
                     />
                 </div>
-
-                {/* NEW: CHARTS SECTION */}
-                <StatsCharts history={data?.history.history || []} />
 
                 {/* Quick Actions */}
                 <div className="grid grid-cols-2 gap-3 mb-8">
