@@ -99,7 +99,16 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
     let minDistance = Infinity;
 
     allowedLocations.forEach(loc => {
-        const dist = calculateDistance(data.lat, data.lng, loc.latitude, loc.longitude);
+        // Ensure coords are numbers
+        const locLat = Number(loc.latitude);
+        const locLng = Number(loc.longitude);
+        
+        if (isNaN(locLat) || isNaN(locLng) || (locLat === 0 && locLng === 0)) {
+            console.warn(`Location ${loc.location_name} has invalid coordinates:`, loc.latitude, loc.longitude);
+            return;
+        }
+
+        const dist = calculateDistance(data.lat, data.lng, locLat, locLng);
         if (dist < minDistance) {
             minDistance = dist;
             nearestLoc = loc;
@@ -107,14 +116,26 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
     });
 
     if (!nearestLoc) {
-        return { success: false, message: "Không thể tìm thấy chi nhánh gần nhất." };
+        return { 
+            success: false, 
+            message: "Không tìm thấy chi nhánh hợp lệ hoặc tọa độ chi nhánh chưa được thiết lập." 
+        };
     }
 
     const allowedRadius = nearestLoc.radius_meters || sysConfig.MAX_DISTANCE_METERS || 200;
     if (minDistance > allowedRadius) {
+        // Log for debugging
+        console.log("Geofence Check Failed:", {
+            userCoords: { lat: data.lat, lng: data.lng },
+            targetLoc: nearestLoc.location_name,
+            targetCoords: { lat: nearestLoc.latitude, lng: nearestLoc.longitude },
+            distance: minDistance,
+            allowed: allowedRadius
+        });
+
         return { 
             success: false, 
-            message: `Bạn đang ở quá xa chi nhánh ${nearestLoc.location_name} (${Math.round(minDistance)}m). Khoảng cách cho phép: ${allowedRadius}m.` 
+            message: `Bạn đang ở quá xa chi nhánh ${nearestLoc.location_name} (${Math.round(minDistance)}m). Vui lòng kiểm tra lại GPS hoặc liên hệ kỹ thuật. (Vị trí: ${data.lat.toFixed(4)}, ${data.lng.toFixed(4)})` 
         };
     }
 
@@ -203,10 +224,10 @@ export async function doCheckOut(employeeId: string, lat?: number, lng?: number)
         const locSnap = await db.collection(COLLECTIONS.LOCATIONS).where("center_id", "==", openDoc.center_id).get();
         if (!locSnap.empty) {
             const loc = locSnap.docs[0].data() as LocationConfig;
-            checkoutDistance = calculateDistance(lat, lng, loc.latitude, loc.longitude);
+            checkoutDistance = calculateDistance(lat, lng, Number(loc.latitude), Number(loc.longitude));
             const allowedRadius = loc.radius_meters || sysConfig.MAX_DISTANCE_METERS || 200;
             if (checkoutDistance > allowedRadius) {
-                 return { success: false, message: `Check-out thất bại: Bạn đang ở quá xa chi nhánh đã check-in (${Math.round(checkoutDistance)}m).` };
+                 return { success: false, message: `Check-out thất bại: Bạn đang ở quá xa chi nhánh đã check-in (${Math.round(checkoutDistance)}m). (Vị trí: ${lat.toFixed(4)}, ${lng.toFixed(4)})` };
             }
         }
     }
