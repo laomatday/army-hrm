@@ -70,13 +70,28 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
     
     // Filter allowed locations
     let allowedLocations = allLocations;
-    if (!user.allowed_locations?.includes("ALL")) {
-        const allowedIds = user.allowed_locations || [user.center_id];
-        allowedLocations = allLocations.filter(loc => allowedIds.includes(loc.center_id));
+    const userAllowed = user.allowed_locations || [];
+    
+    if (!userAllowed.includes("ALL")) {
+        // Fix: Nếu allowed_locations trống, mặc định lấy center_id của user
+        const allowedIds = userAllowed.length > 0 ? userAllowed : [user.center_id];
+        
+        // Ensure ids are cleaned for comparison
+        const cleanAllowedIds = allowedIds.filter(id => !!id).map(id => String(id).trim());
+        
+        allowedLocations = allLocations.filter(loc => 
+            cleanAllowedIds.includes(String(loc.center_id).trim())
+        );
+        
+        console.log("Debug Attendance - Allowed IDs:", cleanAllowedIds);
+        console.log("Debug Attendance - Filtered Locations Count:", allowedLocations.length);
     }
 
     if (allowedLocations.length === 0) {
-        return { success: false, message: "Bạn không có quyền chấm công tại bất kỳ chi nhánh nào." };
+        return { 
+            success: false, 
+            message: `Bạn không có quyền chấm công tại bất kỳ chi nhánh nào. (Center ID: ${user.center_id || 'N/A'})` 
+        };
     }
 
     // Find nearest chi nhánh
