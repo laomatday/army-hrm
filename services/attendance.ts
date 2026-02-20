@@ -64,22 +64,43 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
         await batch.commit();
     }
     
-    // 1. Verify Location (Geofence)
-    let distance = 0;
-    if (user.center_id) {
-        const locationsSnap = await db.collection(COLLECTIONS.LOCATIONS).where("center_id", "==", user.center_id).get();
-        if (!locationsSnap.empty) {
-            const targetLoc = locationsSnap.docs[0].data() as LocationConfig;
-            distance = calculateDistance(data.lat, data.lng, targetLoc.latitude, targetLoc.longitude);
-            
-            const allowedRadius = targetLoc.radius_meters || sysConfig.MAX_DISTANCE_METERS || 200;
-            if (distance > allowedRadius) {
-                return { 
-                    success: false, 
-                    message: `Bạn đang ở quá xa văn phòng (${Math.round(distance)}m). Khoảng cách cho phép: ${allowedRadius}m.` 
-                };
-            }
+    // 1. Multi-Branch Logic & Geofencing (Nearest Geofencing)
+    const locationsSnap = await db.collection(COLLECTIONS.LOCATIONS).get();
+    const allLocations = locationsSnap.docs.map(d => d.data() as LocationConfig);
+    
+    // Filter allowed locations
+    let allowedLocations = allLocations;
+    if (!user.allowed_locations?.includes("ALL")) {
+        const allowedIds = user.allowed_locations || [user.center_id];
+        allowedLocations = allLocations.filter(loc => allowedIds.includes(loc.center_id));
+    }
+
+    if (allowedLocations.length === 0) {
+        return { success: false, message: "Bạn không có quyền chấm công tại bất kỳ chi nhánh nào." };
+    }
+
+    // Find nearest chi nhánh
+    let nearestLoc: LocationConfig | null = null;
+    let minDistance = Infinity;
+
+    allowedLocations.forEach(loc => {
+        const dist = calculateDistance(data.lat, data.lng, loc.latitude, loc.longitude);
+        if (dist < minDistance) {
+            minDistance = dist;
+            nearestLoc = loc;
         }
+    });
+
+    if (!nearestLoc) {
+        return { success: false, message: "Không thể tìm thấy chi nhánh gần nhất." };
+    }
+
+    const allowedRadius = nearestLoc.radius_meters || sysConfig.MAX_DISTANCE_METERS || 200;
+    if (minDistance > allowedRadius) {
+        return { 
+            success: false, 
+            message: `Bạn đang ở quá xa chi nhánh ${nearestLoc.location_name} (${Math.round(minDistance)}m). Khoảng cách cho phép: ${allowedRadius}m.` 
+        };
     }
 
     let imageUrl = "";
@@ -90,14 +111,12 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
     // 2. Determine Shift & Calculate Lateness
     const shifts = await getShifts();
     const nowTimeStr = getCurrentTimeStr();
-    // Logic determineShift đã được cập nhật để handle chính xác các giờ sớm (vd: 7h sáng sẽ vào Ca Sáng 8h30)
     const currentShift = determineShift(nowTimeStr, shifts);
     
     const startMins = timeToMinutes(currentShift.start);
     const nowMins = timeToMinutes(nowTimeStr);
     let lateMins = 0;
     
-    // Logic đi muộn: Chỉ tính nếu vào sau (start + tolerance)
     if (nowMins > startMins + (sysConfig.LATE_TOLERANCE || 15)) {
         lateMins = nowMins - startMins;
     }
@@ -109,7 +128,7 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
         date: todayStr,
         employee_id: user.employee_id,
         name: user.name,
-        center_id: user.center_id,
+        center_id: nearestLoc.center_id, // Lấy mã chi nhánh thực tế phát hiện được
         shift_name: currentShift.name,
         shift_start: currentShift.start,
         shift_end: currentShift.end,
@@ -118,7 +137,7 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
         checkin_type: 'GPS',
         checkin_lat: data.lat,
         checkin_lng: data.lng,
-        distance_meters: distance,
+        distance_meters: minDistance,
         device_id: data.deviceId,
         selfie_url: imageUrl,
         late_minutes: lateMins,
@@ -135,7 +154,7 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
 
     await calculateAndSaveMonthlyStats(user.employee_id, todayStr);
 
-    return { success: true, message: `Check-in thành công! (${currentShift.name})` };
+    return { success: true, message: `Check-in thành công tại ${nearestLoc.location_name}! (${currentShift.name})` };
   } catch (e: any) {
     console.error("Check-in Error:", e);
     return { success: false, message: e.message || "Lỗi chấm công" };
@@ -146,7 +165,6 @@ export async function doCheckOut(employeeId: string, lat?: number, lng?: number)
   try {
     const attRef = db.collection(COLLECTIONS.ATTENDANCE);
     
-    // Find the latest open session
     const q = attRef
         .where("employee_id", "==", employeeId)
         .where("time_out", "==", ""); 
@@ -164,7 +182,21 @@ export async function doCheckOut(employeeId: string, lat?: number, lng?: number)
     const nowTimeStr = getCurrentTimeStr();
     const sysConfig = await getSystemConfig();
 
-    // 3. Calculate Net Hours accounting for Shifts and Breaks
+    // 1. Verify checkout location if GPS provided
+    let checkoutDistance = 0;
+    if (lat && lng) {
+        const locSnap = await db.collection(COLLECTIONS.LOCATIONS).where("center_id", "==", openDoc.center_id).get();
+        if (!locSnap.empty) {
+            const loc = locSnap.docs[0].data() as LocationConfig;
+            checkoutDistance = calculateDistance(lat, lng, loc.latitude, loc.longitude);
+            const allowedRadius = loc.radius_meters || sysConfig.MAX_DISTANCE_METERS || 200;
+            if (checkoutDistance > allowedRadius) {
+                 return { success: false, message: `Check-out thất bại: Bạn đang ở quá xa chi nhánh đã check-in (${Math.round(checkoutDistance)}m).` };
+            }
+        }
+    }
+
+    // 2. Calculate Net Hours accounting for Shifts and Breaks
     const netHoursStr = calculateNetWorkHours(
         openDoc.time_in, 
         nowTimeStr, 
@@ -173,35 +205,27 @@ export async function doCheckOut(employeeId: string, lat?: number, lng?: number)
     );
     let netHours = parseFloat(netHoursStr);
 
-    // Subtract paused minutes if any
     if (openDoc.total_break_mins) {
         netHours = Math.max(0, netHours - (openDoc.total_break_mins / 60));
     }
 
-    // 4. Calculate Early Minutes (Corrected for Overnight)
     let earlyMins = 0;
     if (openDoc.shift_end && openDoc.shift_start) {
         let endMins = timeToMinutes(openDoc.shift_end);
         const startMins = timeToMinutes(openDoc.shift_start);
         let nowMins = timeToMinutes(nowTimeStr);
         
-        // Adjust for overnight shift (Shift ends next day)
-        // e.g. Start 22:00, End 06:00
         if (endMins < startMins) {
              endMins += 24 * 60;
-             // If checking out past midnight (e.g. 05:00), adjust nowMins
              if (nowMins < startMins) {
                  nowMins += 24 * 60;
              }
         } else {
-             // Normal day shift: Check if user works past midnight (unlikely but possible)
              if (nowMins < startMins) {
                  nowMins += 24 * 60;
              }
         }
 
-        // Only count early if leaving before end time (with 1 min tolerance)
-        // And ensure we don't count early minutes if they worked WAY past the shift end (e.g. forgot checkout)
         if (nowMins < endMins - 1) {
             earlyMins = endMins - nowMins;
         }
@@ -211,12 +235,12 @@ export async function doCheckOut(employeeId: string, lat?: number, lng?: number)
         time_out: nowTimeStr,
         checkout_lat: lat,
         checkout_lng: lng,
+        checkout_distance: checkoutDistance,
         work_hours: parseFloat(netHours.toFixed(2)),
         early_minutes: earlyMins,
         last_updated: new Date().toISOString()
     });
 
-    // Recalculate stats for the DATE OF ATTENDANCE (important if overnight)
     await calculateAndSaveMonthlyStats(employeeId, openDoc.date);
 
     return { success: true, message: `Check-out thành công! Công: ${netHours.toFixed(2)}h` };

@@ -37,7 +37,8 @@ const SCHEMAS: any = {
             password: { label: 'Mật khẩu', type: 'password', colSpan: 1 },
             phone: { label: 'Số điện thoại', type: 'text', colSpan: 1 },
             role: { label: 'Vai trò', type: 'select', options: ['Staff', 'Manager', 'Admin', 'HR'], colSpan: 1 },
-            center_id: { label: 'Văn phòng', type: 'reference', collection: 'config_locations', valueField: 'center_id', labelField: 'location_name', colSpan: 1 },
+            center_id: { label: 'Văn phòng chính', type: 'reference', collection: 'config_locations', valueField: 'center_id', labelField: 'location_name', colSpan: 1 },
+            allowed_locations: { label: 'Chi nhánh được phép', type: 'multi-select', collection: 'config_locations', valueField: 'center_id', labelField: 'location_name', colSpan: 2 },
             department: { label: 'Phòng ban', type: 'text', colSpan: 1 },
             position: { label: 'Chức vụ', type: 'text', colSpan: 1 },
             direct_manager_id: { label: 'Quản lý trực tiếp', type: 'reference', collection: 'employees', valueField: 'employee_id', labelField: 'name', colSpan: 1 },
@@ -136,6 +137,113 @@ const SCHEMAS: any = {
              error_count: { label: 'Lỗi', type: 'number', colSpan: 1 }
         }
     }
+};
+
+const MultiSelectTags = ({ 
+    selected, 
+    options, 
+    onAdd, 
+    onRemove, 
+    labelField, 
+    valueField 
+}: { 
+    selected: string[], 
+    options: any[], 
+    onAdd: (val: string) => void, 
+    onRemove: (val: string) => void,
+    labelField: string,
+    valueField: string
+}) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [search, setSearch] = useState('');
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const filteredOptions = options.filter(opt => 
+        !selected.includes(opt[valueField]) &&
+        opt[labelField].toLowerCase().includes(search.toLowerCase())
+    );
+
+    return (
+        <div ref={containerRef} className="relative">
+            <div 
+                onClick={() => setIsOpen(!isOpen)}
+                className="min-h-[46px] p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl flex flex-wrap gap-2 cursor-pointer focus-within:ring-2 focus-within:ring-emerald-500 transition-all shadow-sm"
+            >
+                {selected.length === 0 && !isOpen && (
+                    <span className="text-slate-400 dark:text-slate-500 text-sm mt-1 ml-2">Chọn các chi nhánh...</span>
+                )}
+                {selected.map(val => {
+                    const opt = options.find(o => o[valueField] === val);
+                    return (
+                        <div key={val} className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 px-3 py-1 rounded-xl text-xs font-bold border border-emerald-100 dark:border-emerald-800 animate-scale-in">
+                            {opt ? opt[labelField] : val}
+                            <button onClick={(e) => { e.stopPropagation(); onRemove(val); }} className="hover:text-emerald-900 dark:hover:text-emerald-100">
+                                <i className="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    )
+                })}
+                {selected.includes("ALL") && (
+                     <div className="flex items-center gap-1.5 bg-rose-50 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 px-3 py-1 rounded-xl text-xs font-bold border border-rose-100 dark:border-rose-800">
+                        Tất cả chi nhánh (ALL)
+                        <button onClick={(e) => { e.stopPropagation(); onRemove("ALL"); }} className="hover:text-rose-900 dark:hover:text-rose-100">
+                            <i className="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {isOpen && (
+                <div className="absolute z-[100] top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-scale-in">
+                    <div className="p-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30">
+                        <div className="relative">
+                            <i className="fa-solid fa-search absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                            <input 
+                                autoFocus
+                                type="text" 
+                                className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500"
+                                placeholder="Tìm chi nhánh..."
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                            />
+                        </div>
+                    </div>
+                    <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                        <div 
+                            onClick={() => { onAdd("ALL"); setIsOpen(false); }}
+                            className="px-4 py-3 hover:bg-rose-50 dark:hover:bg-rose-900/20 text-xs font-black text-rose-600 dark:text-rose-400 cursor-pointer transition-colors flex items-center gap-2"
+                        >
+                            <i className="fa-solid fa-globe"></i> TẤT CẢ CHI NHÁNH (ALL)
+                        </div>
+                        {filteredOptions.map(opt => (
+                            <div 
+                                key={opt[valueField]} 
+                                onClick={() => onAdd(opt[valueField])}
+                                className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm text-slate-700 dark:text-slate-300 cursor-pointer transition-colors border-t border-slate-50 dark:border-slate-700 font-medium"
+                            >
+                                {opt[labelField]} ({opt[valueField]})
+                            </div>
+                        ))}
+                        {filteredOptions.length === 0 && search && (
+                            <div className="px-4 py-4 text-center text-xs text-slate-400 font-bold uppercase tracking-widest">
+                                Không có kết quả
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 };
 
 const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
@@ -497,6 +605,30 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                                   </option>
                               ))}
                           </select>
+                       );
+                  } else if (fieldConfig.type === 'multi-select') {
+                       const refData = references[fieldConfig.collection] || [];
+                       const selected = Array.isArray(val) ? val : [];
+                       inputEl = (
+                           <MultiSelectTags 
+                               selected={selected}
+                               options={refData}
+                               labelField={fieldConfig.labelField}
+                               valueField={fieldConfig.valueField}
+                               onAdd={(v) => {
+                                   if (v === "ALL") {
+                                       setFormData({...formData, [key]: ["ALL"]});
+                                   } else {
+                                       const current = selected.filter(x => x !== "ALL");
+                                       if (!current.includes(v)) {
+                                           setFormData({...formData, [key]: [...current, v]});
+                                       }
+                                   }
+                               }}
+                               onRemove={(v) => {
+                                   setFormData({...formData, [key]: selected.filter(x => x !== v)});
+                               }}
+                           />
                        );
                   } else if (fieldConfig.type === 'textarea') {
                       inputEl = (

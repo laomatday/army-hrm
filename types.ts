@@ -5,7 +5,8 @@ export interface Employee {
   email: string;
   password?: string | number;
   role: string; // "Manager", "Staff", "Admin"
-  center_id: string;
+  center_id: string; // Chi nhánh quản lý chính
+  allowed_locations?: string[]; // Danh sách mã các chi nhánh được phép đến chấm công (MỚI)
   position: string;
   department: string;
   phone: string | number;
@@ -24,7 +25,7 @@ export interface Attendance {
   date: string; // YYYY-MM-DD
   employee_id: string;
   name: string;
-  center_id: string;
+  center_id: string; // Mã chi nhánh thực tế tại thời điểm chấm công (CẬP NHẬT LOGIC)
   shift_name?: string;
   shift_start?: string;
   shift_end?: string;

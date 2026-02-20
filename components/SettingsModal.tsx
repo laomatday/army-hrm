@@ -243,6 +243,7 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
     <UserGuideModal 
         isOpen={isGuideOpen} 
         onClose={() => setIsGuideOpen(false)} 
+        setIsNavVisible={setIsNavVisible}
     />
     </>
   );
