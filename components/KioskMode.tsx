@@ -32,26 +32,28 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
   useEffect(() => {
     if (!token) return;
     
+    // Listen for any session created for this kiosk with the current token
     const unsubscribe = db.collection('kiosk_sessions')
       .where('kiosk_id', '==', KIOSK_ID)
-      .where('status', '==', 'pending')
+      .where('token', '==', token)
       .onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
-          if (change.type === 'added') {
+          if (change.type === 'added' || change.type === 'modified') {
             const data = change.doc.data();
-            // Accept if token matches
-            if (data.token === token) {
-              setSession({ id: change.doc.id, ...data });
+            if (data.status === 'pending') {
+              // Accept and move to camera_ready
+              const sessionData = { id: change.doc.id, ...data, status: 'camera_ready' };
+              setSession(sessionData);
               db.collection('kiosk_sessions').doc(change.doc.id).update({ status: 'camera_ready' });
-            } else {
-              // Token mismatch, mark as failed
-              db.collection('kiosk_sessions').doc(change.doc.id).update({ status: 'failed', error: 'Mã QR đã hết hạn' });
+            } else if (session && change.doc.id === session.id) {
+              // Update local session if it's the current one
+              setSession({ id: change.doc.id, ...data });
             }
           }
         });
       });
     return () => unsubscribe();
-  }, [token]);
+  }, [token, session?.id]);
 
   // Camera Logic when session is active
   useEffect(() => {
@@ -60,12 +62,26 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
     if (session && session.status === 'camera_ready') {
       const startCamera = async () => {
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
-          });
+          // Try with ideal constraints first, then fallback
+          let stream: MediaStream;
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+            });
+          } catch (e) {
+            console.warn("Retrying camera with basic constraints");
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          }
+
           streamRef.current = stream;
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
+            // Ensure video plays
+            try {
+                await videoRef.current.play();
+            } catch (playErr) {
+                console.error("Video play error:", playErr);
+            }
           }
           
           // Start countdown
@@ -80,20 +96,25 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
             }
           }, 1000);
           
-        } catch (err) {
+        } catch (err: any) {
           console.error("Camera error:", err);
-          db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: 'Lỗi Camera Kiosk' });
-          setTimeout(resetSession, 3000);
+          const errorMsg = err.name === 'NotAllowedError' ? 'Quyền truy cập Camera bị từ chối' : 'Không thể mở Camera';
+          db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: errorMsg });
+          setSession(prev => prev ? { ...prev, status: 'failed', error: errorMsg } : null);
+          setTimeout(resetSession, 5000);
         }
       };
-      startCamera();
+      
+      // Small delay to ensure video element is mounted
+      const timeout = setTimeout(startCamera, 100);
+      return () => clearTimeout(timeout);
     }
 
     return () => {
       if (timer) clearInterval(timer);
       stopCamera();
     };
-  }, [session?.status]); // Only run when status changes to camera_ready
+  }, [session?.id, session?.status]);
 
   const stopCamera = () => {
     if (streamRef.current) {
