@@ -14,11 +14,14 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
   const [token, setToken] = useState<string>('');
   const [session, setSession] = useState<any>(null);
   const [countdown, setCountdown] = useState<number>(3);
+  const [isCameraActive, setIsCameraActive] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
   // Generate Token every 10s
   useEffect(() => {
+    if (session) return; // Stop rotation if session active
+    
     const generateToken = () => {
       const newToken = Math.random().toString(36).substring(2, 10).toUpperCase();
       setToken(newToken);
@@ -26,29 +29,26 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
     generateToken();
     const interval = setInterval(generateToken, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [!!session]);
 
   // Listen to Kiosk Sessions
   useEffect(() => {
-    if (!token) return;
-    
-    // Listen for any session created for this kiosk with the current token
+    // Listen for any pending or active session for this kiosk
     const unsubscribe = db.collection('kiosk_sessions')
       .where('kiosk_id', '==', KIOSK_ID)
-      .where('token', '==', token)
       .onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === 'added' || change.type === 'modified') {
-            const data = change.doc.data();
-            if (data.status === 'pending') {
-              // Accept and move to camera_ready
-              const sessionData = { id: change.doc.id, ...data, status: 'camera_ready' };
-              setSession(sessionData);
-              db.collection('kiosk_sessions').doc(change.doc.id).update({ status: 'camera_ready' });
-            } else if (session && change.doc.id === session.id) {
-              // Update local session if it's the current one
-              setSession({ id: change.doc.id, ...data });
-            }
+        snapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          
+          // If it's a new pending session and token matches
+          if (data.status === 'pending' && data.token === token && !session) {
+            const sessionData = { id: doc.id, ...data, status: 'camera_ready' };
+            setSession(sessionData);
+            db.collection('kiosk_sessions').doc(doc.id).update({ status: 'camera_ready' });
+          } 
+          // Or if it's our current active session, keep it updated
+          else if (session && doc.id === session.id) {
+            setSession({ id: doc.id, ...data });
           }
         });
       });
@@ -62,6 +62,10 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
     if (session && session.status === 'camera_ready') {
       const startCamera = async () => {
         try {
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            throw new Error("Trình duyệt không hỗ trợ Camera");
+          }
+
           // Try with ideal constraints first, then fallback
           let stream: MediaStream;
           try {
@@ -79,6 +83,7 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
             // Ensure video plays
             try {
                 await videoRef.current.play();
+                setIsCameraActive(true);
             } catch (playErr) {
                 console.error("Video play error:", playErr);
             }
@@ -98,7 +103,7 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
           
         } catch (err: any) {
           console.error("Camera error:", err);
-          const errorMsg = err.name === 'NotAllowedError' ? 'Quyền truy cập Camera bị từ chối' : 'Không thể mở Camera';
+          const errorMsg = err.name === 'NotAllowedError' ? 'Quyền truy cập Camera bị từ chối' : (err.message || 'Không thể mở Camera');
           db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: errorMsg });
           setSession(prev => prev ? { ...prev, status: 'failed', error: errorMsg } : null);
           setTimeout(resetSession, 5000);
@@ -106,7 +111,7 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
       };
       
       // Small delay to ensure video element is mounted
-      const timeout = setTimeout(startCamera, 100);
+      const timeout = setTimeout(startCamera, 200);
       return () => clearTimeout(timeout);
     }
 
@@ -121,6 +126,7 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
       streamRef.current.getTracks().forEach(t => t.stop());
       streamRef.current = null;
     }
+    setIsCameraActive(false);
   };
 
   const takePictureAndSubmit = async () => {
@@ -154,16 +160,17 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
       const mockEmployee = {
           employee_id: session.employee_id,
           name: session.employee_name,
-          center_id: 'CENTER_1', // Assuming default
+          center_id: session.center_id || 'CENTER_1',
           role: 'Employee'
       } as Employee;
       
       try {
-          // Use Kiosk's location (dummy valid location)
+          // Use verified location from user's personal device if available, 
+          // otherwise fallback to Kiosk's default location
           const res = await doCheckIn({
               employeeId: session.employee_id,
-              lat: 10.762622,
-              lng: 106.660172,
+              lat: session.user_lat || 10.762622,
+              lng: session.user_lng || 106.660172,
               deviceId: KIOSK_ID,
               imageBase64: base64
           }, mockEmployee);
@@ -199,7 +206,10 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
         <div className="absolute top-10 left-0 w-full text-center z-10">
             <h1 className="text-4xl font-black text-white mb-2 tracking-tight">Xin chào, {session.employee_name}</h1>
             {session.status === 'camera_ready' && (
-                <p className="text-xl text-emerald-400 font-bold animate-pulse">Vui lòng nhìn vào Camera ({countdown}s)</p>
+                <div className="flex flex-col items-center">
+                    <p className="text-xl text-emerald-400 font-bold animate-pulse">Vui lòng nhìn vào Camera ({countdown}s)</p>
+                    {!isCameraActive && <p className="text-sm text-slate-400 mt-2 italic">Đang khởi động Camera...</p>}
+                </div>
             )}
             {session.status === 'completed' && (
                 <p className="text-xl text-emerald-400 font-bold">Chấm công thành công!</p>
