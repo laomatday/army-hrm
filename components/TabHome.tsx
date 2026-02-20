@@ -512,23 +512,6 @@ const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onScan
                         color="orange"
                     />
                 </div>
-
-                {/* Quick Actions */}
-                <div className="grid grid-cols-2 gap-3 mb-8">
-                    <button onClick={() => { triggerHaptic('light'); onCreateRequest(); }} className="bg-white dark:bg-slate-800 p-5 rounded-[24px] border border-slate-100 dark:border-slate-700/50 shadow-sm flex items-center gap-3 active:scale-95 transition-all group hover:border-emerald-100 dark:hover:border-emerald-900">
-                        <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center text-base border border-emerald-100/50 dark:border-emerald-800/50 group-hover:bg-emerald-600 group-hover:text-white transition-colors shadow-sm">
-                            <i className="fa-solid fa-plus"></i>
-                        </div>
-                        <p className="text-xs font-extrabold text-slate-600 dark:text-slate-300 uppercase group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors tracking-widest">Tạo đề xuất</p>
-                    </button>
-
-                    <button onClick={() => { triggerHaptic('light'); onChangeTab('contacts'); }} className="bg-white dark:bg-slate-800 p-5 rounded-[24px] border border-slate-100 dark:border-slate-700/50 shadow-sm flex items-center gap-3 active:scale-95 transition-all group hover:border-blue-100 dark:hover:border-blue-900">
-                        <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center text-base border border-blue-100/50 dark:border-blue-800/50 group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-sm">
-                            <i className="fa-solid fa-magnifying-glass"></i>
-                        </div>
-                        <p className="text-xs font-extrabold text-slate-600 dark:text-slate-300 uppercase group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors tracking-widest">Tìm nhân sự</p>
-                    </button>
-                </div>
             </div>
         </PullToRefresh>
 

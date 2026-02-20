@@ -1,6 +1,7 @@
 
 
 import React, { useState, useEffect, useRef } from 'react';
+import UserGuideModal from './UserGuideModal';
 
 interface Props {
   isOpen: boolean;
@@ -12,6 +13,7 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
   const [isDark, setIsDark] = useState(false);
   const [isAuto, setIsAuto] = useState(true);
   const [notifEnabled, setNotifEnabled] = useState(true);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   
   const lastScrollY = useRef(0);
 
@@ -109,6 +111,7 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
   );
 
   return (
+    <>
     <div className="fixed inset-0 z-[60] bg-slate-50 dark:bg-slate-900 flex flex-col font-sans animate-slide-up">
         {/* Background Blobs (Consistent with Login/App) */}
         <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
@@ -199,6 +202,7 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
                         colorClass="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
                         title="Hướng dẫn sử dụng"
                         subtitle="Câu hỏi thường gặp (FAQ)"
+                        onClick={() => setIsGuideOpen(true)}
                     />
                 </div>
             </div>
@@ -235,6 +239,12 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
             </div>
         </div>
     </div>
+
+    <UserGuideModal 
+        isOpen={isGuideOpen} 
+        onClose={() => setIsGuideOpen(false)} 
+    />
+    </>
   );
 };
 
