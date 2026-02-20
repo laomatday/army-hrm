@@ -153,6 +153,16 @@ export interface MonthlyStats {
   last_updated: string; 
 }
 
+export interface Kiosk {
+  id?: string;
+  name: string;
+  kiosk_id: string; // Unique identifier (e.g., KIOSK_01)
+  center_id: string; // Location associated with this Kiosk
+  status: 'Active' | 'Inactive';
+  created_at: string;
+  description?: string;
+}
+
 export interface DashboardData {
   userProfile: Employee;
   history: {
