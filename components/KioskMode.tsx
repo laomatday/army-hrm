@@ -15,8 +15,16 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
   const [session, setSession] = useState<any>(null);
   const [countdown, setCountdown] = useState<number>(3);
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  // Clock
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Generate Token every 10s
   useEffect(() => {
@@ -33,20 +41,16 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
 
   // Listen to Kiosk Sessions
   useEffect(() => {
-    // Listen for any pending or active session for this kiosk
     const unsubscribe = db.collection('kiosk_sessions')
       .where('kiosk_id', '==', KIOSK_ID)
       .onSnapshot((snapshot) => {
         snapshot.docs.forEach((doc) => {
           const data = doc.data();
-          
-          // If it's a new pending session and token matches
           if (data.status === 'pending' && data.token === token && !session) {
             const sessionData = { id: doc.id, ...data, status: 'camera_ready' };
             setSession(sessionData);
             db.collection('kiosk_sessions').doc(doc.id).update({ status: 'camera_ready' });
           } 
-          // Or if it's our current active session, keep it updated
           else if (session && doc.id === session.id) {
             setSession({ id: doc.id, ...data });
           }
@@ -55,7 +59,7 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
     return () => unsubscribe();
   }, [token, session?.id]);
 
-  // Camera Logic when session is active
+  // Camera Logic
   useEffect(() => {
     let timer: any;
     
@@ -66,7 +70,6 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
             throw new Error("Trình duyệt không hỗ trợ Camera");
           }
 
-          // Try with ideal constraints first, then fallback
           let stream: MediaStream;
           try {
             stream = await navigator.mediaDevices.getUserMedia({
@@ -80,7 +83,6 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
           streamRef.current = stream;
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
-            // Ensure video plays
             try {
                 await videoRef.current.play();
                 setIsCameraActive(true);
@@ -89,7 +91,6 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
             }
           }
           
-          // Start countdown
           let count = 3;
           setCountdown(count);
           timer = setInterval(() => {
@@ -110,7 +111,6 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
         }
       };
       
-      // Small delay to ensure video element is mounted
       const timeout = setTimeout(startCamera, 200);
       return () => clearTimeout(timeout);
     }
@@ -132,9 +132,7 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
   const takePictureAndSubmit = async () => {
     if (!videoRef.current || !session) return;
     
-    // Ensure video is ready
     if (videoRef.current.videoWidth === 0 || videoRef.current.videoHeight === 0) {
-        console.error("Video not ready for capture");
         db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: 'Camera chưa sẵn sàng' });
         setTimeout(resetSession, 3000);
         return;
@@ -147,16 +145,13 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
     
     const ctx = canvas.getContext('2d');
     if (ctx) {
-      // Mirror the image back to normal if video is mirrored
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
       ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
       const base64 = canvas.toDataURL('image/webp', 0.5);
       
-      // Stop camera immediately after capture
       stopCamera();
       
-      // Submit check-in
       const mockEmployee = {
           employee_id: session.employee_id,
           name: session.employee_name,
@@ -165,8 +160,6 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
       } as Employee;
       
       try {
-          // Use verified location from user's personal device if available, 
-          // otherwise fallback to Kiosk's default location
           const res = await doCheckIn({
               employeeId: session.employee_id,
               lat: session.user_lat || 10.762622,
@@ -200,71 +193,140 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
 
   const qrData = JSON.stringify({ kiosk_id: KIOSK_ID, token });
 
-  if (session) {
-    return (
-      <div className="fixed inset-0 bg-slate-900 flex flex-col items-center justify-center z-[5000]">
-        <div className="absolute top-10 left-0 w-full text-center z-10">
-            <h1 className="text-4xl font-black text-white mb-2 tracking-tight">Xin chào, {session.employee_name}</h1>
-            {session.status === 'camera_ready' && (
-                <div className="flex flex-col items-center">
-                    <p className="text-xl text-emerald-400 font-bold animate-pulse">Vui lòng nhìn vào Camera ({countdown}s)</p>
-                    {!isCameraActive && <p className="text-sm text-slate-400 mt-2 italic">Đang khởi động Camera...</p>}
-                </div>
-            )}
-            {session.status === 'completed' && (
-                <p className="text-xl text-emerald-400 font-bold">Chấm công thành công!</p>
-            )}
-            {session.status === 'failed' && (
-                <p className="text-xl text-red-400 font-bold">Lỗi: {session.error}</p>
-            )}
-        </div>
-        
-        <div className="relative w-full max-w-3xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-800">
-            <video ref={videoRef} className="w-full h-full object-cover transform scale-x-[-1]" autoPlay playsInline muted></video>
-            {session.status === 'camera_ready' && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="w-64 h-64 border-4 border-emerald-500/50 rounded-full border-dashed animate-[spin_10s_linear_infinite]"></div>
-                </div>
-            )}
-            {session.status === 'completed' && (
-                <div className="absolute inset-0 bg-emerald-500/20 flex items-center justify-center">
-                    <i className="fa-solid fa-check-circle text-9xl text-emerald-500 animate-scale-in"></i>
-                </div>
-            )}
-            {session.status === 'failed' && (
-                <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
-                    <i className="fa-solid fa-triangle-exclamation text-9xl text-red-500 animate-scale-in"></i>
-                </div>
-            )}
-        </div>
-      </div>
-    );
-  }
+  // --- RENDER HELPERS ---
+
+  const renderStatusBadge = () => {
+    if (!session) return <span className="text-emerald-500 animate-pulse">● SYSTEM READY</span>;
+    if (session.status === 'camera_ready') return <span className="text-yellow-500 animate-pulse">● PROCESSING USER</span>;
+    if (session.status === 'completed') return <span className="text-emerald-500">● SUCCESS</span>;
+    if (session.status === 'failed') return <span className="text-red-500">● ERROR</span>;
+    return <span className="text-slate-500">● STANDBY</span>;
+  };
 
   return (
-    <div className="fixed inset-0 bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center z-[5000] p-8">
-      <button onClick={onExit} className="absolute top-8 left-8 w-12 h-12 bg-white dark:bg-slate-800 rounded-full shadow-md flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors">
-          <i className="fa-solid fa-arrow-left"></i>
-      </button>
-      
-      <div className="text-center mb-12">
-          <h1 className="text-5xl font-black text-slate-800 dark:text-white tracking-tight mb-4">Trạm Chấm Công</h1>
-          <p className="text-xl text-slate-500 dark:text-slate-400 font-medium">Sử dụng ứng dụng trên điện thoại để quét mã QR</p>
-      </div>
-      
-      <div className="bg-white p-8 rounded-[32px] shadow-2xl shadow-emerald-500/10 border border-slate-100 relative">
-          <div className="absolute -top-4 -right-4 w-8 h-8 bg-emerald-500 rounded-full animate-ping opacity-75"></div>
-          <div className="absolute -top-4 -right-4 w-8 h-8 bg-emerald-500 rounded-full"></div>
+    <div className="fixed inset-0 bg-[#0a0a0a] text-white font-mono flex flex-col overflow-hidden z-[5000]">
+      {/* HEADER */}
+      <header className="h-16 border-b border-[#333] flex items-center justify-between px-8 bg-[#111] relative">
+        <div className="flex items-center gap-4">
+          <div className="w-3 h-3 bg-emerald-500 rounded-full shadow-[0_0_10px_#10b981]"></div>
+          <h1 className="text-lg font-bold tracking-widest text-slate-300">MÁY TRẠM</h1>
+        </div>
+
+        <div className="flex items-center gap-8 text-sm font-bold text-slate-500">
+          <button onClick={onExit} className="hover:text-white transition-colors">
+            <i className="fa-solid fa-power-off"></i> EXIT
+          </button>
+        </div>
+      </header>
+
+      {/* MAIN CONTENT */}
+      <main className="flex-1 flex relative">
+        {/* INTERACTION AREA */}
+        <div className="flex-1 flex items-center justify-center bg-[#050505] relative overflow-hidden">
           
-          <QRCode value={qrData} size={320} level="H" />
-          
-          <div className="mt-8 text-center">
-              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Mã tự động làm mới sau</p>
-              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                  <div className="bg-emerald-500 h-full animate-[pulse_10s_linear_infinite]" style={{ width: '100%' }}></div>
-              </div>
+          {/* Token Display Overlay */}
+          <div className="absolute bottom-8 left-8 z-20 opacity-30 hover:opacity-100 transition-opacity pointer-events-none">
+             <div className="text-[10px] text-[#666] uppercase tracking-widest mb-1">Session Token</div>
+             <div className="font-mono text-xl text-emerald-500 tracking-wider">{token}</div>
           </div>
-      </div>
+          
+          {/* BACKGROUND GRID */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none" 
+               style={{ backgroundImage: 'linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
+          </div>
+
+          {/* IDLE STATE: QR CODE */}
+          {!session && (
+            <div className="relative z-10 flex flex-col items-center animate-fade-in">
+              <div className="relative p-6 bg-white rounded-xl shadow-[0_0_50px_rgba(255,255,255,0.1)]">
+                <div className="absolute -top-3 -left-3 w-6 h-6 border-t-4 border-l-4 border-emerald-500"></div>
+                <div className="absolute -top-3 -right-3 w-6 h-6 border-t-4 border-r-4 border-emerald-500"></div>
+                <div className="absolute -bottom-3 -left-3 w-6 h-6 border-b-4 border-l-4 border-emerald-500"></div>
+                <div className="absolute -bottom-3 -right-3 w-6 h-6 border-b-4 border-r-4 border-emerald-500"></div>
+                <QRCode value={qrData} size={300} level="H" />
+              </div>
+              <div className="mt-8 flex items-center gap-3 text-slate-500 text-sm font-bold tracking-widest uppercase">
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span>
+                Waiting for connection...
+              </div>
+            </div>
+          )}
+
+          {/* ACTIVE STATE: CAMERA & FEEDBACK */}
+          {session && (
+            <div className="relative z-10 w-full h-full flex flex-col items-center justify-center p-12">
+              
+              {/* CAMERA FRAME */}
+              <div className="relative w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden border border-[#333] shadow-2xl">
+                
+                {/* VIDEO FEED */}
+                <video ref={videoRef} className="w-full h-full object-cover transform scale-x-[-1]" autoPlay playsInline muted></video>
+                
+                {/* OVERLAY UI */}
+                <div className="absolute inset-0 pointer-events-none">
+                  {/* CORNERS */}
+                  <div className="absolute top-8 left-8 w-16 h-16 border-t-2 border-l-2 border-white/50"></div>
+                  <div className="absolute top-8 right-8 w-16 h-16 border-t-2 border-r-2 border-white/50"></div>
+                  <div className="absolute bottom-8 left-8 w-16 h-16 border-b-2 border-l-2 border-white/50"></div>
+                  <div className="absolute bottom-8 right-8 w-16 h-16 border-b-2 border-r-2 border-white/50"></div>
+
+                  {/* CENTER TARGET */}
+                  {session.status === 'camera_ready' && (
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-white/30 rounded-full flex items-center justify-center">
+                      <div className="w-60 h-60 border border-white/20 rounded-full animate-ping"></div>
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    </div>
+                  )}
+
+                  {/* INFO BAR */}
+                  <div className="absolute bottom-0 left-0 w-full bg-black/80 backdrop-blur p-6 flex justify-between items-center border-t border-[#333]">
+                    <div>
+                      <h2 className="text-2xl font-bold text-white">{session.employee_name}</h2>
+                      <p className="text-sm text-slate-400 font-mono">{session.employee_id}</p>
+                    </div>
+                    
+                    {session.status === 'camera_ready' && (
+                      <div className="text-5xl font-black text-white font-mono tracking-tighter">
+                        00:0{countdown}
+                      </div>
+                    )}
+
+                    {session.status === 'completed' && (
+                      <div className="flex items-center gap-3 text-emerald-400">
+                        <i className="fa-solid fa-check-circle text-3xl"></i>
+                        <span className="text-xl font-bold uppercase">Verified</span>
+                      </div>
+                    )}
+
+                    {session.status === 'failed' && (
+                      <div className="flex items-center gap-3 text-red-400">
+                        <i className="fa-solid fa-triangle-exclamation text-3xl"></i>
+                        <span className="text-xl font-bold uppercase">Failed</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* LOADING SPINNER */}
+                {session.status === 'camera_ready' && !isCameraActive && (
+                   <div className="absolute inset-0 flex items-center justify-center bg-[#111]">
+                      <div className="text-emerald-500 font-mono animate-pulse">INITIALIZING OPTICS...</div>
+                   </div>
+                )}
+              </div>
+              
+              {/* ERROR MESSAGE BELOW */}
+              {session.status === 'failed' && (
+                <div className="mt-6 bg-red-900/20 border border-red-900/50 text-red-400 px-6 py-3 rounded font-mono text-sm">
+                  ERROR: {session.error}
+                </div>
+              )}
+
+            </div>
+          )}
+
+        </div>
+      </main>
     </div>
   );
 };
