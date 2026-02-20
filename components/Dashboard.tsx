@@ -122,8 +122,11 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
       setShowQRScanner(false);
       try {
           const qrData = JSON.parse(qrString);
-          if (!qrData.kiosk_id || !qrData.token) {
-              handleShowAlert("Lỗi", "Mã QR không hợp lệ", "error");
+          // Kiosk ID is optional for single-kiosk setups, defaults to KIOSK_01
+          const targetKioskId = qrData.kiosk_id || 'KIOSK_01';
+          
+          if (!qrData.token) {
+              handleShowAlert("Lỗi", "Mã QR thiếu Token xác thực", "error");
               return;
           }
 
@@ -150,7 +153,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
 
               // Create session in Firestore
               const sessionRef = await db.collection('kiosk_sessions').add({
-                  kiosk_id: qrData.kiosk_id,
+                  kiosk_id: targetKioskId,
                   token: qrData.token,
                   employee_id: currentUser.employee_id,
                   employee_name: currentUser.name,
