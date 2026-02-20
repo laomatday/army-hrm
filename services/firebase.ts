@@ -26,9 +26,9 @@ if (!firebase.apps.length) {
 }
 
 const db = firebase.firestore();
-// Attempt to enable persistence
+// Attempt to enable persistence with multi-tab support
 try {
-    db.enablePersistence().catch((err: any) => {
+    db.enablePersistence({ synchronizeTabs: true }).catch((err: any) => {
         console.log("Persistence not available", err);
     });
 } catch(e) {

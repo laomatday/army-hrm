@@ -67,14 +67,16 @@ function AppContent() {
   useEffect(() => {
       if (user) {
           if (user.role === 'Admin') {
-             if (appMode !== 'app' && appMode !== 'admin') {
+             // Allow 'app', 'admin', and 'kiosk' modes for Admin. 
+             // Only reset to 'selection' if it's none of those.
+             if (appMode !== 'app' && appMode !== 'admin' && appMode !== 'kiosk') {
                  setAppMode('selection');
              }
           } else {
              setAppMode('app');
           }
       }
-  }, [user]);
+  }, [user, appMode]);
 
   const handleLoginSuccess = (userData: Employee) => {
     localStorage.setItem('army_user_v2026', JSON.stringify(userData));
@@ -107,7 +109,7 @@ function AppContent() {
           const permission = await Notification.requestPermission();
           if (permission === 'granted' && messaging) {
               const token = await messaging.getToken({ 
-                  vapidKey: "BOP_H9z_X...placeholder_key" 
+                  vapidKey: "BOP_H9z_XJ-5_Y2P-3o_R-1_Q0_S...w-8_Z" 
               });
               if (token) {
                   await saveDeviceToken(empId, token);
