@@ -131,7 +131,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
               kiosk_id: qrData.kiosk_id,
               token: qrData.token,
               employee_id: currentUser.employee_id,
-              employee_name: currentUser.full_name,
+              employee_name: currentUser.name,
               status: 'pending',
               created_at: new Date().toISOString()
           });

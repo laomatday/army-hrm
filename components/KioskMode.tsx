@@ -124,7 +124,7 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
       // Submit check-in
       const mockEmployee = {
           employee_id: session.employee_id,
-          full_name: session.employee_name,
+          name: session.employee_name,
           center_id: 'CENTER_1', // Assuming default
           role: 'Employee'
       } as Employee;
