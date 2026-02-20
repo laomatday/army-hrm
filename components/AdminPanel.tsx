@@ -22,6 +22,7 @@ const COLLECTIONS = [
   { id: 'config_shifts', name: 'Cấu hình ca', icon: 'fa-clock' },
   { id: 'config_holidays', name: 'Cấu hình ngày lễ', icon: 'fa-calendar-day' },
   { id: 'config_system', name: 'Cấu hình hệ thống', icon: 'fa-gears' },
+  { id: 'kiosks', name: 'Quản lý Kiosk', icon: 'fa-tablet-screen-button' },
   { id: 'monthly_stats', name: 'Thống kê tháng', icon: 'fa-chart-column' }
 ];
 
@@ -108,6 +109,17 @@ const SCHEMAS: any = {
         fields: {
             key: { label: 'Mã cấu hình', type: 'text', required: true, colSpan: 1 },
             value: { label: 'Giá trị', type: 'text', required: true, colSpan: 1 },
+            description: { label: 'Mô tả', type: 'textarea', colSpan: 2 }
+        }
+    },
+    kiosks: {
+        primaryKey: 'kiosk_id',
+        headers: ['kiosk_id', 'name', 'center_id', 'status'],
+        fields: {
+            kiosk_id: { label: 'Mã Kiosk', type: 'text', required: true, colSpan: 1, placeholder: 'KIOSK_01' },
+            name: { label: 'Tên Kiosk', type: 'text', required: true, colSpan: 1 },
+            center_id: { label: 'Văn phòng', type: 'reference', collection: 'config_locations', valueField: 'center_id', labelField: 'location_name', required: true, colSpan: 1 },
+            status: { label: 'Trạng thái', type: 'select', options: ['Active', 'Inactive'], colSpan: 1 },
             description: { label: 'Mô tả', type: 'textarea', colSpan: 2 }
         }
     },
