@@ -1,0 +1,253 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Army HRM V2026</title>
+    
+    <!-- Performance Optimization -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://firebasestorage.googleapis.com">
+
+    <!-- Firebase Compat Scripts (Fixed Version 10.12.0) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
+
+    <!-- PWA Settings -->
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Army HRM" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" href="https://firebasestorage.googleapis.com/v0/b/army-hrm-70615.firebasestorage.app/o/logo%2Flogo.png?alt=media" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://firebasestorage.googleapis.com/v0/b/army-hrm-70615.firebasestorage.app/o/logo%2Flogo_white.png?alt=media" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              // Force Plus Jakarta Sans as the primary and fallback
+              sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+            },
+            fontWeight: {
+              normal: 400,
+              medium: 500,
+              semibold: 600,
+              bold: 700,
+              extrabold: 800,
+              black: 900,
+            },
+            letterSpacing: {
+              tighter: '-0.04em',
+              tight: '-0.02em',
+              normal: '0em',
+              wide: '0.02em',
+              wider: '0.05em',
+              widest: '0.1em',
+            },
+            fontSize: {
+              xxs: ['0.65rem', { lineHeight: '1rem' }],
+            },
+            keyframes: {
+              slideUp: {
+                'from': { opacity: '0', transform: 'translateY(15px)' },
+                'to': { opacity: '1', transform: 'translateY(0)' },
+              },
+              fadeIn: {
+                'from': { opacity: '0' },
+                'to': { opacity: '1' },
+              },
+              scaleIn: {
+                'from': { transform: 'scale(0.95)', opacity: '0' },
+                'to': { transform: 'scale(1)', opacity: '1' },
+              },
+              slideInRight: {
+                'from': { transform: 'translateX(40px)', opacity: '0' },
+                'to': { transform: 'translateX(0)', opacity: '1' },
+              },
+              slideInLeft: {
+                'from': { transform: 'translateX(-40px)', opacity: '0' },
+                'to': { transform: 'translateX(0)', opacity: '1' },
+              },
+              bellShake: {
+                '0%, 100%': { transform: 'rotate(0)' },
+                '10%': { transform: 'rotate(15deg)' },
+                '20%': { transform: 'rotate(-15deg)' },
+                '30%': { transform: 'rotate(10deg)' },
+                '40%': { transform: 'rotate(-10deg)' },
+                '50%': { transform: 'rotate(5deg)' },
+                '60%': { transform: 'rotate(-5deg)' },
+                '70%': { transform: 'rotate(0)' },
+              }
+            },
+            animation: {
+              'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'fade-in': 'fadeIn 0.3s ease-out forwards',
+              'scale-in': 'scaleIn 0.3s cubic-bezier(0.19, 1, 0.22, 1) forwards',
+              'slide-in-right': 'slideInRight 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'slide-in-left': 'slideInLeft 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'bell-shake': 'bellShake 3s infinite ease-in-out',
+            }
+          }
+        }
+      }
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --c-primary: #059669; /* Emerald 600 */
+        --c-surface: #ffffff;
+        --c-bg: #f8fafc; /* Slate 50 */
+        --font-main: 'Plus Jakarta Sans', sans-serif;
+      }
+      
+      .dark {
+        --c-surface: #1e293b; /* Slate 800 */
+        --c-bg: #0f172a; /* Slate 900 */
+      }
+
+      /* 
+       * MOBILE TYPOGRAPHY SYNCHRONIZATION 
+       */
+      html {
+        scroll-behavior: smooth;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+        
+        /* Typography Smoothing */
+        -webkit-font-smoothing: antialiased; 
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+      }
+
+      body {
+        background-color: var(--c-bg);
+        color: #475569; /* Slate 600 */
+        font-family: var(--font-main);
+        font-size: 16px;
+        line-height: 1.5;
+        transition: background-color 0.3s ease, color 0.3s ease;
+        
+        /* Modern Font Features */
+        font-feature-settings: "cv11", "ss01"; 
+        
+        -webkit-tap-highlight-color: transparent;
+        overscroll-behavior-y: none;
+        touch-action: manipulation;
+      }
+      
+      .dark body {
+        color: #94a3b8; /* Slate 400 */
+      }
+
+      h1, h2, h3, h4, h5, h6 {
+        color: #0f172a; 
+        letter-spacing: -0.02em; /* Tight tracking for headings */
+        font-weight: 800; /* Default extrabold for headers */
+      }
+      
+      .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+        color: #f8fafc;
+      }
+
+      /* Strict Font Inheritance for Form Elements */
+      button, input, textarea, select, optgroup {
+        font-family: inherit;
+        font-feature-settings: inherit;
+        font-size: 100%;
+        line-height: inherit;
+        color: inherit;
+        margin: 0;
+      }
+
+      /* Normalize Form Elements */
+      button, input, textarea, select {
+        -webkit-appearance: none;
+        appearance: none;
+        border-radius: 0;
+      }
+      
+      /* Restore Checkbox Appearance */
+      input[type="checkbox"] {
+        -webkit-appearance: checkbox;
+        appearance: checkbox;
+        border-radius: 4px;
+        width: 1rem;
+        height: 1rem;
+      }
+      
+      input[type="date"] {
+        display: block;
+        -webkit-appearance: none;
+        min-height: 2.5rem;
+        font-family: inherit;
+      }
+
+      /* Data Display Helpers */
+      .tabular-nums {
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* Utilities */
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      .pb-safe { padding-bottom: env(safe-area-inset-bottom, 34px); }
+      .pt-safe { padding-top: env(safe-area-inset-top, 44px); }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "xlsx": "https://esm.sh/xlsx@^0.18.5",
+    "react-native": "https://esm.sh/react-native@^0.84.0",
+    "react-native-webview": "https://esm.sh/react-native-webview@^13.16.0",
+    "recharts": "https://esm.sh/recharts@^3.7.0",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4"
+  }
+}
+</script>
+</head>
+  <body class="bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 select-none h-screen w-screen overflow-hidden font-sans antialiased transition-colors duration-300">
+    <div id="root" class="h-full w-full"></div>
+    <script type="module" src="./src/index.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(registration => {
+              console.log('ServiceWorker registration successful');
+            })
+            .catch(err => {
+              // Suppress known origin errors in preview environments
+              const msg = err.message || err.toString();
+              if (msg.includes('origin') || msg.includes('scriptURL') || msg.includes('ServiceWorker registration failed')) {
+                  console.warn('ServiceWorker skipped (Preview Environment restrictions).');
+              } else {
+                  console.log('ServiceWorker registration failed: ', err);
+              }
+            });
+        });
+      }
+    </script>
+  </body>
+</html>
