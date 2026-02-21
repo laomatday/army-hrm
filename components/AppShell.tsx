@@ -28,7 +28,7 @@ interface Props {
   onLogout: () => void;
 }
 
-const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
+const AppShell: React.FC<Props> = ({ user, onLogout }) => {
   const [alertMessage, setAlertMessage] = useState<{title: string, msg: string, type: 'success' | 'error' | 'warning'} | null>(null);
 
   const handleShowAlert = (title: string, msg: string, type: 'success' | 'error' | 'warning' = 'success') => {
@@ -382,4 +382,4 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
   );
 };
 
-export default Dashboard;
+export default AppShell;

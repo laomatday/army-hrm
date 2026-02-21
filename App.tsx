@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import LoginView from './components/LoginView';
-import Dashboard from './components/Dashboard';
+import AppShell from './components/AppShell';
 import AdminPanel from './components/AdminPanel';
 import AdminModeSelection from './components/AdminModeSelection';
 import KioskMode from './components/KioskMode';
@@ -30,13 +30,11 @@ function AppContent() {
 
   const { showToast } = useToast();
 
-  // DARK MODE HANDLER (System + Manual Override)
   useEffect(() => {
     const applyTheme = () => {
         const savedTheme = localStorage.getItem('army_theme');
         const sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         
-        // Priority: Manual Setting > System Preference
         const isDark = savedTheme === 'dark' || (!savedTheme && sysDark);
         
         if (isDark) {
@@ -48,10 +46,8 @@ function AppContent() {
         }
     };
 
-    // Initial Apply
     applyTheme();
 
-    // Listeners
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleSystemChange = () => applyTheme();
     
@@ -67,8 +63,6 @@ function AppContent() {
   useEffect(() => {
       if (user) {
           if (user.role === 'Admin') {
-             // Allow 'app', 'admin', and 'kiosk' modes for Admin. 
-             // Only reset to 'selection' if it's none of those.
              if (appMode !== 'app' && appMode !== 'admin' && appMode !== 'kiosk') {
                  setAppMode('selection');
              }
@@ -116,11 +110,9 @@ function AppContent() {
               }
           }
       } catch (error) {
-          // Silent fail or minimal logging if needed
       }
   };
 
-  // REAL-TIME NOTIFICATION LISTENER (Firestore)
   useEffect(() => {
       if (!user) return;
 
@@ -131,14 +123,12 @@ function AppContent() {
               snapshot.docChanges().forEach((change) => {
                   if (change.type === "added") {
                       const data = change.doc.data();
-                      // Show In-App Toast
                       showToast({
                           title: data.title,
                           body: data.body,
                           type: data.type || 'info'
                       });
                       
-                      // Trigger Browser Notification if in background
                       if (document.hidden && Notification.permission === 'granted') {
                            new Notification(data.title, {
                                body: data.body,
@@ -146,7 +136,6 @@ function AppContent() {
                            });
                       }
 
-                      // Mark as read immediately to avoid re-toast on refresh
                       db.collection('user_notifications').doc(change.doc.id).update({ is_read: true });
                   }
               });
@@ -155,10 +144,8 @@ function AppContent() {
       return () => unsubscribe();
   }, [user, showToast]);
 
-  // FCM Listener (Foreground & Init)
   useEffect(() => {
       if (user && messaging) {
-          // Initialize token registration here (Single source of truth)
           initNotifications(user.employee_id);
           
           const unsubscribe = messaging.onMessage((payload) => {
@@ -190,7 +177,7 @@ function AppContent() {
       return <KioskMode onExit={() => handleModeSelect('selection')} />;
   }
 
-  return <Dashboard user={user} onLogout={handleLogout} />;
+  return <AppShell user={user} onLogout={handleLogout} />;
 }
 
 function App() {
