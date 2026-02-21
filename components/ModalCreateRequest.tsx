@@ -1,8 +1,7 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Employee } from '../types';
 import { submitRequest } from '../services/api';
-import { formatDateString } from '../utils/helpers';
+import { formatDateString, triggerHaptic } from '../utils/helpers';
 import ModalHeader from './ModalHeader';
 
 interface Props {
@@ -10,7 +9,7 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  onAlert: (title: string, msg: string, type: 'success' | 'error') => void;
+  onAlert: (title: string, msg: string, type: 'success' | 'error' | 'warning') => void;
   initialData?: { type: string, date: string, reason: string } | null;
 }
 
@@ -24,6 +23,10 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
   });
   const [loading, setLoading] = useState(false);
   const [isTypeOpen, setIsTypeOpen] = useState(false);
+
+  // Refs for Swipe Detection
+  const touchStart = useRef<{x: number, y: number} | null>(null);
+  const touchEnd = useRef<{x: number, y: number} | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -50,8 +53,9 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
   ];
 
   const handleSubmit = async () => {
+      triggerHaptic('light');
       if(!formData.fromDate || !formData.toDate || !formData.reason) {
-          onAlert("Thiếu thông tin", "Vui lòng nhập đầy đủ ngày và lý do.", 'error');
+          onAlert("Thiếu thông tin", "Vui lòng nhập đầy đủ ngày và lý do.", 'warning');
           return;
       }
       
@@ -78,9 +82,12 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
       onAlert(res.success ? "Thành công" : "Lỗi", res.message, res.success ? 'success' : 'error');
 
       if(res.success) {
+          triggerHaptic('success');
           setFormData({ type: 'Nghỉ phép năm', fromDate: '', toDate: '', expirationDate: '', reason: '' });
           onSuccess();
           onClose();
+      } else {
+          triggerHaptic('error');
       }
   };
 
@@ -88,131 +95,193 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
     return formatDateString(dateStr);
   };
 
+  // --- SWIPE HANDLERS ---
+  const onTouchStart = (e: React.TouchEvent) => {
+    const x = e.targetTouches[0].clientX;
+    if (x < 30 || x > window.innerWidth - 30) {
+        touchStart.current = null;
+        return;
+    }
+    touchEnd.current = null;
+    touchStart.current = { x, y: e.targetTouches[0].clientY };
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+     touchEnd.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY };
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart.current || !touchEnd.current) return;
+    
+    const distanceX = touchStart.current.x - touchEnd.current.x;
+    const distanceY = touchStart.current.y - touchEnd.current.y;
+    
+    if (Math.abs(distanceX) > Math.abs(distanceY)) {
+         if (distanceX < -60) {
+             triggerHaptic('light');
+             onClose();
+         }
+    }
+  };
+
   if (!isOpen) return null;
 
-  // Use z-[50] to sit above standard content (z-0) and header (z-40) but below BottomNav (z-100)
+  const gradientClass = 'from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20';
+
   return (
-    <div className="fixed inset-0 z-[50] bg-slate-50 flex flex-col animate-slide-up overflow-y-auto no-scrollbar pb-32 pt-safe">
-        
-        {/* CLOSE BUTTON HEADER */}
-        <div className="fixed top-0 left-0 w-full z-[60] pointer-events-auto">
+    <div 
+        className="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-900 flex flex-col animate-slide-up transition-colors duration-300"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+    >
+        {/* HEADER */}
+        <div className="fixed top-0 left-0 w-full z-[110]">
              <ModalHeader 
-                onClose={onClose} 
+                onClose={() => { triggerHaptic('light'); onClose(); }} 
                 bgClass="bg-transparent border-none shadow-none" 
              />
         </div>
 
-        <div className="relative">
-            <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-br from-emerald-500/10 to-teal-500/10"></div>
-            
-            <div className="relative z-10 flex flex-col items-center pt-20 pb-8 px-6">
-                 <div className="w-24 h-24 rounded-full p-2 bg-white shadow-xl shadow-emerald-100 mb-4 mt-2 flex items-center justify-center">
-                     <div className="w-full h-full rounded-full bg-emerald-50 flex items-center justify-center border border-emerald-100 text-emerald-500">
-                         <i className="fa-solid fa-paper-plane text-3xl"></i>
-                     </div>
-                 </div>
-            </div>
-        </div>
-
-        <div className="flex-1 px-6 pb-12">
-             <div className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 space-y-5">
-                 <div className="relative">
-                     <label className="text-xs font-bold text-emerald-700 block mb-2 uppercase tracking-widest">Loại đề xuất</label>
-                     <button 
-                        onClick={() => setIsTypeOpen(!isTypeOpen)}
-                        className={`w-full p-4 flex justify-between items-center bg-white border rounded-2xl text-base font-semibold outline-none transition-all ${isTypeOpen ? 'border-emerald-500 ring-4 ring-emerald-500/10' : 'border-slate-200'}`}
-                     >
-                         <span className="text-slate-800">{formData.type}</span>
-                         <i className={`fa-solid fa-chevron-down text-slate-400 text-xs transition-transform ${isTypeOpen ? 'rotate-180' : ''}`}></i>
-                     </button>
-                     
-                     {isTypeOpen && (
-                        <div className="absolute top-full left-0 w-full mt-2 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 overflow-hidden animate-fade-in p-2 space-y-1">
-                            {requestTypes.map((type) => (
-                                <div 
-                                    key={type}
-                                    onClick={() => {
-                                        setFormData({...formData, type: type});
-                                        setIsTypeOpen(false);
-                                    }}
-                                    className={`flex items-center justify-between p-3.5 rounded-xl cursor-pointer transition-all ${
-                                        formData.type === type 
-                                        ? 'bg-emerald-50 text-emerald-700' 
-                                        : 'text-slate-600 hover:bg-slate-50'
-                                    }`}
-                                >
-                                    <span className="font-semibold text-sm">{type}</span>
-                                    {formData.type === type && (
-                                        <i className="fa-solid fa-check text-emerald-600"></i>
-                                    )}
-                                </div>
-                            ))}
+        {/* SCROLLABLE CONTENT */}
+        <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-14">
+            <div className="animate-fade-in mt-4">
+                
+                {/* Top Banner Card */}
+                <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 shadow-sm border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors">
+                    <div className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-br ${gradientClass} rounded-t-[32px] transition-colors duration-500`}></div>
+                    
+                    <div className="relative z-10 flex flex-col items-center">
+                        <div className="w-28 h-28 rounded-full p-1.5 bg-white dark:bg-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 mb-4 mt-2 relative transition-colors">
+                            <div className="w-full h-full rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center border border-emerald-100 dark:border-emerald-800/50 text-emerald-500 dark:text-emerald-400">
+                                <i className="fa-solid fa-paper-plane text-4xl ml-[-4px]"></i>
+                            </div>
                         </div>
-                     )}
-                 </div>
+                        <h2 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight leading-tight">Tạo Đề Xuất</h2>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-bold mt-2 uppercase tracking-wide">Điền thông tin chi tiết bên dưới</p>
+                    </div>
+                </div>
 
-                 <div className="grid grid-cols-2 gap-4">
+                {/* Form Section */}
+                <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
+                    <i className="fa-solid fa-pen-to-square text-[10px]"></i>
+                    Thông tin đề xuất
+                </h3>
+                
+                <div className="bg-white dark:bg-slate-800 rounded-[32px] p-6 shadow-sm border border-slate-100 dark:border-slate-700 space-y-5 transition-colors mb-8">
+                     
+                     {/* Dropdown Loại Đề Xuất */}
+                     <div className="relative">
+                         <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1 block mb-1.5">Loại đề xuất</label>
+                         <button 
+                            onClick={() => { triggerHaptic('light'); setIsTypeOpen(!isTypeOpen); }}
+                            className={`w-full h-14 px-4 flex justify-between items-center bg-slate-50 dark:bg-slate-900 border rounded-2xl text-sm font-bold outline-none transition-all ${isTypeOpen ? 'border-emerald-500 dark:border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200 dark:border-slate-700'}`}
+                         >
+                             <span className="text-slate-800 dark:text-white">{formData.type}</span>
+                             <i className={`fa-solid fa-chevron-down text-slate-400 dark:text-slate-500 text-xs transition-transform ${isTypeOpen ? 'rotate-180' : ''}`}></i>
+                         </button>
+                         
+                         {isTypeOpen && (
+                            <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-xl z-50 overflow-hidden animate-fade-in p-2 space-y-1">
+                                {requestTypes.map((type) => (
+                                    <div 
+                                        key={type}
+                                        onClick={() => {
+                                            triggerHaptic('light');
+                                            setFormData({...formData, type: type});
+                                            setIsTypeOpen(false);
+                                        }}
+                                        className={`flex items-center justify-between p-3.5 rounded-xl cursor-pointer transition-all ${
+                                            formData.type === type 
+                                            ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' 
+                                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                        }`}
+                                    >
+                                        <span className="font-bold text-sm">{type}</span>
+                                        {formData.type === type && (
+                                            <i className="fa-solid fa-check text-emerald-600 dark:text-emerald-400"></i>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                         )}
+                     </div>
+
+                     {/* Date Pickers */}
+                     <div className="grid grid-cols-2 gap-4">
+                         <div>
+                             <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1 block mb-1.5">Từ ngày</label>
+                             <div className="relative h-14 w-full">
+                                 <input 
+                                     type="date" 
+                                     className="absolute inset-0 w-full h-full z-20 opacity-0 cursor-pointer"
+                                     value={formData.fromDate} 
+                                     onChange={e => setFormData({...formData, fromDate: e.target.value})}
+                                     onClick={(e) => { try { e.currentTarget.showPicker() } catch(err) {} }}
+                                 />
+                                 <div className={`absolute inset-0 w-full h-full px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold flex items-center justify-between pointer-events-none z-10 transition-colors ${formData.fromDate ? 'text-slate-800 dark:text-white' : 'text-slate-400 dark:text-slate-500'}`}>
+                                     <span>{formData.fromDate ? formatDateDisplay(formData.fromDate) : 'dd/mm/yyyy'}</span>
+                                     <i className="fa-regular fa-calendar text-slate-400 dark:text-slate-500"></i>
+                                 </div>
+                             </div>
+                         </div>
+                         <div>
+                             <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1 block mb-1.5">Đến ngày</label>
+                             <div className="relative h-14 w-full">
+                                 <input 
+                                     type="date" 
+                                     className="absolute inset-0 w-full h-full z-20 opacity-0 cursor-pointer"
+                                     value={formData.toDate} 
+                                     onChange={e => setFormData({...formData, toDate: e.target.value})}
+                                     onClick={(e) => { try { e.currentTarget.showPicker() } catch(err) {} }}
+                                 />
+                                 <div className={`absolute inset-0 w-full h-full px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold flex items-center justify-between pointer-events-none z-10 transition-colors ${formData.toDate ? 'text-slate-800 dark:text-white' : 'text-slate-400 dark:text-slate-500'}`}>
+                                     <span>{formData.toDate ? formatDateDisplay(formData.toDate) : 'dd/mm/yyyy'}</span>
+                                     <i className="fa-regular fa-calendar text-slate-400 dark:text-slate-500"></i>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+
+                     {/* Expiration Date */}
                      <div>
-                         <label className="text-xs font-bold text-emerald-700 block mb-2 uppercase tracking-widest">Từ ngày</label>
+                         <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1 block mb-1.5">Ngày hết hạn (Tuỳ chọn)</label>
                          <div className="relative h-14 w-full">
                              <input 
                                  type="date" 
                                  className="absolute inset-0 w-full h-full z-20 opacity-0 cursor-pointer"
-                                 value={formData.fromDate} 
-                                 onChange={e => setFormData({...formData, fromDate: e.target.value})}
+                                 value={formData.expirationDate} 
+                                 onChange={e => setFormData({...formData, expirationDate: e.target.value})}
                                  onClick={(e) => { try { e.currentTarget.showPicker() } catch(err) {} }}
                              />
-                             <div className={`absolute inset-0 w-full h-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold flex items-center justify-between pointer-events-none z-10 transition-colors ${formData.fromDate ? 'text-slate-800 bg-white' : 'text-slate-400'}`}>
-                                 <span>{formData.fromDate ? formatDateDisplay(formData.fromDate) : 'dd/mm/yyyy'}</span>
-                                 <i className="fa-regular fa-calendar text-slate-400"></i>
+                             <div className={`absolute inset-0 w-full h-full px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold flex items-center justify-between pointer-events-none z-10 transition-colors ${formData.expirationDate ? 'text-slate-800 dark:text-white' : 'text-slate-400 dark:text-slate-500'}`}>
+                                 <span>{formData.expirationDate ? formatDateDisplay(formData.expirationDate) : 'dd/mm/yyyy'}</span>
+                                 <i className="fa-regular fa-clock text-slate-400 dark:text-slate-500"></i>
                              </div>
                          </div>
                      </div>
+
+                     {/* Reason Textarea */}
                      <div>
-                         <label className="text-xs font-bold text-emerald-700 block mb-2 uppercase tracking-widest">Đến ngày</label>
-                         <div className="relative h-14 w-full">
-                             <input 
-                                 type="date" 
-                                 className="absolute inset-0 w-full h-full z-20 opacity-0 cursor-pointer"
-                                 value={formData.toDate} 
-                                 onChange={e => setFormData({...formData, toDate: e.target.value})}
-                                 onClick={(e) => { try { e.currentTarget.showPicker() } catch(err) {} }}
-                             />
-                             <div className={`absolute inset-0 w-full h-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold flex items-center justify-between pointer-events-none z-10 transition-colors ${formData.toDate ? 'text-slate-800 bg-white' : 'text-slate-400'}`}>
-                                 <span>{formData.toDate ? formatDateDisplay(formData.toDate) : 'dd/mm/yyyy'}</span>
-                                 <i className="fa-regular fa-calendar text-slate-400"></i>
-                             </div>
-                         </div>
+                         <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1 block mb-1.5">Lý do chi tiết</label>
+                         <textarea 
+                            className="w-full p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:text-white outline-none h-32 resize-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:focus:border-emerald-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" 
+                            placeholder="Nhập lý do nghỉ..."
+                            value={formData.reason} 
+                            onChange={e => setFormData({...formData, reason: e.target.value})}
+                         ></textarea>
                      </div>
-                 </div>
-
-                 <div>
-                     <label className="text-xs font-bold text-emerald-700 block mb-2 uppercase tracking-widest">Ngày hết hạn (Tuỳ chọn)</label>
-                     <div className="relative h-14 w-full">
-                         <input 
-                             type="date" 
-                             className="absolute inset-0 w-full h-full z-20 opacity-0 cursor-pointer"
-                             value={formData.expirationDate} 
-                             onChange={e => setFormData({...formData, expirationDate: e.target.value})}
-                             onClick={(e) => { try { e.currentTarget.showPicker() } catch(err) {} }}
-                         />
-                         <div className={`absolute inset-0 w-full h-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold flex items-center justify-between pointer-events-none z-10 transition-colors ${formData.expirationDate ? 'text-slate-800 bg-white' : 'text-slate-400'}`}>
-                             <span>{formData.expirationDate ? formatDateDisplay(formData.expirationDate) : 'dd/mm/yyyy'}</span>
-                             <i className="fa-regular fa-clock text-slate-400"></i>
-                         </div>
-                     </div>
-                 </div>
-
-                 <div>
-                     <label className="text-xs font-bold text-emerald-700 block mb-2 uppercase tracking-widest">Lý do chi tiết</label>
-                     <textarea className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 outline-none h-32 resize-none focus:border-emerald-500 transition-colors placeholder:text-slate-400" placeholder="Nhập lý do nghỉ..."
-                        value={formData.reason} onChange={e => setFormData({...formData, reason: e.target.value})}></textarea>
-                 </div>
-                 
-                 <button onClick={handleSubmit} disabled={loading} className="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl shadow-xl shadow-emerald-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-wide">
-                        {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : <>Gửi đề xuất <i className="fa-solid fa-paper-plane"></i></>}
-                 </button>
-             </div>
+                     
+                     {/* Submit Button */}
+                     <button 
+                        onClick={handleSubmit} 
+                        disabled={loading} 
+                        className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-400 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wide mt-2"
+                     >
+                            {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : <>Gửi đề xuất <i className="fa-solid fa-paper-plane"></i></>}
+                     </button>
+                </div>
+            </div>
         </div>
     </div>
   );
