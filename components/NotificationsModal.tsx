@@ -30,7 +30,7 @@ const NotificationsModal: React.FC<Props> = ({ data, user, activeTab, onClose, o
   }, [myRequests, myExplanations]);
 
   const renderDateRange = (from: string, to?: string) => {
-      if (!to) return formatDateString(from.split('T')[0]); // For explanation
+      if (!to) return formatDateString(from.split('T')[0]);
       const f = formatDateString(from.split('T')[0]);
       const t = formatDateString(to.split('T')[0]);
       if (from.split('T')[0] === to.split('T')[0]) return f;
@@ -39,14 +39,12 @@ const NotificationsModal: React.FC<Props> = ({ data, user, activeTab, onClose, o
 
   return (
     <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-slate-900 font-sans">
-        {/* Adjusted padding to match other tabs (pt-28) and removed fixed header logic */}
         <div className="pt-28 pb-32 px-4 animate-fade-in">
             
-            {/* ACTION REQUIRED SECTION (FOR MANAGERS) */}
             {pendingCount > 0 && (
                 <div 
                     onClick={() => { onSwitchTab('manager'); }}
-                    className="bg-white dark:bg-slate-800 rounded-[28px] p-5 mb-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-emerald-100 dark:border-emerald-900/30 relative overflow-hidden group active:scale-[0.98] transition-all cursor-pointer animate-slide-up"
+                    className="bg-white dark:bg-slate-800 rounded-[28px] p-5 mb-8 border border-emerald-100 dark:border-emerald-900/30 relative overflow-hidden group active:scale-[0.98] transition-all cursor-pointer animate-slide-up"
                 >
                     <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 dark:bg-emerald-900/20 rounded-full blur-3xl pointer-events-none -mr-10 -mt-10 opacity-60"></div>
                     
@@ -69,18 +67,17 @@ const NotificationsModal: React.FC<Props> = ({ data, user, activeTab, onClose, o
                             </p>
                         </div>
 
-                        <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center text-xl shadow-sm border border-emerald-100 dark:border-emerald-900/30 group-hover:bg-emerald-500 group-hover:text-white dark:group-hover:text-white group-hover:shadow-lg group-hover:shadow-emerald-200 dark:group-hover:shadow-emerald-900/30 transition-all duration-300">
+                        <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center text-xl border border-emerald-100 dark:border-emerald-900/30 group-hover:bg-emerald-500 group-hover:text-white dark:group-hover:text-white transition-all duration-300">
                             <i className="fa-solid fa-arrow-right-long group-hover:translate-x-1 transition-transform"></i>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* MY NOTIFICATIONS LIST */}
             <div className="space-y-4">
                 {myNotifications.length === 0 && pendingCount === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-600 opacity-60 animate-fade-in">
-                        <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 shadow-inner border border-slate-200 dark:border-slate-700/50">
+                        <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 border border-slate-200 dark:border-slate-700/50">
                             <i className="fa-regular fa-bell-slash text-3xl text-slate-300 dark:text-slate-600"></i>
                         </div>
                         <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Không có thông báo mới</p>
@@ -96,7 +93,6 @@ const NotificationsModal: React.FC<Props> = ({ data, user, activeTab, onClose, o
                                 : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30';
                             const statusIcon = isApproved ? 'fa-circle-check' : 'fa-circle-xmark';
                             
-                            // Left Icon Config matching TabRequests
                             let leftIconConfig = { bg: 'bg-slate-50', text: 'text-slate-500', border: 'border-slate-100' };
                             if (isRequest) {
                                 if (item.type.includes('Nghỉ phép')) leftIconConfig = { bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-500 dark:text-blue-400', border: 'border-blue-100 dark:border-blue-900/30' };
@@ -108,16 +104,13 @@ const NotificationsModal: React.FC<Props> = ({ data, user, activeTab, onClose, o
                             }
 
                             return (
-                                <div key={item.id} className="bg-white dark:bg-slate-800 p-5 rounded-[28px] shadow-sm border border-slate-100 dark:border-slate-700 animate-slide-up relative overflow-hidden group active:scale-[0.98] transition-all">
+                                <div key={item.id} className="bg-white dark:bg-slate-800 p-5 rounded-[28px] border border-slate-100 dark:border-slate-700 animate-slide-up relative overflow-hidden group active:scale-[0.98] transition-all">
                                     <div className="flex gap-4">
-                                        {/* Icon Box */}
-                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl shadow-sm border ${leftIconConfig.bg} ${leftIconConfig.text} ${leftIconConfig.border}`}>
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl border ${leftIconConfig.bg} ${leftIconConfig.text} ${leftIconConfig.border}`}>
                                             <i className={`fa-solid ${isRequest ? (item.type.includes('Nghỉ phép') ? 'fa-umbrella-beach' : item.type.includes('Công tác') ? 'fa-plane-departure' : item.type.includes('Nghỉ ốm') ? 'fa-user-nurse' : 'fa-file-lines') : 'fa-file-signature'}`}></i>
                                         </div>
 
-                                        {/* Content Column */}
                                         <div className="flex-1 min-w-0 pt-0.5">
-                                            {/* Row 1: Name + Status */}
                                             <div className="flex justify-between items-start gap-2 mb-1">
                                                 <h4 className="font-black text-slate-800 dark:text-white text-sm leading-tight">
                                                     {isRequest ? item.type : 'Giải trình công'}
@@ -128,7 +121,6 @@ const NotificationsModal: React.FC<Props> = ({ data, user, activeTab, onClose, o
                                                 </span>
                                             </div>
 
-                                            {/* Row 2: Date */}
                                             <div className="flex items-center gap-2 text-xs font-bold text-slate-400 dark:text-slate-500 font-mono">
                                                 <i className="fa-regular fa-calendar-days"></i>
                                                 {renderDateRange(isRequest ? item.from_date : item.date, item.to_date)}

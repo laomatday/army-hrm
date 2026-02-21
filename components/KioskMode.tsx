@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import QRCode from 'react-qr-code';
 import { db } from '../services/firebase';
@@ -25,7 +24,6 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // Fetch Kiosk Info from DB
   useEffect(() => {
     if (!isConfiguring && savedKioskId) {
         const fetchKiosk = async () => {
@@ -40,13 +38,11 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
     }
   }, [isConfiguring, savedKioskId]);
 
-  // Clock
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Generate Token every 10s
   useEffect(() => {
     if (session || isConfiguring || !kioskInfo) return; 
     
@@ -59,7 +55,6 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
     return () => clearInterval(interval);
   }, [!!session, isConfiguring, !!kioskInfo]);
 
-  // Listen to Kiosk Sessions
   useEffect(() => {
     if (isConfiguring || !kioskInfo) return;
 
@@ -85,7 +80,6 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
     return () => unsubscribe();
   }, [token, session?.id, isConfiguring, kioskInfo?.kiosk_id]);
 
-  // Camera Logic
   useEffect(() => {
     let timer: any;
     
@@ -153,12 +147,10 @@ const takePictureAndSubmit = async () => {
       
       const mockEmployee = { employee_id: session.employee_id, name: session.employee_name, center_id: kioskInfo.center_id } as Employee;
       
-      // BẮT ĐẦU SỬA: Lấy GPS thực tế của máy Kiosk thay vì số 10
       if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
               async (position) => {
                   try {
-                      // Gửi tọa độ THẬT lên API
                       const res = await doCheckIn({
                           employeeId: session.employee_id,
                           lat: position.coords.latitude,
@@ -182,7 +174,6 @@ const takePictureAndSubmit = async () => {
                   setTimeout(resetSession, 4000);
               },
               async (error) => {
-                  // Xử lý nếu máy Kiosk chưa được cấp quyền truy cập Vị trí
                   console.error("Kiosk GPS Error:", error);
                   await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: "Lỗi GPS Kiosk: Vui lòng bật định vị cho thiết bị này." });
                   setSession((prev: any) => ({ ...prev, status: 'failed', error: "Chưa cấp quyền GPS cho Kiosk" }));
@@ -191,7 +182,6 @@ const takePictureAndSubmit = async () => {
               { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
           );
       } else {
-          // Trình duyệt không hỗ trợ GPS
           await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: "Thiết bị Kiosk không hỗ trợ định vị." });
           setSession((prev: any) => ({ ...prev, status: 'failed', error: "Trình duyệt không hỗ trợ GPS" }));
           setTimeout(resetSession, 4000);
@@ -214,7 +204,7 @@ const takePictureAndSubmit = async () => {
   if (isConfiguring) {
     return (
         <div className="fixed inset-0 bg-slate-900 text-white flex items-center justify-center p-6 z-[6000]">
-            <div className="w-full max-w-sm bg-slate-800 p-8 rounded-2xl shadow-2xl border border-slate-700">
+            <div className="w-full max-w-sm bg-slate-800 p-8 rounded-2xl border border-slate-700">
                 <div className="text-center mb-8">
                     <i className="fa-solid fa-gear text-emerald-500 text-4xl mb-3"></i>
                     <h2 className="text-2xl font-bold">Kiosk Setup</h2>
@@ -255,7 +245,6 @@ const takePictureAndSubmit = async () => {
 
   return (
     <div className="fixed inset-0 bg-slate-900 text-white font-sans flex flex-col z-[5000]">
-      {/* HEADER */}
       <header className="h-20 flex items-center justify-between px-8 border-b border-slate-800">
         <div>
           <h1 className="text-lg font-bold tracking-wider text-emerald-500">AITENDANCE KIOSK</h1>
@@ -267,7 +256,6 @@ const takePictureAndSubmit = async () => {
         </div>
       </header>
 
-      {/* MAIN CONTENT */}
       <main className="flex-1 flex flex-col items-center justify-center p-8">
           
         {!session && (
@@ -277,7 +265,7 @@ const takePictureAndSubmit = async () => {
               Use the mobile app to scan the QR code and begin.
             </p>
 
-            <div className="p-6 bg-white rounded-xl shadow-lg">
+            <div className="p-6 bg-white rounded-xl">
                 <QRCode value={qrData} size={256} />
             </div>
             
@@ -301,7 +289,7 @@ const takePictureAndSubmit = async () => {
 
               {session.status === 'camera_ready' && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-7xl font-bold text-white drop-shadow-lg">{countdown}</div>
+                    <div className="text-7xl font-bold text-white">{countdown}</div>
                 </div>
               )}
             </div>

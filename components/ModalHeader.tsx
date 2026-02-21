@@ -1,20 +1,17 @@
-
 import React from 'react';
 
 interface Props {
   title?: string;
   onClose: () => void;
   rightContent?: React.ReactNode;
-  bgClass?: string; // Optional override for background
+  bgClass?: string;
 }
 
 const ModalHeader: React.FC<Props> = ({ title, onClose, rightContent, bgClass }) => {
   return (
-    <div className={`sticky top-0 z-50 pt-safe transition-all border-b border-transparent shadow-sm/30 ${bgClass || 'bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md'}`}>
-        {/* Height h-14 (56px) - Consistent with App Header */}
+    <div className={`sticky top-0 z-50 pt-safe transition-all border-b border-transparent ${bgClass || 'bg-slate-50/90 dark:bg-slate-900/90'}`}>
         <div className="flex items-center justify-between h-14 px-4 relative">
             
-            {/* Title Slot */}
             <div className="flex-1 flex items-center min-w-0 gap-2">
                 {title && (
                     <h2 className="text-xl font-extrabold text-slate-800 dark:text-white tracking-tight truncate animate-fade-in">
@@ -23,14 +20,12 @@ const ModalHeader: React.FC<Props> = ({ title, onClose, rightContent, bgClass })
                 )}
             </div>
 
-            {/* Actions Slot */}
             <div className="flex items-center gap-3 pl-2 flex-shrink-0">
                 {rightContent}
                 
-                {/* Standardized Close Button: w-9 h-9 */}
                 <button 
                     onClick={onClose} 
-                    className="w-9 h-9 rounded-full bg-slate-200/50 dark:bg-slate-800 border border-slate-300/30 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all shadow-sm active:scale-90"
+                    className="w-9 h-9 rounded-full bg-slate-200/50 dark:bg-slate-800 border border-slate-300/30 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all active:scale-90"
                 >
                     <i className="fa-solid fa-xmark text-lg"></i>
                 </button>

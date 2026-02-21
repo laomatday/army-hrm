@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { DashboardData, Employee, LeaveRequest, Explanation } from '../types';
 import { processRequest, processExplanation } from '../services/api';
@@ -17,7 +16,6 @@ interface Props {
 const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDate }) => {
   const [processing, setProcessing] = useState<string | null>(null);
   
-  // Rejection Modal State
   const [rejectModal, setRejectModal] = useState<{
       isOpen: boolean;
       docId: string;
@@ -36,7 +34,6 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
       return map;
   }, [data?.locations]);
 
-  // --- CALENDAR LOGIC ---
   const generateCalendar = () => {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
@@ -55,7 +52,6 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
       return teamLeaves.filter(l => l.from_date <= dateStr && l.to_date >= dateStr);
   };
 
-  // --- APPROVAL GROUPING LOGIC ---
   const groupedApprovals = useMemo(() => {
       const allItems = [
           ...approvals.map(a => ({ ...a, itemType: 'leave' as const })),
@@ -79,7 +75,6 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
       return groups;
   }, [approvals, explanationApprovals, contacts, locationsMap]);
 
-  // --- ACTIONS ---
   const handleAction = async (docId: string, status: 'Approved' | 'Rejected', type: 'leave' | 'explanation') => {
       triggerHaptic('medium');
       if (status === 'Rejected') {
@@ -146,15 +141,13 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
     <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-slate-900 font-sans">
         <div className="pt-28 pb-32 px-4 animate-fade-in space-y-8">
             
-            {/* --- SECTION 1: CALENDAR --- */}
             <div>
-                 {/* Calendar Title - Standardized with TabContacts */}
                  <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
                      <i className="fa-solid fa-calendar-days text-[10px]"></i>
                      Lịch nghỉ nhân viên
                  </h3>
 
-                 <div className="bg-white dark:bg-slate-800 p-4 rounded-[24px] shadow-sm border border-slate-100 dark:border-slate-700">
+                 <div className="bg-white dark:bg-slate-800 p-4 rounded-[24px] border border-slate-100 dark:border-slate-700">
                      <div className="grid grid-cols-7 mb-3">
                         {["CN", "T2", "T3", "T4", "T5", "T6", "T7"].map((d, i) => (
                             <div key={i} className="text-center text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide">{d}</div>
@@ -187,14 +180,12 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
                  </div>
             </div>
 
-            {/* --- SECTION 2: APPROVALS --- */}
             <div>
-                {/* Approval Header - Standardized */}
                 <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
                     <i className="fa-solid fa-clipboard-check text-[10px]"></i>
                     Cần duyệt 
                     {totalPending > 0 && (
-                        <span className={`bg-red-500 text-white text-[10px] font-bold h-5 flex items-center justify-center rounded-full shadow-sm shadow-red-200 dark:shadow-red-900/50 ${totalPending < 10 ? 'w-5' : 'px-1.5 min-w-[20px]'}`}>
+                        <span className={`bg-red-500 text-white text-[10px] font-bold h-5 flex items-center justify-center rounded-full ${totalPending < 10 ? 'w-5' : 'px-1.5 min-w-[20px]'}`}>
                             {totalPending}
                         </span>
                     )}
@@ -232,7 +223,7 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
                                                         : formatDateString(item.date?.split('T')[0]);
 
                                                     return (
-                                                        <div key={item.id} className="bg-white dark:bg-slate-800 p-4 rounded-[20px] shadow-sm border border-slate-100 dark:border-slate-700 relative group active:scale-[0.99] transition-all">
+                                                        <div key={item.id} className="bg-white dark:bg-slate-800 p-4 rounded-[20px] border border-slate-100 dark:border-slate-700 relative group active:scale-[0.99] transition-all">
                                                             <div className="flex justify-between items-start mb-3">
                                                                 <div className="flex items-center gap-3">
                                                                     <Avatar 
@@ -270,7 +261,7 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
                                                                 <button 
                                                                     disabled={!!processing}
                                                                     onClick={() => handleAction(item.id, 'Approved', item.itemType)}
-                                                                    className="py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-200 dark:shadow-emerald-900/20 flex items-center justify-center gap-2 uppercase tracking-wide"
+                                                                    className="py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 flex items-center justify-center gap-2 uppercase tracking-wide"
                                                                 >
                                                                     {processing === item.id ? <i className="fa-solid fa-circle-notch fa-spin"></i> : <span>Duyệt ngay</span>}
                                                                 </button>
@@ -289,10 +280,9 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
             </div>
         </div>
 
-        {/* REJECTION REASON MODAL */}
         {rejectModal.isOpen && (
              <div className="fixed inset-0 z-[2100] bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 animate-fade-in">
-                 <div className="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-sm shadow-2xl p-6 animate-scale-in">
+                 <div className="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-sm p-6 animate-scale-in">
                      <div className="text-center mb-6">
                          <div className="w-14 h-14 bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100 dark:border-red-900/30">
                              <i className="fa-solid fa-triangle-exclamation text-xl"></i>
@@ -318,7 +308,7 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
                          <button 
                             onClick={submitRejection}
                             disabled={!rejectModal.reason.trim()}
-                            className="flex-1 py-3 rounded-xl bg-red-500 text-white text-sm font-bold shadow-lg shadow-red-200 dark:shadow-red-900/20 hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide"
+                            className="flex-1 py-3 rounded-xl bg-red-500 text-white text-sm font-bold hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide"
                          >
                              Xác nhận
                          </button>

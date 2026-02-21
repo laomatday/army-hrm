@@ -21,7 +21,7 @@ const NavItem = ({ name, icon, activeIcon, activeTab, onChange }: { name: TabTyp
             onClick={() => onChange(name)} 
             className={`relative flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 active:scale-90 ${
                 isActive 
-                ? 'bg-emerald-600 dark:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 dark:shadow-emerald-900/30 translate-y-[-4px]' 
+                ? 'bg-emerald-600 dark:bg-emerald-500 text-white translate-y-[-4px]' 
                 : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
             }`}
         >

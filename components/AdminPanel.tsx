@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Employee } from '../types';
 import { adminGetCollection, adminDeleteDoc, adminUpdateDoc, adminCreateDoc } from '../services/api';
@@ -13,7 +12,6 @@ interface Props {
   onBackToApp: () => void;
 }
 
-// --- CONFIGURATION SCHEMAS ---
 const COLLECTIONS = [
   { id: 'employees', name: 'Nhân viên', icon: 'fa-users' },
   { id: 'attendance', name: 'Chấm công', icon: 'fa-calendar-check' },
@@ -177,7 +175,7 @@ const MultiSelectTags = ({
         <div ref={containerRef} className="relative">
             <div 
                 onClick={() => setIsOpen(!isOpen)}
-                className="min-h-[46px] p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl flex flex-wrap gap-2 cursor-pointer focus-within:ring-2 focus-within:ring-emerald-500 transition-all shadow-sm"
+                className="min-h-[46px] p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl flex flex-wrap gap-2 cursor-pointer focus-within:ring-2 focus-within:ring-emerald-500 transition-all"
             >
                 {selected.length === 0 && !isOpen && (
                     <span className="text-slate-400 dark:text-slate-500 text-sm mt-1 ml-2">Chọn các chi nhánh...</span>
@@ -204,7 +202,7 @@ const MultiSelectTags = ({
             </div>
 
             {isOpen && (
-                <div className="absolute z-[100] top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-scale-in">
+                <div className="absolute z-[100] top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden animate-scale-in">
                     <div className="p-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30">
                         <div className="relative">
                             <i className="fa-solid fa-search absolute left-3 top-2.5 text-slate-400 text-xs"></i>
@@ -252,25 +250,20 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   
-  // Advanced Features State
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [sortConfig, setSortConfig] = useState<{key: string, direction: 'asc' | 'desc'} | null>(null);
   
-  // Selection State
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  // Reference Data (for dropdowns)
   const [references, setReferences] = useState<any>({});
 
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [formData, setFormData] = useState<any>({});
   
   const { showToast } = useToast();
 
-  // Confirm Modal State
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     title: string;
@@ -307,8 +300,6 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
       setData(res);
       setLoading(false);
   };
-
-  // --- ACTIONS ---
 
   const handleDelete = (id: string) => {
       setConfirmDialog({
@@ -577,7 +568,7 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                   const colSpanClass = fieldConfig.colSpan === 2 ? 'md:col-span-2' : 'md:col-span-1';
 
                   let inputEl;
-                  const commonClasses = "block w-full rounded-2xl border-0 px-4 py-3 text-slate-800 dark:text-white shadow-sm ring-1 ring-inset ring-slate-200 dark:ring-slate-700 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6 transition-all bg-white dark:bg-slate-800 font-medium";
+                  const commonClasses = "block w-full rounded-2xl border-0 px-4 py-3 text-slate-800 dark:text-white ring-1 ring-inset ring-slate-200 dark:ring-slate-700 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6 transition-all bg-white dark:bg-slate-800 font-medium";
 
                   if (fieldConfig.type === 'select') {
                       inputEl = (
@@ -686,9 +677,9 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
 
   return (
     <div className="flex h-screen w-screen bg-slate-50 dark:bg-slate-900 overflow-hidden font-sans transition-colors duration-300">
-        <div className="w-72 bg-slate-900 text-slate-300 flex flex-col flex-shrink-0 border-r border-slate-800 shadow-xl z-20 hidden md:flex">
+        <div className="w-72 bg-slate-900 text-slate-300 flex flex-col flex-shrink-0 border-r border-slate-800 z-20 hidden md:flex">
             <div className="p-6 flex items-center gap-3 mb-2">
-                <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-emerald-900/50">A</div>
+                <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black">A</div>
                 <div>
                      <h1 className="font-black text-white tracking-wide text-lg leading-none">Army Admin</h1>
                      <p className="text-[10px] text-slate-500 font-extrabold uppercase tracking-widest mt-1">Management System</p>
@@ -699,7 +690,7 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                 <div className="px-3 py-2 text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mt-2">Dữ liệu</div>
                 {COLLECTIONS.map(col => (
                     <button key={col.id} onClick={() => setSelectedCollection(col.id)}
-                        className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-bold transition-all flex items-center gap-3 ${selectedCollection === col.id ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/20' : 'hover:bg-slate-800 hover:text-white text-slate-400'}`}>
+                        className={`w-full text-left px-4 py-3 rounded-2xl text-sm font-bold transition-all flex items-center gap-3 ${selectedCollection === col.id ? 'bg-emerald-600 text-white' : 'hover:bg-slate-800 hover:text-white text-slate-400'}`}>
                         <i className={`fa-solid ${col.icon} w-5 text-center`}></i>
                         {col.name}
                     </button>
@@ -726,10 +717,9 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
         </div>
 
         <div className="flex-1 flex flex-col min-w-0 relative bg-slate-50/50 dark:bg-slate-900/50">
-            <header className="h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 z-10 sticky top-0">
+            <header className="h-20 bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 z-10 sticky top-0">
                 <div className="flex items-center gap-4">
-                     {/* Mobile Menu Toggle could be here */}
-                     <div className="md:hidden w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black shadow-lg">A</div>
+                     <div className="md:hidden w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black">A</div>
                     <h2 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-3 tracking-tight">
                         {COLLECTIONS.find(c => c.id === selectedCollection)?.name}
                         <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2.5 py-0.5 rounded-lg text-xs font-extrabold border border-slate-200 dark:border-slate-700 uppercase tracking-wide">{processedData.length} records</span>
@@ -738,7 +728,7 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                 
                 <div className="flex items-center gap-3">
                     {selectedIds.size > 0 && (
-                        <button onClick={handleBulkDelete} className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 px-4 py-2.5 rounded-2xl text-xs font-extrabold hover:bg-red-100 dark:hover:bg-red-900/30 hover:shadow-lg hover:shadow-red-100/50 flex items-center gap-2 transition-all animate-scale-in uppercase tracking-wide">
+                        <button onClick={handleBulkDelete} className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 px-4 py-2.5 rounded-2xl text-xs font-extrabold hover:bg-red-100 dark:hover:bg-red-900/30 flex items-center gap-2 transition-all animate-scale-in uppercase tracking-wide">
                             <i className="fa-solid fa-trash-can"></i> <span className="hidden md:inline">Xóa {selectedIds.size} mục</span>
                         </button>
                     )}
@@ -746,12 +736,12 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                     <div className="relative group hidden md:block">
                         <i className="fa-solid fa-search absolute left-4 top-3 text-slate-400 dark:text-slate-500 text-sm group-focus-within:text-emerald-500 transition-colors"></i>
                         <input type="text" placeholder="Tìm kiếm..." 
-                            className="pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-medium w-64 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-sm transition-all text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            className="pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-medium w-64 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
                             value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
                         />
                     </div>
                     
-                    <div className="flex items-center bg-white dark:bg-slate-800 rounded-2xl p-1 border border-slate-200 dark:border-slate-700 shadow-sm hidden md:flex">
+                    <div className="flex items-center bg-white dark:bg-slate-800 rounded-2xl p-1 border border-slate-200 dark:border-slate-700 hidden md:flex">
                         <button onClick={() => fileInputRef.current?.click()} className="px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl flex items-center gap-1 transition-colors uppercase tracking-wide">
                             <i className="fa-solid fa-file-import text-blue-500 dark:text-blue-400"></i> Import
                         </button>
@@ -762,23 +752,23 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                         <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx, .xls" onChange={handleFileChange} />
                     </div>
 
-                    <button onClick={handleCreate} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-2.5 rounded-2xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-slate-100 shadow-lg shadow-slate-900/20 dark:shadow-white/10 flex items-center gap-2 ml-2 transition-all active:scale-95 uppercase tracking-wide">
+                    <button onClick={handleCreate} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-2.5 rounded-2xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-slate-100 flex items-center gap-2 ml-2 transition-all active:scale-95 uppercase tracking-wide">
                         <i className="fa-solid fa-plus"></i> <span className="hidden md:inline">Tạo mới</span>
                     </button>
                 </div>
             </header>
 
             <div className="flex-1 overflow-hidden p-6 flex flex-col">
-                <div key={selectedCollection} className="bg-white dark:bg-slate-800 rounded-[24px] shadow-sm border border-slate-200 dark:border-slate-700 flex-1 flex flex-col overflow-hidden relative transition-all duration-300 animate-slide-up">
+                <div key={selectedCollection} className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 flex-1 flex flex-col overflow-hidden relative transition-all duration-300 animate-slide-up">
                     <div className="overflow-auto flex-1 custom-scrollbar">
                         {loading && (
-                             <div className="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm z-30">
+                             <div className="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-slate-900/60 z-30">
                                 <div className="animate-spin rounded-full h-10 w-10 border-[3px] border-slate-200 dark:border-slate-700 border-t-emerald-600 dark:border-t-emerald-500"></div>
                              </div>
                         )}
                         
                         <table className="w-full text-left border-collapse table-auto md:w-full">
-                            <thead className="bg-slate-50 dark:bg-slate-800/80 sticky top-0 z-20 shadow-sm backdrop-blur-md">
+                            <thead className="bg-slate-50 dark:bg-slate-800/80 sticky top-0 z-20">
                                 <tr>
                                     <th className="px-6 py-4 w-14 border-b border-slate-200 dark:border-slate-700">
                                         <input type="checkbox" className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 cursor-pointer accent-emerald-600 bg-white dark:bg-slate-700"
@@ -879,14 +869,14 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
         </div>
 
         {isModalOpen && (
-            <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-                <div className="bg-white dark:bg-slate-800 rounded-[24px] shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col animate-scale-in">
+            <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-slate-800 rounded-[24px] w-full max-w-3xl max-h-[90vh] flex flex-col animate-scale-in">
                     <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/30 rounded-t-[24px]">
                         <div>
                              <h3 className="text-xl font-black text-slate-800 dark:text-white tracking-tight">{editingItem ? 'Cập nhật thông tin' : 'Thêm mới bản ghi'}</h3>
                              <p className="text-xs text-slate-500 dark:text-slate-400 font-bold mt-1 uppercase tracking-wide">{COLLECTIONS.find(c => c.id === selectedCollection)?.name}</p>
                         </div>
-                        <button onClick={() => setIsModalOpen(false)} className="w-9 h-9 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-600 flex items-center justify-center transition-colors shadow-sm">
+                        <button onClick={() => setIsModalOpen(false)} className="w-9 h-9 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-600 flex items-center justify-center transition-colors">
                             <i className="fa-solid fa-xmark"></i>
                         </button>
                     </div>
@@ -896,10 +886,10 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                     </div>
 
                     <div className="px-8 py-5 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30 rounded-b-[24px] flex justify-end gap-3">
-                        <button onClick={() => setIsModalOpen(false)} className="px-6 py-3 rounded-2xl text-sm font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all shadow-sm uppercase tracking-wide">
+                        <button onClick={() => setIsModalOpen(false)} className="px-6 py-3 rounded-2xl text-sm font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all uppercase tracking-wide">
                             Hủy bỏ
                         </button>
-                        <button onClick={handleSave} className="px-6 py-3 rounded-2xl text-sm font-bold bg-slate-900 dark:bg-emerald-600 text-white hover:bg-slate-800 dark:hover:bg-emerald-700 shadow-lg shadow-slate-900/20 dark:shadow-emerald-900/20 transition-all active:scale-95 uppercase tracking-wide">
+                        <button onClick={handleSave} className="px-6 py-3 rounded-2xl text-sm font-bold bg-slate-900 dark:bg-emerald-600 text-white hover:bg-slate-800 dark:hover:bg-emerald-700 transition-all active:scale-95 uppercase tracking-wide">
                             {editingItem ? 'Lưu thay đổi' : 'Tạo mới'}
                         </button>
                     </div>

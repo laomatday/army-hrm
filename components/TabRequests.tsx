@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { DashboardData, Employee } from '../types';
 import { formatDateString, triggerHaptic } from '../utils/helpers';
@@ -8,13 +7,11 @@ interface Props {
   data: DashboardData | null;
   user: Employee;
   onRefresh: () => Promise<void>;
-  // onCreateClick removed as it is now in Header
 }
 
 const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
   const [viewMode, setViewMode] = useState<'leaves' | 'explanations'>('leaves');
 
-  // Sort requests by created_at desc
   const requests = useMemo(() => {
       return [...(data?.myRequests || [])].sort((a, b) => 
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -43,7 +40,6 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
       return { icon: 'fa-file-lines', bg: 'bg-slate-50 dark:bg-slate-700/50', text: 'text-slate-500 dark:text-slate-400' };
   };
 
-  // --- Summary Stats ---
   const stats = useMemo(() => {
       if (viewMode === 'leaves') {
           const pending = requests.filter(r => r.status === 'Pending').length;
@@ -76,44 +72,40 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
         <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-slate-900 font-sans">
             <div className="pt-28 space-y-4 animate-fade-in pb-28 px-4">
                 
-                {/* VIEW TOGGLE CAPSULE */}
                 <div className="flex justify-center mb-6">
-                     <div className="bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-full flex relative shadow-inner">
+                     <div className="bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-full flex relative">
                          <button 
                             onClick={() => switchViewMode('leaves')}
-                            className={`px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'leaves' ? 'text-emerald-600 dark:text-emerald-400 bg-white dark:bg-slate-700 shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                            className={`px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'leaves' ? 'text-emerald-600 dark:text-emerald-400 bg-white dark:bg-slate-700' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                          >
                              Nghỉ phép
                          </button>
                          <button 
                             onClick={() => switchViewMode('explanations')}
-                            className={`px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'explanations' ? 'text-emerald-600 dark:text-emerald-400 bg-white dark:bg-slate-700 shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                            className={`px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'explanations' ? 'text-emerald-600 dark:text-emerald-400 bg-white dark:bg-slate-700' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                          >
                              Giải trình
                          </button>
                      </div>
                 </div>
 
-                {/* SUMMARY WIDGETS (Matched TabHistory Style) */}
                 <div className="grid grid-cols-3 gap-3 mb-8">
-                    <div className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28 shadow-sm">
+                    <div className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28">
                         <span className={`text-3xl font-black mb-1 tabular-nums tracking-tighter ${stats.col1.color}`}>{stats.col1.value}</span>
                         <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{stats.col1.label}</span>
                     </div>
-                    <div className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28 shadow-sm">
+                    <div className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28">
                         <span className={`text-3xl font-black mb-1 tabular-nums tracking-tighter ${stats.col2.color}`}>{stats.col2.value}</span>
                         <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{stats.col2.label}</span>
                     </div>
-                    <div className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28 shadow-sm">
+                    <div className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28">
                         <span className={`text-3xl font-black mb-1 tabular-nums tracking-tighter ${stats.col3.color}`}>{stats.col3.value}</span>
                         <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{stats.col3.label}</span>
                     </div>
                 </div>
 
-                {/* LEAVE REQUESTS SECTION */}
                 {viewMode === 'leaves' && (
                     <div className="animate-slide-up">
-                        {/* Updated Header: text-[11px] font-extrabold */}
                         <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase ml-2 mb-3 tracking-widest flex items-center gap-2">
                             <i className="fa-solid fa-umbrella-beach text-[10px]"></i>
                             Danh sách đơn nghỉ phép
@@ -132,16 +124,13 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
                                     const typeInfo = getTypeConfig(req.type);
 
                                     return (
-                                        <div key={req.id} className="bg-white dark:bg-slate-800 p-5 rounded-[28px] shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden active:scale-[0.99] transition-all group">
+                                        <div key={req.id} className="bg-white dark:bg-slate-800 p-5 rounded-[28px] border border-slate-100 dark:border-slate-700 relative overflow-hidden active:scale-[0.99] transition-all group">
                                             <div className="flex gap-4">
-                                                {/* Left Icon */}
-                                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${typeInfo.bg} ${typeInfo.text} shadow-sm`}>
+                                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${typeInfo.bg} ${typeInfo.text}`}>
                                                     <i className={`fa-solid ${typeInfo.icon} text-xl`}></i>
                                                 </div>
 
-                                                {/* Right Content */}
                                                 <div className="flex-1 min-w-0 pt-0.5">
-                                                    {/* Title & Status Row - NO BADGE */}
                                                     <div className="flex justify-between items-start gap-2 mb-1">
                                                         <h4 className="font-black text-slate-800 dark:text-white text-sm leading-tight">
                                                             {req.type}
@@ -151,7 +140,6 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
                                                         </span>
                                                     </div>
 
-                                                    {/* Date Row */}
                                                     <div className="flex items-center gap-2 text-xs font-bold text-slate-400 dark:text-slate-500 font-mono">
                                                         <i className="fa-regular fa-calendar-days"></i>
                                                         {req.from_date === req.to_date ? 
@@ -162,12 +150,10 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
                                                 </div>
                                             </div>
 
-                                            {/* Reason Box */}
                                             <div className="mt-4 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50">
                                                 <p className="text-sm text-slate-600 dark:text-slate-300 font-medium italic leading-relaxed">"{req.reason}"</p>
                                             </div>
                                             
-                                            {/* Manager Note */}
                                             {req.manager_note && (
                                                 <div className={`mt-3 px-4 py-3 rounded-2xl border text-xs font-medium flex items-start gap-2 ${req.status === 'Approved' ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-300' : 'bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-900/30 text-red-800 dark:text-red-300'}`}>
                                                     <i className="fa-solid fa-comment-dots mt-0.5"></i>
@@ -185,10 +171,8 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
                     </div>
                 )}
 
-                {/* EXPLANATIONS SECTION */}
                 {viewMode === 'explanations' && (
                     <div className="animate-slide-up">
-                        {/* Updated Header: text-[11px] font-extrabold */}
                         <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase ml-2 mb-3 tracking-widest flex items-center gap-2">
                             <i className="fa-solid fa-file-signature text-[10px]"></i>
                             Danh sách giải trình
@@ -206,14 +190,13 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
                                     const statusInfo = getStatusConfig(exp.status);
                                     
                                     return (
-                                        <div key={exp.id} className="bg-white dark:bg-slate-800 p-5 rounded-[28px] shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden active:scale-[0.99] transition-all group">
+                                        <div key={exp.id} className="bg-white dark:bg-slate-800 p-5 rounded-[28px] border border-slate-100 dark:border-slate-700 relative overflow-hidden active:scale-[0.99] transition-all group">
                                             <div className="flex gap-4">
-                                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-amber-50 dark:bg-amber-900/20 text-amber-500 dark:text-amber-400 shadow-sm border border-amber-100/50 dark:border-amber-800/50">
+                                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-amber-50 dark:bg-amber-900/20 text-amber-500 dark:text-amber-400 border border-amber-100/50 dark:border-amber-800/50">
                                                     <i className="fa-solid fa-file-signature text-xl"></i>
                                                 </div>
                                                 
                                                 <div className="flex-1 min-w-0 pt-0.5">
-                                                    {/* Title & Status Row - NO BADGE */}
                                                     <div className="flex justify-between items-start gap-2 mb-1">
                                                         <h4 className="font-black text-slate-800 dark:text-white text-sm leading-tight">
                                                             Giải trình công

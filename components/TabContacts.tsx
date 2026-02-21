@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { DashboardData, Employee } from '../types';
 import { getShortName, triggerHaptic } from '../utils/helpers';
@@ -33,22 +32,18 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
   const inputRef = useRef<HTMLInputElement>(null);
   const lastScrollY = useRef(0);
   
-  // Ref for Swipe Detection
   const touchStart = useRef<{x: number, y: number} | null>(null);
   const touchEnd = useRef<{x: number, y: number} | null>(null);
 
-  // TRIGGER SEARCH FROM HEADER
   useEffect(() => {
       if (searchTrigger > 0) {
           handleStartSearch();
       }
   }, [searchTrigger]);
 
-  // RESET VIEW WHEN BOTTOM NAV CLICKED
   useEffect(() => {
       if (resetTrigger > 0) {
           if (selectedContact) {
-              // If resetting via tab click, we need to respect history history to avoid double back
               if (window.history.state && window.history.state.view === 'contact-detail') {
                   window.history.back();
               } else {
@@ -63,21 +58,18 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
       }
   }, [resetTrigger]);
 
-  // Ensure nav is visible when closing detail or opening tab
   useEffect(() => {
       if (!selectedContact && setIsNavVisible) {
           setIsNavVisible(true);
       }
   }, [selectedContact, setIsNavVisible]);
 
-  // Cleanup on unmount
   useEffect(() => {
       return () => {
           if (setIsHeaderVisible) setIsHeaderVisible(true);
       };
   }, []);
 
-  // HISTORY HANDLING FOR BACK BUTTON
   const handleOpenContact = (c: Employee) => {
       triggerHaptic('light');
       window.history.pushState({ view: 'contact-detail', id: c.employee_id }, '');
@@ -97,7 +89,6 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
 
   useEffect(() => {
       const handlePopState = (event: PopStateEvent) => {
-          // If we popped a state, it means we are going back
           if (selectedContact) {
               setSelectedContact(null);
               if (setIsHeaderVisible) setIsHeaderVisible(true);
@@ -115,7 +106,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
       if (data?.contacts && data.contacts.length > 0) {
           try {
               localStorage.setItem('army_contacts_cache', JSON.stringify(data.contacts));
-              setCachedContacts(data.contacts); 
+              setCachedContacts(data.contacts);
           } catch (e) {
               console.error("Failed to save contacts cache", e);
           }
@@ -200,7 +191,6 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
       }
   };
 
-  // --- SCROLL HANDLER FOR DETAIL VIEW ---
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
       if (!setIsNavVisible) return;
       const currentScrollY = e.currentTarget.scrollTop;
@@ -217,10 +207,8 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
       lastScrollY.current = currentScrollY;
   };
 
-  // --- SWIPE HANDLERS FOR MODAL ---
   const onTouchStart = (e: React.TouchEvent) => {
     const x = e.targetTouches[0].clientX;
-    // Edge Protection
     if (x < 30 || x > window.innerWidth - 30) {
         touchStart.current = null;
         return;
@@ -236,19 +224,16 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
   const onTouchEnd = () => {
     if (!touchStart.current || !touchEnd.current) return;
     
-    const distanceX = touchStart.current.x - touchEnd.current.x; // dX > 0: R-to-L, dX < 0: L-to-R
+    const distanceX = touchStart.current.x - touchEnd.current.x;
     const distanceY = touchStart.current.y - touchEnd.current.y;
     
-    // Check for horizontal swipe
     if (Math.abs(distanceX) > Math.abs(distanceY)) {
-         // Only allow Left-to-Right swipe (Back gesture) to close
          if (distanceX < -60) {
              handleCloseContact();
          }
     }
   };
 
-  // --- REUSABLE ROW COMPONENT FOR MODAL ---
   const ContactDetailRow = ({ 
       icon, 
       colorClass, 
@@ -266,7 +251,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
   }) => {
       const Content = (
           <>
-            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-base flex-shrink-0 shadow-sm border border-white/50 dark:border-slate-700/50 ${colorClass}`}>
+            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-base flex-shrink-0 border border-white/50 dark:border-slate-700/50 ${colorClass}`}>
                 <i className={`fa-solid ${icon}`}></i>
             </div>
             <div className="flex-1 min-w-0">
@@ -291,10 +276,8 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
   return (
     <div className="absolute inset-0 flex flex-col bg-slate-50 dark:bg-slate-900 font-sans transition-colors duration-300">
         
-        {/* CONTENT LIST with Global Header Padding */}
         <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-28">
             
-            {/* SEARCH BAR (INLINE) */}
             {isSearching && (
                 <div className="mb-4 animate-fade-in z-20">
                     <div className="flex items-center gap-3">
@@ -306,7 +289,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                                 type="text"
                                 inputMode="search"
                                 enterKeyHint="search"
-                                className="w-full h-12 bg-white dark:bg-slate-800 rounded-2xl pl-12 pr-10 text-base font-bold text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/20 border border-slate-200 dark:border-slate-700 transition-all shadow-sm"
+                                className="w-full h-12 bg-white dark:bg-slate-800 rounded-2xl pl-12 pr-10 text-base font-bold text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/20 border border-slate-200 dark:border-slate-700 transition-all"
                                 placeholder="Tìm kiếm..."
                                 value={term}
                                 onChange={e => setTerm(e.target.value)}
@@ -329,8 +312,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
             
             {isSearching && term ? (
                 <div className="mt-2 animate-fade-in">
-                    {/* Search Results - Using List Style */}
-                    <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700">
+                    <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700">
                         {term !== debouncedTerm ? (
                             <div className="flex flex-col items-center justify-center py-10 text-slate-400 dark:text-slate-600 opacity-60">
                                 <i className="fa-solid fa-circle-notch fa-spin text-2xl mb-3"></i>
@@ -377,11 +359,9 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                     </div>
                 </div>
             ) : (
-                /* Default Grouped View - SETTINGS STYLE LISTS */
                 <div className="pb-4">
                     {sortedGroups.map((groupKey, index) => (
                         <div key={groupKey} className="space-y-3 animate-slide-up mb-6">
-                            {/* Header matched to SettingsModal */}
                             <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase ml-2 tracking-widest flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-2">
                                     <i className="fa-solid fa-user-group text-[10px]"></i>
@@ -390,7 +370,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                                 <span className="bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded text-[10px] tabular-nums">{groupedContacts[groupKey].length}</span>
                             </h3>
                             
-                            <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700">
+                            <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700">
                                 {groupedContacts[groupKey].map(c => (
                                     <div key={c.employee_id} 
                                         onClick={() => handleOpenContact(c)}
@@ -429,7 +409,6 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
             )}
         </div>
 
-        {/* CONTACT DETAIL MODAL - Updated to Match TabProfile */}
         {selectedContact && (
             <div 
                 className="fixed inset-0 z-[90] bg-slate-50 dark:bg-slate-900 flex flex-col animate-slide-up transition-colors duration-300"
@@ -437,26 +416,23 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
             >
-                 {/* HEADER - No Background, No Text, Correct Height */}
                  <div className="fixed top-0 left-0 w-full z-[95]">
                      <ModalHeader 
                         onClose={handleCloseContact}
-                        bgClass="bg-transparent border-none shadow-none"
+                        bgClass="bg-transparent border-none"
                      />
                  </div>
 
-                 {/* SCROLLABLE CONTENT */}
                  <div 
                     className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-14"
                     onScroll={handleScroll}
                  >
                       <div className="animate-fade-in mt-4">
-                          {/* Profile Header Card */}
-                          <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 shadow-sm border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors">
+                          <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors">
                                <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20 rounded-t-[32px] transition-colors duration-500"></div>
                                
                                <div className="relative z-10 flex flex-col items-center">
-                                   <div className="w-28 h-28 rounded-full p-1.5 bg-white dark:bg-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 mb-4 mt-2 relative group transition-colors">
+                                   <div className="w-28 h-28 rounded-full p-1.5 bg-white dark:bg-slate-800 mb-4 mt-2 relative group transition-colors">
                                        <Avatar 
                                           src={selectedContact.face_ref_url} 
                                           name={selectedContact.name} 
@@ -473,11 +449,10 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                                </div>
                           </div>
 
-                          {/* WORK INFO GROUP */}
                           <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-2 ml-2 tracking-widest flex items-center gap-2">
                               <i className="fa-solid fa-briefcase text-[10px]"></i> Công việc
                           </h3>
-                          <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-6">
+                          <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-6">
                               <ContactDetailRow 
                                   icon="fa-location-dot" 
                                   colorClass="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
@@ -500,11 +475,10 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                               )}
                           </div>
 
-                          {/* CONTACT INFO GROUP (Clickable) */}
                           <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-2 ml-2 tracking-widest flex items-center gap-2">
                               <i className="fa-solid fa-address-book text-[10px]"></i> Liên hệ
                           </h3>
-                          <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
+                          <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
                               <ContactDetailRow 
                                   icon="fa-envelope" 
                                   colorClass="bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"

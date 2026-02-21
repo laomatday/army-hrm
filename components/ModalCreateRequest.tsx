@@ -24,7 +24,6 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
   const [loading, setLoading] = useState(false);
   const [isTypeOpen, setIsTypeOpen] = useState(false);
 
-  // Refs for Swipe Detection
   const touchStart = useRef<{x: number, y: number} | null>(null);
   const touchEnd = useRef<{x: number, y: number} | null>(null);
 
@@ -95,7 +94,6 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
     return formatDateString(dateStr);
   };
 
-  // --- SWIPE HANDLERS ---
   const onTouchStart = (e: React.TouchEvent) => {
     const x = e.targetTouches[0].clientX;
     if (x < 30 || x > window.innerWidth - 30) {
@@ -135,24 +133,21 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
     >
-        {/* HEADER */}
         <div className="fixed top-0 left-0 w-full z-[110]">
              <ModalHeader 
                 onClose={() => { triggerHaptic('light'); onClose(); }} 
-                bgClass="bg-transparent border-none shadow-none" 
+                bgClass="bg-transparent border-none"
              />
         </div>
 
-        {/* SCROLLABLE CONTENT */}
         <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-14">
             <div className="animate-fade-in mt-4">
                 
-                {/* Top Banner Card */}
-                <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 shadow-sm border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors">
+                <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors">
                     <div className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-br ${gradientClass} rounded-t-[32px] transition-colors duration-500`}></div>
                     
                     <div className="relative z-10 flex flex-col items-center">
-                        <div className="w-28 h-28 rounded-full p-1.5 bg-white dark:bg-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 mb-4 mt-2 relative transition-colors">
+                        <div className="w-28 h-28 rounded-full p-1.5 bg-white dark:bg-slate-800 mb-4 mt-2 relative transition-colors">
                             <div className="w-full h-full rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center border border-emerald-100 dark:border-emerald-800/50 text-emerald-500 dark:text-emerald-400">
                                 <i className="fa-solid fa-paper-plane text-4xl ml-[-4px]"></i>
                             </div>
@@ -162,15 +157,13 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
                     </div>
                 </div>
 
-                {/* Form Section */}
                 <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
                     <i className="fa-solid fa-pen-to-square text-[10px]"></i>
                     Thông tin đề xuất
                 </h3>
                 
-                <div className="bg-white dark:bg-slate-800 rounded-[32px] p-6 shadow-sm border border-slate-100 dark:border-slate-700 space-y-5 transition-colors mb-8">
+                <div className="bg-white dark:bg-slate-800 rounded-[32px] p-6 border border-slate-100 dark:border-slate-700 space-y-5 transition-colors mb-8">
                      
-                     {/* Dropdown Loại Đề Xuất */}
                      <div className="relative">
                          <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1 block mb-1.5">Loại đề xuất</label>
                          <button 
@@ -182,7 +175,7 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
                          </button>
                          
                          {isTypeOpen && (
-                            <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl shadow-xl z-50 overflow-hidden animate-fade-in p-2 space-y-1">
+                            <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl z-50 overflow-hidden animate-fade-in p-2 space-y-1">
                                 {requestTypes.map((type) => (
                                     <div 
                                         key={type}
@@ -207,7 +200,6 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
                          )}
                      </div>
 
-                     {/* Date Pickers */}
                      <div className="grid grid-cols-2 gap-4">
                          <div>
                              <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1 block mb-1.5">Từ ngày</label>
@@ -243,7 +235,6 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
                          </div>
                      </div>
 
-                     {/* Expiration Date */}
                      <div>
                          <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1 block mb-1.5">Ngày hết hạn (Tuỳ chọn)</label>
                          <div className="relative h-14 w-full">
@@ -261,7 +252,6 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
                          </div>
                      </div>
 
-                     {/* Reason Textarea */}
                      <div>
                          <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1 block mb-1.5">Lý do chi tiết</label>
                          <textarea 
@@ -272,11 +262,10 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
                          ></textarea>
                      </div>
                      
-                     {/* Submit Button */}
                      <button 
                         onClick={handleSubmit} 
                         disabled={loading} 
-                        className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-400 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wide mt-2"
+                        className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-400 text-white font-bold py-4 rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wide mt-2"
                      >
                             {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : <>Gửi đề xuất <i className="fa-solid fa-paper-plane"></i></>}
                      </button>

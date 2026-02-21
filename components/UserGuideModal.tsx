@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useScrollControl } from '../hooks/useScrollControl';
 import { triggerHaptic } from '../utils/helpers';
@@ -13,23 +12,12 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
   const [activeTab, setActiveTab] = useState(0);
   const { handleScroll } = useScrollControl(setIsNavVisible);
 
-  // --- LOGIC: Kiểm tra đã xem chưa ---
-  useEffect(() => {
-    if (isOpen) {
-        const hasSeen = localStorage.getItem('army_guide_seen_v2026');
-        if (hasSeen === 'true') {
-            onClose();
-        }
-    }
-  }, [isOpen]);
-
   useEffect(() => {
     if (isOpen && setIsNavVisible) {
       setIsNavVisible(false);
     }
   }, [isOpen, setIsNavVisible]);
 
-  // --- ACTIONS ---
   const handleCloseAndSave = () => {
       triggerHaptic('medium');
       localStorage.setItem('army_guide_seen_v2026', 'true');
@@ -54,21 +42,21 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
             <div className="absolute inset-0 bg-emerald-200/30 dark:bg-emerald-500/10 rounded-full blur-xl animate-pulse"></div>
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border border-emerald-500/20 rounded-full animate-spin-slow"></div>
             
-            <div className="relative z-10 w-24 h-38 bg-slate-900 rounded-[1.8rem] border-[3px] border-slate-800 shadow-2xl flex flex-col items-center p-2 overflow-hidden">
+            <div className="relative z-10 w-24 h-38 bg-slate-900 rounded-[1.8rem] border-[3px] border-slate-800 flex flex-col items-center p-2 overflow-hidden">
                 <div className="w-8 h-1 bg-slate-800 rounded-full mb-3 mt-0.5"></div>
                 <div className="w-full h-full border border-dashed border-emerald-500/40 rounded-xl flex items-center justify-center relative overflow-hidden bg-emerald-500/5">
                     <div className="flex flex-col items-center gap-1.5">
                         <i className="fa-solid fa-face-viewfinder text-2xl text-emerald-400 animate-pulse"></i>
                         <span className="text-[5px] font-bold text-emerald-400/70 tracking-tighter uppercase">Scanning</span>
                     </div>
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_8px_rgba(52,211,153,0.5)] animate-scan"></div>
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-scan"></div>
                 </div>
             </div>
 
-            <div className="absolute top-1 -right-1 w-10 h-10 bg-white dark:bg-slate-800 rounded-lg shadow-xl flex items-center justify-center border border-emerald-100 dark:border-emerald-800/50 rotate-12 animate-bounce-slow">
+            <div className="absolute top-1 -right-1 w-10 h-10 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center border border-emerald-100 dark:border-emerald-800/50 rotate-12 animate-bounce-slow">
                 <i className="fa-solid fa-location-dot text-base text-rose-500"></i>
             </div>
-            <div className="absolute bottom-4 -left-3 w-9 h-9 bg-white dark:bg-slate-800 rounded-lg shadow-xl flex items-center justify-center border border-emerald-100 dark:border-emerald-800/50 -rotate-12 animate-float">
+            <div className="absolute bottom-4 -left-3 w-9 h-9 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center border border-emerald-100 dark:border-emerald-800/50 -rotate-12 animate-float">
                 <i className="fa-solid fa-wifi text-sm text-emerald-500"></i>
             </div>
         </div>
@@ -90,8 +78,8 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
         <div className="relative w-full aspect-square max-w-[140px] mx-auto flex items-center justify-center">
             <div className="absolute inset-0 bg-blue-200/30 dark:bg-blue-500/10 rounded-full blur-xl animate-pulse"></div>
             
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-20 bg-white/40 dark:bg-slate-800/40 rounded-lg border border-white/50 dark:border-slate-700/50 -rotate-6 translate-x-2 -translate-y-2 backdrop-blur-sm"></div>
-            <div className="relative z-10 w-32 h-24 bg-white dark:bg-slate-800 rounded-lg shadow-2xl p-4 flex flex-col gap-2 border border-slate-100 dark:border-slate-700">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-20 bg-white/40 dark:bg-slate-800/40 rounded-lg border border-white/50 dark:border-slate-700/50 -rotate-6 translate-x-2 -translate-y-2"></div>
+            <div className="relative z-10 w-32 h-24 bg-white dark:bg-slate-800 rounded-lg p-4 flex flex-col gap-2 border border-slate-100 dark:border-slate-700">
                 <div className="flex justify-between items-center mb-1">
                     <div className="flex gap-1">
                         <div className="w-1.5 h-1.5 rounded-full bg-rose-400"></div>
@@ -105,7 +93,7 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
                     <div className="w-3/4 h-2 bg-slate-100 dark:bg-slate-700/50 rounded-full"></div>
                 </div>
                 <div className="mt-auto flex justify-end">
-                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/30 animate-pulse">
+                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white animate-pulse">
                         <i className="fa-solid fa-signature text-xs"></i>
                     </div>
                 </div>
@@ -133,7 +121,7 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
         <div className="relative w-full aspect-square max-w-[140px] mx-auto flex items-center justify-center">
             <div className="absolute inset-0 bg-violet-200/30 dark:bg-violet-500/10 rounded-full blur-xl animate-pulse"></div>
             
-            <div className="relative z-10 w-32 h-32 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-4 flex flex-col border border-slate-100 dark:border-slate-700 overflow-hidden">
+            <div className="relative z-10 w-32 h-32 bg-white dark:bg-slate-800 rounded-2xl p-4 flex flex-col border border-slate-100 dark:border-slate-700 overflow-hidden">
                 <div className="flex justify-between items-start mb-3">
                     <div>
                         <p className="text-[7px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">Tháng này</p>
@@ -148,14 +136,14 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
                     {[40, 70, 50, 90, 60, 85].map((h, i) => (
                         <div 
                             key={i} 
-                            className="flex-1 bg-gradient-to-t from-violet-600 to-violet-400 rounded-t-sm animate-height-grow shadow-[0_0_6px_rgba(139,92,246,0.3)]" 
+                            className="flex-1 bg-gradient-to-t from-violet-600 to-violet-400 rounded-t-sm animate-height-grow" 
                             style={{height: `${h}%`, animationDelay: `${i * 0.1}s`}}
                         ></div>
                     ))}
                 </div>
             </div>
 
-            <div className="absolute -bottom-1 -left-1 w-16 h-16 bg-white dark:bg-slate-900 rounded-full shadow-xl p-1.5 border-2 border-violet-100 dark:border-violet-900 flex flex-col items-center justify-center rotate-[-10deg]">
+            <div className="absolute -bottom-1 -left-1 w-16 h-16 bg-white dark:bg-slate-900 rounded-full p-1.5 border-2 border-violet-100 dark:border-violet-900 flex flex-col items-center justify-center rotate-[-10deg]">
                 <div className="relative w-full h-full flex items-center justify-center">
                     <svg className="w-full h-full -rotate-90">
                         <circle cx="50%" cy="50%" r="40%" className="fill-none stroke-violet-100 dark:stroke-violet-900/30 stroke-[3]" />
@@ -185,13 +173,13 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
         <div className="relative w-full aspect-square max-w-[140px] mx-auto flex items-center justify-center">
             <div className="absolute inset-0 bg-rose-200/30 dark:bg-rose-500/10 rounded-full blur-xl animate-pulse"></div>
             
-            <div className="relative z-10 w-24 h-24 bg-slate-900 rounded-[1.8rem] shadow-2xl flex items-center justify-center border-[3px] border-slate-800">
-                <div className="w-14 h-14 bg-rose-500 rounded-full flex items-center justify-center text-white shadow-[0_0_15px_rgba(244,63,94,0.4)] animate-pulse">
+            <div className="relative z-10 w-24 h-24 bg-slate-900 rounded-[1.8rem] flex items-center justify-center border-[3px] border-slate-800">
+                <div className="w-14 h-14 bg-rose-500 rounded-full flex items-center justify-center text-white animate-pulse">
                     <i className="fa-solid fa-shield-halved text-3xl"></i>
                 </div>
                 
                 <div className="absolute inset-0 animate-spin-slow">
-                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-6 h-6 bg-white dark:bg-slate-800 rounded-md shadow-lg flex items-center justify-center border border-rose-100 dark:border-rose-900/50">
+                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-6 h-6 bg-white dark:bg-slate-800 rounded-md flex items-center justify-center border border-rose-100 dark:border-rose-900/50">
                         <i className="fa-solid fa-lock text-rose-500 text-[10px]"></i>
                     </div>
                 </div>
@@ -214,7 +202,6 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
 
   const handleTouchStart = (e: React.TouchEvent) => {
     const x = e.targetTouches[0].clientX;
-    // Edge Protection
     if (x < 30 || x > window.innerWidth - 30) {
         touchStart.current = null;
         return;
@@ -256,12 +243,11 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
       >
         <button 
             onClick={handleCloseAndSave}
-            className="absolute top-safe mt-4 right-4 z-50 px-3 py-1.5 rounded-full bg-black/5 dark:bg-white/5 backdrop-blur-md text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest hover:bg-black/10 transition-colors"
+            className="absolute top-safe mt-4 right-4 z-50 px-3 py-1.5 rounded-full bg-black/5 dark:bg-white/5 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest hover:bg-black/10 transition-colors"
         >
-            Bỏ qua
+            Đóng
         </button>
         
-        {/* HEADER */}
         <div className={`relative pt-12 pb-6 px-6 transition-all duration-700 ease-in-out ${currentSection.bgLight} ${currentSection.bgDark} overflow-hidden`}>
             <div className={`absolute -top-10 -left-10 w-48 h-48 rounded-full bg-gradient-to-br ${currentSection.color} opacity-10 blur-3xl animate-pulse`}></div>
             
@@ -280,7 +266,6 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
             </div>
         </div>
 
-        {/* CONTENT */}
         <div className="flex-1 px-8 pt-8 overflow-y-auto no-scrollbar">
             <div key={`content-${activeTab}`} className="space-y-6 pb-10">
                 {currentSection.steps.map((step, idx) => (
@@ -289,7 +274,7 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
                         className="flex items-start gap-5 group animate-slide-right" 
                         style={{animationDelay: `${idx * 0.1}s`}}
                     >
-                        <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${currentSection.color} text-white flex items-center justify-center text-xl shadow-xl shadow-current/20 group-hover:scale-110 transition-transform flex-shrink-0`}>
+                        <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${currentSection.color} text-white flex items-center justify-center text-xl group-hover:scale-110 transition-transform flex-shrink-0`}>
                             <i className={`fa-solid ${step.icon}`}></i>
                         </div>
                         <div className="flex-1">
@@ -303,9 +288,7 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
             </div>
         </div>
 
-        {/* FOOTER */}
-        <div className="px-8 py-8 flex flex-col items-center gap-6 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800/50">
-            {/* Dots */}
+        <div className="px-8 py-8 flex flex-col items-center gap-6 bg-white/80 dark:bg-slate-950/80 border-t border-slate-100 dark:border-slate-800/50">
             <div className="flex gap-2.5">
                 {sections.map((_, idx) => (
                     <button 
@@ -316,7 +299,6 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
                 ))}
             </div>
 
-            {/* Navigation Buttons */}
             <div className="w-full flex gap-4">
                 {activeTab > 0 && (
                     <button 
@@ -330,7 +312,7 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
                 {activeTab < sections.length - 1 ? (
                     <button 
                         onClick={() => handleChangeTab(activeTab + 1)}
-                        className={`flex-1 h-14 rounded-2xl bg-gradient-to-r ${currentSection.color} text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-current/30 active:scale-[0.98] transition-all flex items-center justify-center gap-3`}
+                        className={`flex-1 h-14 rounded-2xl bg-gradient-to-r ${currentSection.color} text-white font-black text-xs uppercase tracking-[0.2em] active:scale-[0.98] transition-all flex items-center justify-center gap-3`}
                     >
                         Tiếp theo
                         <i className="fa-solid fa-chevron-right text-[10px]"></i>
@@ -338,10 +320,10 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
                 ) : (
                     <button 
                         onClick={handleCloseAndSave}
-                        className="flex-1 h-14 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-xs uppercase tracking-[0.2em] shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                        className="flex-1 h-14 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-xs uppercase tracking-[0.2em] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
                     >
-                        Bắt đầu ngay
-                        <i className="fa-solid fa-rocket text-sm"></i>
+                        Hoàn thành
+                        <i className="fa-solid fa-check text-sm"></i>
                     </button>
                 )}
             </div>
@@ -349,7 +331,6 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
       </div>
 
       <style>{`
-        /* Optimization */
         .animate-scan, .animate-spin-slow, .animate-float, .animate-bounce-slow {
             will-change: transform, opacity;
         }

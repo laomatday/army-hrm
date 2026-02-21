@@ -11,16 +11,14 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   
-  // GPS State
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
   const [isHighAccuracy, setIsHighAccuracy] = useState(true);
 
   useEffect(() => {
-    // 1. SETUP CAMERA
     const constraints = {
         video: { 
             facingMode: 'user',
-            width: { ideal: 640 }, // Giảm yêu cầu đầu vào
+            width: { ideal: 640 },
             height: { ideal: 480 }
         }
     };
@@ -37,8 +35,6 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
         onClose();
       });
 
-    // 2. PRE-FETCH GPS (Hybrid Strategy)
-    // Thử High Accuracy trước
     let watchId = navigator.geolocation.watchPosition(
         (pos) => {
             setLocation({
@@ -53,7 +49,6 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
         { enableHighAccuracy: true, timeout: 3000, maximumAge: 10000 }
     );
 
-    // Sau 3s nếu chưa có tọa độ, hủy watch cũ và ép dùng Low Accuracy (Wifi/Cell)
     const fallbackTimer = setTimeout(() => {
         if (!location) {
             navigator.geolocation.clearWatch(watchId);
@@ -80,12 +75,11 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
       navigator.geolocation.clearWatch(watchId);
       clearTimeout(fallbackTimer);
     };
-  }, [location]); // Re-run effect only if location state logic needs check (actually dependencies should be empty array for setup)
+  }, [location]);
 
   const takePicture = () => {
     if (!videoRef.current) return;
 
-    // Last resort GPS check
     if (!location) {
         navigator.geolocation.getCurrentPosition(
             (pos) => {
@@ -94,7 +88,7 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
             (err) => {
                 onError("Không thể định vị. Vui lòng kiểm tra GPS/Wifi.");
             },
-            { enableHighAccuracy: false, timeout: 3000 } // Force Low Accuracy for speed
+            { enableHighAccuracy: false, timeout: 3000 }
         );
         return;
     }
@@ -105,8 +99,6 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
   const captureProcess = (lat: number, lng: number) => {
     if (!videoRef.current) return;
 
-    // --- ULTRA OPTIMIZATION ---
-    // Resize xuống 320px width - Đủ để nhận diện khuôn mặt, dung lượng siêu nhỏ (~30KB)
     const MAX_WIDTH = 320; 
     const videoWidth = videoRef.current.videoWidth;
     const videoHeight = videoRef.current.videoHeight;
@@ -122,9 +114,6 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
     const ctx = canvas.getContext('2d');
     if (ctx) {
         ctx.drawImage(videoRef.current, 0, 0, finalWidth, finalHeight);
-        
-        // Nén WebP 0.5 -> Dung lượng khoảng 20-40KB
-        // Upload cực nhanh ngay cả mạng E/3G
         const base64 = canvas.toDataURL('image/webp', 0.5);
         onCapture(base64, lat, lng);
     }
@@ -140,7 +129,7 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
           </div>
 
           <div className="absolute top-4 right-4 z-10">
-              <div className={`px-3 py-1 rounded-full backdrop-blur-md flex items-center gap-2 ${location ? 'bg-emerald-500/20 border border-emerald-500/30' : 'bg-red-500/20 border border-red-500/30'}`}>
+              <div className={`px-3 py-1 rounded-full flex items-center gap-2 ${location ? 'bg-emerald-900/50 border border-emerald-500/30' : 'bg-red-900/50 border border-red-500/30'}`}>
                   <div className={`w-2 h-2 rounded-full ${location ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></div>
                   <span className={`text-[10px] font-bold uppercase tracking-wide ${location ? 'text-emerald-400' : 'text-red-400'}`}>
                       {location ? (isHighAccuracy ? 'GPS Chính xác' : 'GPS Tương đối') : 'Đang tìm vị trí...'}
@@ -158,7 +147,7 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
             <button 
                 onClick={takePicture} 
                 disabled={!location}
-                className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${!location ? 'opacity-50 grayscale cursor-not-allowed bg-slate-700' : 'bg-white border-4 border-emerald-500 shadow-xl active:scale-95'}`}
+                className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${!location ? 'opacity-50 grayscale cursor-not-allowed bg-slate-700' : 'bg-white border-4 border-emerald-500 active:scale-95'}`}
             >
               <div className={`w-16 h-16 rounded-full border-2 border-white ${!location ? 'bg-slate-500' : 'bg-emerald-600'}`}></div>
             </button>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { doLogin } from '../services/api';
 import { getDeviceId, triggerHaptic } from '../utils/helpers';
@@ -38,14 +39,11 @@ const LoginView: React.FC<Props> = ({ onLoginSuccess }) => {
 
   return (
     <div className="w-full h-full bg-slate-50 dark:bg-slate-900 flex flex-col justify-between p-8 relative overflow-hidden font-sans transition-colors duration-300">
-      {/* Background Decor */}
-      <div className="absolute top-[-20%] right-[-20%] w-[80%] h-[50%] bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[40%] bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full z-10 animate-slide-up">
         {/* Brand */}
         <div className="mb-12 flex flex-col items-center">
-           <div className="w-40 h-40 mb-8 relative shadow-2xl shadow-emerald-500/10 rounded-[2.5rem] bg-white dark:bg-slate-800 p-2 flex items-center justify-center border border-slate-100 dark:border-slate-700 transform hover:scale-105 transition-transform duration-500">
+           <div className="w-40 h-40 mb-8 relative rounded-[2.5rem] bg-white dark:bg-slate-800 p-2 flex items-center justify-center border border-slate-100 dark:border-slate-700 transform hover:scale-105 transition-transform duration-500">
               <img 
                 src={LOGO_URL} 
                 className="w-full h-full object-contain" 
@@ -82,7 +80,7 @@ const LoginView: React.FC<Props> = ({ onLoginSuccess }) => {
                   enterKeyHint="next"
                   autoComplete="username"
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-11 pr-4 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white font-bold text-base outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 placeholder:font-semibold shadow-sm tracking-tight" 
+                  className="w-full pl-11 pr-4 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white font-bold text-base outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 placeholder:font-semibold tracking-tight" 
                   placeholder="Mã nhân viên / Email" 
                 />
             </div>
@@ -98,7 +96,7 @@ const LoginView: React.FC<Props> = ({ onLoginSuccess }) => {
                   enterKeyHint="go"
                   autoComplete="current-password"
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white font-bold text-base outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 placeholder:font-semibold shadow-sm tracking-widest" 
+                  className="w-full pl-11 pr-4 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white font-bold text-base outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 placeholder:font-semibold tracking-widest" 
                   placeholder="••••••••" 
                 />
             </div>
@@ -107,7 +105,7 @@ const LoginView: React.FC<Props> = ({ onLoginSuccess }) => {
           <button 
             type="submit"
             disabled={loading}
-            className="w-full mt-4 bg-emerald-600 text-white shadow-xl shadow-emerald-600/20 py-4 rounded-2xl font-extrabold text-base hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 uppercase tracking-widest"
+            className="w-full mt-4 bg-emerald-600 text-white py-4 rounded-2xl font-extrabold text-base hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 uppercase tracking-widest"
           >
             {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : <span>Đăng Nhập</span>}
             {!loading && <i className="fa-solid fa-arrow-right text-base"></i>}

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 
 interface Props {
@@ -14,14 +13,11 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) =
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
   
-  // State to store calculated display dimensions
   const [displaySize, setDisplaySize] = useState<{width: number, height: number} | null>(null);
 
   const imgRef = useRef<HTMLImageElement>(null);
 
-  // Viewport size (visual crop area)
   const VIEWPORT_SIZE = 280; 
-  // Output resolution
   const OUTPUT_SIZE = 500;
 
   const onImgLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -30,13 +26,10 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) =
       
       let width, height;
       
-      // Calculate dimensions to "Cover" the viewport exactly at Zoom 1x
       if (ratio < 1) {
-          // Portrait
           width = VIEWPORT_SIZE;
           height = VIEWPORT_SIZE / ratio;
       } else {
-          // Landscape
           height = VIEWPORT_SIZE;
           width = VIEWPORT_SIZE * ratio;
       }
@@ -76,20 +69,16 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) =
     const ctx = canvas.getContext('2d');
 
     if (ctx) {
-      // Background fill
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, OUTPUT_SIZE, OUTPUT_SIZE);
 
       const scaleRatio = OUTPUT_SIZE / VIEWPORT_SIZE;
       
-      // Move to center of canvas
       ctx.translate(OUTPUT_SIZE / 2, OUTPUT_SIZE / 2);
       
-      // Apply transforms (Pan + Zoom)
       ctx.translate(pan.x * scaleRatio, pan.y * scaleRatio);
       ctx.scale(zoom * scaleRatio, zoom * scaleRatio);
       
-      // Draw image centered at origin using calculated displaySize
       ctx.drawImage(
         imgRef.current,
         -displaySize.width / 2,
@@ -106,18 +95,12 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) =
   return (
     <div className="fixed inset-0 z-[5000] bg-black flex flex-col animate-fade-in touch-none">
       
-      {/* Editor Area */}
       <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden w-full bg-black">
          
-         {/* Container for the mask and touch events */}
          <div 
             className="relative z-20"
             style={{ width: VIEWPORT_SIZE, height: VIEWPORT_SIZE }}
          >
-             {/* Circular Mask Border with heavy shadow to darken outside area */}
-             <div className="absolute inset-0 rounded-full border-2 border-white/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.85)] pointer-events-none z-20"></div>
-             
-             {/* Touch Area */}
              <div 
                 className="absolute inset-0 z-30 cursor-move"
                 onPointerDown={handlePointerDown}
@@ -130,7 +113,6 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) =
              ></div>
          </div>
 
-         {/* Image Layer */}
           <div 
             className="absolute top-1/2 left-1/2 flex items-center justify-center pointer-events-none z-10"
             style={{ 
@@ -163,10 +145,8 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) =
           </p>
       </div>
 
-      {/* Controls - Bottom Sheet */}
-      <div className="bg-slate-900 border-t border-slate-800 pb-safe pt-6 px-6 z-40 w-full rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+      <div className="bg-slate-900 border-t border-slate-800 pb-safe pt-6 px-6 z-40 w-full rounded-t-3xl">
           
-          {/* Slider */}
           <div className="flex items-center gap-4 justify-center mb-8">
               <i className="fa-solid fa-image text-slate-500 text-xs"></i>
               <input 
@@ -181,7 +161,6 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) =
               <i className="fa-solid fa-image text-white text-lg"></i>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex gap-4">
                <button 
                   onClick={onCancel} 
@@ -192,7 +171,7 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) =
                <button 
                   onClick={processCrop}
                   disabled={!imageLoaded}
-                  className="flex-1 py-3.5 bg-emerald-500 text-white rounded-2xl font-bold text-sm shadow-lg shadow-emerald-500/20 active:scale-95 transition-all disabled:opacity-50"
+                  className="flex-1 py-3.5 bg-emerald-500 text-white rounded-2xl font-bold text-sm active:scale-95 transition-all disabled:opacity-50"
                >
                    Xong
                </button>

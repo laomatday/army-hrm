@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState, useRef } from 'react';
 import { Employee } from '../types';
 import { getShortName, formatDateString, triggerHaptic } from '../utils/helpers';
@@ -27,10 +26,8 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   
-  // State for Cropper
   const [croppingImage, setCroppingImage] = useState<string | null>(null);
 
-  // Refs for Swipe Detection
   const touchStart = useRef<{x: number, y: number} | null>(null);
   const touchEnd = useRef<{x: number, y: number} | null>(null);
 
@@ -57,7 +54,6 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
           return;
       }
 
-      // Read file to data URL and open cropper
       const reader = new FileReader();
       reader.onload = () => {
           if (typeof reader.result === 'string') {
@@ -122,10 +118,8 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
       }
   };
 
-  // --- SWIPE HANDLERS ---
   const onTouchStart = (e: React.TouchEvent) => {
     const x = e.targetTouches[0].clientX;
-    // Edge Protection
     if (x < 30 || x > window.innerWidth - 30) {
         touchStart.current = null;
         return;
@@ -141,12 +135,10 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
   const onTouchEnd = () => {
     if (!touchStart.current || !touchEnd.current) return;
     
-    const distanceX = touchStart.current.x - touchEnd.current.x; // dX < 0 is L-to-R (Back)
+    const distanceX = touchStart.current.x - touchEnd.current.x;
     const distanceY = touchStart.current.y - touchEnd.current.y;
     
-    // Check for horizontal swipe
     if (Math.abs(distanceX) > Math.abs(distanceY)) {
-         // Allow only L-to-R swipe (Back gesture)
          if (distanceX < -60) {
              triggerHaptic('light');
              onClose();
@@ -154,7 +146,6 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
     }
   };
 
-  // --- REUSABLE ROW COMPONENT ---
   const ProfileRow = ({ 
       icon, 
       colorClass, 
@@ -176,7 +167,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
           onClick={() => { if(onClick) { triggerHaptic('light'); onClick(); } }}
           className={`flex items-center gap-4 p-4 active:bg-slate-50 dark:active:bg-slate-700/50 transition-colors group ${onClick ? 'cursor-pointer' : ''}`}
       >
-          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-base flex-shrink-0 shadow-sm border border-white/50 dark:border-slate-700/50 ${colorClass}`}>
+          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-base flex-shrink-0 border border-white/50 dark:border-slate-700/50 ${colorClass}`}>
               <i className={`fa-solid ${icon}`}></i>
           </div>
           
@@ -201,25 +192,22 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
         onTouchEnd={onTouchEnd}
     >
         
-        {/* HEADER - Consistent Modal Header with Transparent BG */}
         <div className="fixed top-0 left-0 w-full z-40">
             <ModalHeader 
                 onClose={() => { triggerHaptic('light'); onClose(); }} 
-                bgClass="bg-transparent border-none shadow-none" 
+                bgClass="bg-transparent border-none"
             />
         </div>
 
-        {/* SCROLLABLE CONTENT */}
         <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-14">
             <div className="animate-fade-in">
                 
-                {/* Profile Card */}
-                <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 shadow-sm border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors mt-4">
+                <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors mt-4">
                     <div className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-br ${gradientClass} rounded-t-[32px] transition-colors duration-500`}></div>
                     
                     <div className="relative z-10 flex flex-col items-center">
                         <div className="relative group">
-                            <div className="w-32 h-32 rounded-full p-1.5 bg-white dark:bg-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50 mb-4 mt-2 relative overflow-hidden transition-colors">
+                            <div className="w-32 h-32 rounded-full p-1.5 bg-white dark:bg-slate-800 mb-4 mt-2 relative overflow-hidden transition-colors">
                                 <Avatar 
                                     src={user.face_ref_url} 
                                     name={user.name} 
@@ -227,7 +215,6 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                                     textSize="text-4xl"
                                     onClick={() => fileInputRef.current?.click()}
                                 />
-                                {/* Overlay Edit Icon */}
                                 <div onClick={() => fileInputRef.current?.click()} className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full">
                                     <i className="fa-solid fa-camera text-white text-2xl"></i>
                                 </div>
@@ -255,14 +242,11 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                     </div>
                 </div>
 
-                {/* INFO GROUPS */}
-                
-                {/* 1. Cong viec */}
                 <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
                     <i className="fa-solid fa-briefcase text-[10px]"></i>
                     Thông tin công việc
                 </h3>
-                <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
+                <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
                     <ProfileRow 
                         icon="fa-location-dot" 
                         colorClass="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
@@ -283,12 +267,11 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                     />
                 </div>
 
-                {/* 2. Ca nhan */}
                 <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
                     <i className="fa-solid fa-address-card text-[10px]"></i>
                     Thông tin cá nhân
                 </h3>
-                <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
+                <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
                     <ProfileRow 
                         icon="fa-envelope" 
                         colorClass="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
@@ -309,12 +292,11 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                     />
                 </div>
 
-                {/* 3. Tai khoan */}
                 <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
                     <i className="fa-solid fa-user-shield text-[10px]"></i>
                     Tài khoản
                 </h3>
-                <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
+                <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
                     <ProfileRow 
                         icon="fa-key" 
                         colorClass="bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
@@ -335,17 +317,15 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                     />
                 </div>
                 
-                {/* Version Info */}
                 <div className="text-center pb-8">
                     <p className="text-[10px] font-extrabold text-slate-300 dark:text-slate-600 uppercase tracking-widest">Army HRM v2026.2.0</p>
                 </div>
             </div>
         </div>
 
-        {/* Change Password Modal */}
         {showPwdModal && (
             <div className="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-6 animate-fade-in">
-                <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[32px] p-6 shadow-2xl animate-scale-in">
+                <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[32px] p-6 animate-scale-in">
                     <div className="text-center mb-6">
                         <div className="w-16 h-16 bg-amber-50 dark:bg-amber-900/20 text-amber-500 dark:text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-100 dark:border-amber-900/30">
                             <i className="fa-solid fa-lock text-2xl"></i>
@@ -397,7 +377,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                         <button 
                             onClick={handleUpdatePassword}
                             disabled={loadingPwd}
-                            className="flex-1 py-3.5 bg-amber-500 text-white font-bold text-sm rounded-2xl shadow-lg shadow-amber-500/20 hover:bg-amber-600 transition-all active:scale-95 disabled:opacity-70 disabled:active:scale-100 uppercase tracking-wide"
+                            className="flex-1 py-3.5 bg-amber-500 text-white font-bold text-sm rounded-2xl hover:bg-amber-600 transition-all active:scale-95 disabled:opacity-70 disabled:active:scale-100 uppercase tracking-wide"
                         >
                             {loadingPwd ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'Lưu thay đổi'}
                         </button>
@@ -416,7 +396,6 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
             type="danger"
         />
 
-        {/* Image Cropper Modal */}
         {croppingImage && (
             <ImageCropper 
                 imageSrc={croppingImage} 

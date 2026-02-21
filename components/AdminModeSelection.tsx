@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface Props {
@@ -21,9 +20,9 @@ const AdminModeSelection: React.FC<Props> = ({ onSelectMode, onLogout }) => {
              <div className="space-y-4">
                  <button 
                     onClick={() => onSelectMode('app')}
-                    className="w-full bg-white dark:bg-slate-800 p-6 rounded-[24px] shadow-lg shadow-emerald-500/5 border border-slate-100 dark:border-slate-700 flex items-center gap-6 group hover:border-emerald-500/50 transition-all active:scale-[0.98]"
+                    className="w-full bg-white dark:bg-slate-800 p-6 rounded-[24px] border border-slate-100 dark:border-slate-700 flex items-center gap-6 group hover:border-emerald-500/50 transition-all active:scale-[0.98]"
                  >
-                     <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-2xl group-hover:bg-emerald-500 group-hover:text-white transition-colors shadow-sm">
+                     <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-2xl group-hover:bg-emerald-500 group-hover:text-white transition-colors">
                          <i className="fa-solid fa-mobile-screen"></i>
                      </div>
                      <div className="text-left">
@@ -34,9 +33,9 @@ const AdminModeSelection: React.FC<Props> = ({ onSelectMode, onLogout }) => {
 
                  <button 
                     onClick={() => onSelectMode('kiosk')}
-                    className="w-full bg-white dark:bg-slate-800 p-6 rounded-[24px] shadow-lg shadow-blue-500/5 border border-slate-100 dark:border-slate-700 flex items-center gap-6 group hover:border-blue-500/50 transition-all active:scale-[0.98]"
+                    className="w-full bg-white dark:bg-slate-800 p-6 rounded-[24px] border border-slate-100 dark:border-slate-700 flex items-center gap-6 group hover:border-blue-500/50 transition-all active:scale-[0.98]"
                  >
-                     <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-2xl group-hover:bg-blue-500 group-hover:text-white transition-colors shadow-sm">
+                     <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-2xl group-hover:bg-blue-500 group-hover:text-white transition-colors">
                          <i className="fa-solid fa-display"></i>
                      </div>
                      <div className="text-left">
@@ -47,9 +46,9 @@ const AdminModeSelection: React.FC<Props> = ({ onSelectMode, onLogout }) => {
 
                  <button 
                     onClick={() => onSelectMode('admin')}
-                    className="w-full bg-slate-800 dark:bg-slate-700 p-6 rounded-[24px] shadow-lg shadow-slate-800/20 border border-slate-700 flex items-center gap-6 group hover:bg-slate-900 dark:hover:bg-slate-600 transition-all active:scale-[0.98]"
+                    className="w-full bg-slate-800 dark:bg-slate-700 p-6 rounded-[24px] border border-slate-700 flex items-center gap-6 group hover:bg-slate-900 dark:hover:bg-slate-600 transition-all active:scale-[0.98]"
                  >
-                     <div className="w-16 h-16 rounded-2xl bg-slate-700 dark:bg-slate-800 text-slate-300 flex items-center justify-center text-2xl group-hover:text-white transition-colors shadow-inner">
+                     <div className="w-16 h-16 rounded-2xl bg-slate-700 dark:bg-slate-800 text-slate-300 flex items-center justify-center text-2xl group-hover:text-white transition-colors">
                          <i className="fa-solid fa-database"></i>
                      </div>
                      <div className="text-left">
