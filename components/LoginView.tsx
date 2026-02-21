@@ -35,7 +35,7 @@ const LoginView: React.FC<Props> = ({ onLoginSuccess }) => {
     }
   };
 
-  const LOGO_URL = "https://firebasestorage.googleapis.com/v0/b/army-hrm-70615.firebasestorage.app/o/logo%2Flogo.png?alt=media";
+  const LOGO_URL = "https://lh3.googleusercontent.com/fife/1r_FuqN4QJbch0FYXAwX8efW9s0ucreiO";
 
   return (
     <div className="w-full h-full bg-slate-50 dark:bg-slate-900 flex flex-col justify-between p-8 relative overflow-hidden font-sans transition-colors duration-300">
