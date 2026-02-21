@@ -1,6 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useScrollControl } from '../hooks/useScrollControl';
+import { triggerHaptic } from '../utils/helpers';
 
 interface Props {
   isOpen: boolean;
@@ -12,11 +13,33 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
   const [activeTab, setActiveTab] = useState(0);
   const { handleScroll } = useScrollControl(setIsNavVisible);
 
+  // --- LOGIC: Kiểm tra đã xem chưa ---
+  useEffect(() => {
+    if (isOpen) {
+        const hasSeen = localStorage.getItem('army_guide_seen_v2026');
+        if (hasSeen === 'true') {
+            onClose();
+        }
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (isOpen && setIsNavVisible) {
       setIsNavVisible(false);
     }
   }, [isOpen, setIsNavVisible]);
+
+  // --- ACTIONS ---
+  const handleCloseAndSave = () => {
+      triggerHaptic('medium');
+      localStorage.setItem('army_guide_seen_v2026', 'true');
+      onClose();
+  };
+
+  const handleChangeTab = (index: number) => {
+      triggerHaptic('light');
+      setActiveTab(index);
+  };
 
   const sections = [
     {
@@ -205,9 +228,9 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
     
     if (Math.abs(dX) > Math.abs(dY) && Math.abs(dX) > 50) {
       if (dX > 0 && activeTab < sections.length - 1) {
-        setActiveTab(prev => prev + 1);
+        handleChangeTab(activeTab + 1);
       } else if (dX < 0 && activeTab > 0) {
-        setActiveTab(prev => prev - 1);
+        handleChangeTab(activeTab - 1);
       }
     }
   };
@@ -226,12 +249,13 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
         onTouchEnd={handleTouchEnd}
       >
         <button 
-            onClick={onClose}
+            onClick={handleCloseAndSave}
             className="absolute top-safe mt-4 right-4 z-50 px-3 py-1.5 rounded-full bg-black/5 dark:bg-white/5 backdrop-blur-md text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest hover:bg-black/10 transition-colors"
         >
             Bỏ qua
         </button>
         
+        {/* HEADER */}
         <div className={`relative pt-12 pb-6 px-6 transition-all duration-700 ease-in-out ${currentSection.bgLight} ${currentSection.bgDark} overflow-hidden`}>
             <div className={`absolute -top-10 -left-10 w-48 h-48 rounded-full bg-gradient-to-br ${currentSection.color} opacity-10 blur-3xl animate-pulse`}></div>
             
@@ -250,6 +274,7 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
             </div>
         </div>
 
+        {/* CONTENT */}
         <div className="flex-1 px-8 pt-8 overflow-y-auto no-scrollbar">
             <div key={`content-${activeTab}`} className="space-y-6 pb-10">
                 {currentSection.steps.map((step, idx) => (
@@ -272,22 +297,25 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
             </div>
         </div>
 
-        <div className="px-8 py-8 flex flex-col items-center gap-8 bg-white/50 dark:bg-slate-950/50 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800/50">
+        {/* FOOTER */}
+        <div className="px-8 py-8 flex flex-col items-center gap-6 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800/50">
+            {/* Dots */}
             <div className="flex gap-2.5">
                 {sections.map((_, idx) => (
                     <button 
                         key={idx}
-                        onClick={() => setActiveTab(idx)}
-                        className={`h-2 rounded-full transition-all duration-500 ease-out ${activeTab === idx ? `w-10 bg-gradient-to-r ${currentSection.color}` : 'w-2 bg-slate-200 dark:bg-slate-800'}`}
+                        onClick={() => handleChangeTab(idx)}
+                        className={`h-1.5 rounded-full transition-all duration-500 ease-out ${activeTab === idx ? `w-8 bg-gradient-to-r ${currentSection.color}` : 'w-1.5 bg-slate-300 dark:bg-slate-800'}`}
                     />
                 ))}
             </div>
 
+            {/* Navigation Buttons */}
             <div className="w-full flex gap-4">
                 {activeTab > 0 && (
                     <button 
-                        onClick={() => setActiveTab(prev => prev - 1)}
-                        className="w-16 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-white flex items-center justify-center transition-all active:scale-90"
+                        onClick={() => handleChangeTab(activeTab - 1)}
+                        className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-white flex items-center justify-center transition-all active:scale-90 hover:bg-slate-200 dark:hover:bg-slate-700"
                     >
                         <i className="fa-solid fa-arrow-left text-lg"></i>
                     </button>
@@ -295,16 +323,16 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
                 
                 {activeTab < sections.length - 1 ? (
                     <button 
-                        onClick={() => setActiveTab(prev => prev + 1)}
-                        className={`flex-1 h-14 rounded-2xl bg-gradient-to-r ${currentSection.color} text-white font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-current/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3`}
+                        onClick={() => handleChangeTab(activeTab + 1)}
+                        className={`flex-1 h-14 rounded-2xl bg-gradient-to-r ${currentSection.color} text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-current/30 active:scale-[0.98] transition-all flex items-center justify-center gap-3`}
                     >
                         Tiếp theo
                         <i className="fa-solid fa-chevron-right text-[10px]"></i>
                     </button>
                 ) : (
                     <button 
-                        onClick={onClose}
-                        className="flex-1 h-14 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-xs uppercase tracking-[0.2em] shadow-2xl active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                        onClick={handleCloseAndSave}
+                        className="flex-1 h-14 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-xs uppercase tracking-[0.2em] shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-3"
                     >
                         Bắt đầu ngay
                         <i className="fa-solid fa-rocket text-sm"></i>
@@ -315,6 +343,11 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
       </div>
 
       <style>{`
+        /* Optimization */
+        .animate-scan, .animate-spin-slow, .animate-float, .animate-bounce-slow {
+            will-change: transform, opacity;
+        }
+
         @keyframes scan {
             0% { top: 0; opacity: 0; }
             10% { opacity: 1; }

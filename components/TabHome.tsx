@@ -150,9 +150,21 @@ const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onScan
       const startMins = timeToMinutes(currentShift.start);
       let endMins = timeToMinutes(currentShift.end);
       
-      if (endMins < startMins) endMins += 24 * 60;
+      // Fix: Determine if shift is overnight
+      const isOvernight = endMins < startMins;
+      
+      if (isOvernight) endMins += 24 * 60;
+      
       let displayNowMins = nowMins;
-      if (working && nowMins < startMins) displayNowMins += 24 * 60;
+      
+      // Fix: Only adjust displayNowMins if it IS an overnight shift and time suggests next day
+      // Prevents early check-ins on day shifts from being counted as +24h overtime
+      if (isOvernight && nowMins < startMins) {
+           // Heuristic: If nowMins is significantly smaller (e.g., morning vs night), assume next day
+           if (nowMins < startMins - 720) { // 12 hours buffer
+               displayNowMins += 24 * 60;
+           }
+      }
 
       const tolerance = data?.systemConfig?.LATE_TOLERANCE || 15;
 

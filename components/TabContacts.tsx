@@ -365,12 +365,15 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, onClose, setIsNa
                 /* Default Grouped View - SETTINGS STYLE LISTS */
                 <div className="pb-4">
                     {sortedGroups.map((groupKey, index) => (
-                        <div key={groupKey} className={`animate-slide-up ${index === 0 ? 'mb-6' : 'my-6'}`}>
-                            {/* FIXED: Standardized Group Header: same size, weight, and spacing as TabManager */}
-                            <h4 className="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-1 truncate tracking-widest flex items-center justify-between">
-                                <span>{groupKey}</span>
-                                <span className="bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded text-[10px]">{groupedContacts[groupKey].length}</span>
-                            </h4>
+                        <div key={groupKey} className="space-y-3 animate-slide-up mb-6">
+                            {/* Header matched to SettingsModal */}
+                            <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase ml-2 tracking-widest flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                    <i className="fa-solid fa-user-group text-[10px]"></i>
+                                    <span>{groupKey}</span>
+                                </div>
+                                <span className="bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded text-[10px] tabular-nums">{groupedContacts[groupKey].length}</span>
+                            </h3>
                             
                             <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700">
                                 {groupedContacts[groupKey].map(c => (
@@ -385,7 +388,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, onClose, setIsNa
                                             textSize="text-xs"
                                         />
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="text-base font-bold text-slate-800 dark:text-white truncate leading-tight">{c.name}</h4>
+                                            <h4 className="text-base font-bold text-slate-800 dark:text-white truncate leading-tight group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">{c.name}</h4>
                                             <div className="flex flex-wrap gap-1 mt-1">
                                                 {c.department && (
                                                     <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[10px] font-extrabold border border-blue-100 dark:border-blue-900/30 uppercase tracking-wide truncate max-w-[120px]">
