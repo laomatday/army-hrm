@@ -107,22 +107,32 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
   };
 
   const handleCheckIn = async (base64: string, lat: number, lng: number) => {
+    // 1. Show processing state
     setCheckingIn(true);
-    setCheckInStatus("Đang xử lý dữ liệu chấm công...");
+    setCheckInStatus("Đang đồng bộ dữ liệu...");
     setShowCamera(false);
+
+    // 2. Call API
     const res = await doCheckIn({
         employeeId: currentUser.employee_id, lat, lng, deviceId: getDeviceId(), imageBase64: base64
     }, currentUser);
-    if(res.success) await refresh();
+
+    // 3. Optimistic Feedback: Close loading immediately
     setCheckingIn(false);
+    
+    // 4. Show result
     handleShowAlert(res.success ? "Thành công" : "Lỗi", res.message, res.success ? 'success' : 'error');
+
+    // 5. Background Refresh (Don't await this to keep UI responsive)
+    if(res.success) {
+        refresh(); 
+    }
   };
 
   const handleQRScan = async (qrString: string) => {
       setShowQRScanner(false);
       try {
           const qrData = JSON.parse(qrString);
-          // Kiosk ID is optional for single-kiosk setups, defaults to KIOSK_01
           const targetKioskId = qrData.kiosk_id || 'KIOSK_01';
           
           if (!qrData.token) {
@@ -133,6 +143,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
           setCheckingIn(true);
           setCheckInStatus("Đang xác thực vị trí...");
 
+          // Use watchPosition for faster fix if already warm
           navigator.geolocation.getCurrentPosition(async (pos) => {
               // Verify location against office geofence
               if (data && data.locations) {
@@ -182,10 +193,14 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
                       } else if (session.status === 'completed') {
                           clearTimeout(timeoutId);
                           unsubscribe();
+                          
+                          // Optimistic UI update
                           setCheckingIn(false);
                           triggerHaptic('success');
                           handleShowAlert("Thành công", "Đã ghi nhận chấm công từ Kiosk", "success");
-                          await refresh();
+                          
+                          // Background refresh
+                          refresh();
                       } else if (session.status === 'failed') {
                           clearTimeout(timeoutId);
                           unsubscribe();
@@ -208,6 +223,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
       setShowCheckoutConfirm(false);
       setCheckingIn(true);
       setCheckInStatus("Đang xác thực vị trí...");
+
       navigator.geolocation.getCurrentPosition(async (pos) => {
           if (data && data.locations) {
               const userLoc = data.locations.find(l => l.center_id === currentUser.center_id);
@@ -221,11 +237,17 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
                   }
               }
           }
+          
           setCheckInStatus("Đang gửi yêu cầu Check-out...");
           const res = await doCheckOut(currentUser.employee_id, pos.coords.latitude, pos.coords.longitude);
-          if(res.success) await refresh(); 
+          
+          // Optimistic UI
           setCheckingIn(false);
           handleShowAlert(res.success ? "Thành công" : "Lỗi", res.message, res.success ? 'success' : 'error');
+          
+          // Background Refresh
+          if(res.success) refresh(); 
+
       }, (err) => {
           setCheckingIn(false);
           handleShowAlert("Lỗi định vị", "Vui lòng bật GPS.", 'error');
@@ -265,8 +287,8 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
   return (
     <div className="h-full w-full bg-slate-50 dark:bg-slate-900 relative flex flex-col font-sans transition-colors duration-300">
        {checkingIn && (
-         <div className="fixed inset-0 z-[5000] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-6 text-center">
-           <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 max-w-sm w-full shadow-2xl">
+         <div className="fixed inset-0 z-[5000] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-6 text-center animate-fade-in">
+           <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 max-w-sm w-full shadow-2xl animate-scale-in">
              <div className="relative w-20 h-20 mx-auto mb-6">
                <div className="absolute inset-0 border-4 border-slate-100 dark:border-slate-700 rounded-full"></div>
                <div className="absolute inset-0 border-4 border-emerald-500 rounded-full border-t-transparent animate-spin"></div>
@@ -275,11 +297,12 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
                {checkInStatus || "Vui lòng đợi trong giây lát"}
              </p>
+             {/* Disable cancel during critical sync */}
              <button 
                onClick={() => setCheckingIn(false)}
                className="mt-8 text-slate-400 text-xs font-bold uppercase tracking-widest hover:text-slate-600 transition-colors"
              >
-               Hủy bỏ
+               Ẩn đi (Vẫn chạy nền)
              </button>
            </div>
          </div>

@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface Props {
   onClose: () => void;
@@ -10,9 +10,13 @@ interface Props {
 const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  
+  // GPS State
+  const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [gpsError, setGpsError] = useState<string>("");
 
   useEffect(() => {
-    // Ưu tiên camera trước, độ phân giải vừa đủ 720p để giảm tải xử lý ban đầu
+    // 1. SETUP CAMERA
     const constraints = {
         video: { 
             facingMode: 'user',
@@ -33,24 +37,60 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
         onClose();
       });
 
+    // 2. PRE-FETCH GPS (Critical for speed)
+    // Bắt đầu lấy vị trí ngay khi mở camera, không đợi bấm nút chụp
+    const watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+            setLocation({
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude
+            });
+            setGpsError("");
+        },
+        (err) => {
+            console.warn("GPS Pre-fetch warning:", err);
+            // Không báo lỗi ngay, đợi lúc chụp mới kiểm tra lại nếu chưa có vị trí
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    );
+
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(t => t.stop());
       }
+      navigator.geolocation.clearWatch(watchId);
     };
   }, []);
 
   const takePicture = () => {
     if (!videoRef.current) return;
-    
-    // --- OPTIMIZATION LOGIC ---
-    // Thay vì lấy full resolution của camera (có thể lên tới 4K), 
-    // ta resize ngay lập tức xuống mức đủ dùng cho chấm công (640px width).
+
+    // Kiểm tra GPS trước
+    if (!location) {
+        // Nếu chưa có vị trí từ watchPosition, thử gọi getCurrentPosition lần cuối
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                captureProcess(pos.coords.latitude, pos.coords.longitude);
+            },
+            (err) => {
+                onError("Không thể định vị. Vui lòng bật GPS và thử lại.");
+            },
+            { enableHighAccuracy: true, timeout: 5000 }
+        );
+        return;
+    }
+
+    // Nếu đã có vị trí sẵn, xử lý ngay tức thì
+    captureProcess(location.lat, location.lng);
+  };
+
+  const captureProcess = (lat: number, lng: number) => {
+    if (!videoRef.current) return;
+
     const MAX_WIDTH = 640;
     const videoWidth = videoRef.current.videoWidth;
     const videoHeight = videoRef.current.videoHeight;
     
-    // Tính toán tỷ lệ scale
     const scale = videoWidth > MAX_WIDTH ? MAX_WIDTH / videoWidth : 1;
     const finalWidth = videoWidth * scale;
     const finalHeight = videoHeight * scale;
@@ -61,32 +101,32 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
     
     const ctx = canvas.getContext('2d');
     if (ctx) {
-        // Vẽ ảnh đã resize lên canvas
         ctx.drawImage(videoRef.current, 0, 0, finalWidth, finalHeight);
         
-        // Nén ảnh sang WebP với chất lượng 50% (0.5)
-        // WebP thường nhỏ hơn 25-34% so với JPEG ở cùng chất lượng
-        const base64 = canvas.toDataURL('image/webp', 0.5);
-
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            onCapture(base64, pos.coords.latitude, pos.coords.longitude);
-          },
-          (err) => {
-            onError("Lỗi định vị GPS: " + err.message);
-          },
-          { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
-        );
+        // Tối ưu hóa: Giảm chất lượng xuống 0.4 (vẫn rõ nét nhưng nhẹ hơn nhiều)
+        const base64 = canvas.toDataURL('image/webp', 0.4);
+        onCapture(base64, lat, lng);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[4000] bg-black flex flex-col">
+    <div className="fixed inset-0 z-[4000] bg-black flex flex-col animate-fade-in">
       <div className="relative flex-1 overflow-hidden bg-black">
           <video ref={videoRef} className="w-full h-full object-cover" autoPlay playsInline muted></video>
+          
           {/* Guide Overlay */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="w-64 h-64 border-2 border-white/30 rounded-full border-dashed"></div>
+          </div>
+
+          {/* GPS Indicator (UX Enhancement) */}
+          <div className="absolute top-4 right-4 z-10">
+              <div className={`px-3 py-1 rounded-full backdrop-blur-md flex items-center gap-2 ${location ? 'bg-emerald-500/20 border border-emerald-500/30' : 'bg-red-500/20 border border-red-500/30'}`}>
+                  <div className={`w-2 h-2 rounded-full ${location ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></div>
+                  <span className={`text-[10px] font-bold uppercase tracking-wide ${location ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {location ? 'GPS Sẵn sàng' : 'Đang tìm GPS...'}
+                  </span>
+              </div>
           </div>
       </div>
       
@@ -96,13 +136,19 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
               <i className="fa-solid fa-xmark text-xl"></i>
             </button>
             
-            <button onClick={takePicture} className="w-20 h-20 rounded-full bg-white border-4 border-emerald-500 shadow-xl flex items-center justify-center active:scale-95 transition-transform">
-              <div className="w-16 h-16 bg-emerald-600 rounded-full border-2 border-white"></div>
+            <button 
+                onClick={takePicture} 
+                disabled={!location}
+                className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${!location ? 'opacity-50 grayscale cursor-not-allowed bg-slate-700' : 'bg-white border-4 border-emerald-500 shadow-xl active:scale-95'}`}
+            >
+              <div className={`w-16 h-16 rounded-full border-2 border-white ${!location ? 'bg-slate-500' : 'bg-emerald-600'}`}></div>
             </button>
             
-            <div className="w-14 h-14"></div> {/* Spacer for alignment */}
+            <div className="w-14 h-14"></div> 
           </div>
-          <p className="text-center text-slate-400 text-xs mt-4 mb-2">Giữ khuôn mặt trong khung hình</p>
+          <p className="text-center text-slate-400 text-xs mt-4 mb-2">
+              {location ? "Giữ khuôn mặt trong khung hình" : "Đang xác định vị trí..."}
+          </p>
       </div>
     </div>
   );
