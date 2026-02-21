@@ -1,17 +1,21 @@
 import React, { useState, useRef } from 'react';
+import { uploadToGoogleDrive } from '../services/googleDrive';
+import Spinner from './Spinner';
 
 interface Props {
   imageSrc: string;
+  userId: string; // Add userId to create unique filenames
   onCancel: () => void;
-  onCropComplete: (base64: string) => void;
+  onCropComplete: (url: string) => Promise<void>; // Changed from fileId to url
 }
 
-const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) => {
+const ImageCropper: React.FC<Props> = ({ imageSrc, userId, onCancel, onCropComplete }) => {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   
   const [displaySize, setDisplaySize] = useState<{width: number, height: number} | null>(null);
 
@@ -39,6 +43,7 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) =
   };
 
   const handlePointerDown = (e: React.PointerEvent | React.TouchEvent) => {
+    if (isUploading) return;
     setIsDragging(true);
     const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.PointerEvent).clientX;
     const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.PointerEvent).clientY;
@@ -46,7 +51,7 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) =
   };
 
   const handlePointerMove = (e: React.PointerEvent | React.TouchEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || isUploading) return;
     const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.PointerEvent).clientX;
     const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.PointerEvent).clientY;
     
@@ -60,8 +65,8 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) =
     setIsDragging(false);
   };
 
-  const processCrop = () => {
-    if (!imgRef.current || !displaySize) return;
+  const processCrop = (): string | null => {
+    if (!imgRef.current || !displaySize) return null;
 
     const canvas = document.createElement('canvas');
     canvas.width = OUTPUT_SIZE;
@@ -87,20 +92,44 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) =
         displaySize.height
       );
 
-      const base64 = canvas.toDataURL('image/webp', 0.8);
-      onCropComplete(base64);
+      return canvas.toDataURL('image/jpeg', 0.9); // Use jpeg for better compatibility
+    }
+    return null;
+  };
+
+  const handleConfirmCrop = async () => {
+    const base64Image = processCrop();
+    if (base64Image) {
+        setIsUploading(true);
+        const filename = `avatar_${userId}_${Date.now()}.jpg`;
+        const url = await uploadToGoogleDrive(filename, base64Image);
+        
+        if (url) {
+            await onCropComplete(url);
+        } else {
+            alert('Tải ảnh lên không thành công. Vui lòng thử lại.');
+        }
+        setIsUploading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[5000] bg-black flex flex-col animate-fade-in touch-none">
+    <div className="fixed inset-0 z-[5000] bg-black/80 backdrop-blur-sm flex flex-col animate-fade-in touch-none">
       
-      <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden w-full bg-black">
-         
-         <div 
+      <div className="flex-1 flex flex-col items-center justify-center relative w-full">
+          
+          <h2 className="text-white font-bold text-lg absolute top-[15vh] pointer-events-none">Chỉnh sửa ảnh đại diện</h2>
+
+          <div
             className="relative z-20"
-            style={{ width: VIEWPORT_SIZE, height: VIEWPORT_SIZE }}
-         >
+            style={{
+              width: VIEWPORT_SIZE,
+              height: VIEWPORT_SIZE,
+              borderRadius: '50%',
+              overflow: 'hidden',
+              boxShadow: '0 0 0 4px rgba(255,255,255,0.1)'
+            }}
+          >
              <div 
                 className="absolute inset-0 z-30 cursor-move"
                 onPointerDown={handlePointerDown}
@@ -111,17 +140,8 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) =
                 onTouchMove={handlePointerMove}
                 onTouchEnd={handlePointerUp}
              ></div>
-         </div>
 
-          <div 
-            className="absolute top-1/2 left-1/2 flex items-center justify-center pointer-events-none z-10"
-            style={{ 
-                width: VIEWPORT_SIZE, 
-                height: VIEWPORT_SIZE,
-                transform: 'translate(-50%, -50%)'
-            }}
-          >
-             <div className="relative w-full h-full flex items-center justify-center">
+             <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
                 <img 
                     ref={imgRef}
                     src={imageSrc}
@@ -134,21 +154,24 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) =
                         height: displaySize ? displaySize.height : 'auto',
                         transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
                         opacity: imageLoaded ? 1 : 0,
-                        transition: 'opacity 0.2s'
+                        transition: isDragging ? 'none' : 'opacity 0.2s',
                     }}
                 />
              </div>
           </div>
-          
-          <p className="absolute bottom-10 text-white/50 text-[10px] font-bold uppercase tracking-widest pointer-events-none z-30">
-             Di chuyển và Thu phóng
-          </p>
+
+          {isUploading && (
+            <div className="absolute inset-0 z-40 bg-black/50 flex flex-col items-center justify-center">
+                <Spinner />
+                <p className="text-white/80 mt-4">Đang tải ảnh lên...</p>
+            </div>
+          )}
       </div>
 
       <div className="bg-slate-900 border-t border-slate-800 pb-safe pt-6 px-6 z-40 w-full rounded-t-3xl">
           
-          <div className="flex items-center gap-4 justify-center mb-8">
-              <i className="fa-solid fa-image text-slate-500 text-xs"></i>
+          <div className="flex items-center gap-4 justify-center mb-6">
+              <i className="fa-solid fa-magnifying-glass-minus text-slate-500"></i>
               <input 
                 type="range" 
                 min="1" 
@@ -156,24 +179,26 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) =
                 step="0.05" 
                 value={zoom}
                 onChange={(e) => setZoom(parseFloat(e.target.value))}
-                className="w-full max-w-[240px] h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                disabled={isUploading}
+                className="w-full max-w-[240px] h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 disabled:opacity-50"
               />
-              <i className="fa-solid fa-image text-white text-lg"></i>
+              <i className="fa-solid fa-magnifying-glass-plus text-white"></i>
           </div>
 
           <div className="flex gap-4">
                <button 
                   onClick={onCancel} 
-                  className="flex-1 py-4 bg-slate-800 text-slate-300 rounded-2xl font-bold text-base border border-slate-700 active:scale-95 transition-all"
+                  disabled={isUploading}
+                  className="flex-1 py-4 bg-slate-800 text-slate-300 rounded-2xl font-bold text-base border border-slate-700 active:scale-95 transition-all disabled:opacity-50"
                >
                    Hủy
                </button>
                <button 
-                  onClick={processCrop}
-                  disabled={!imageLoaded}
-                  className="flex-1 py-4 bg-emerald-500 text-white rounded-2xl font-bold text-base active:scale-95 transition-all disabled:opacity-50"
+                  onClick={handleConfirmCrop}
+                  disabled={!imageLoaded || isUploading}
+                  className="flex-1 py-4 bg-emerald-500 text-white rounded-2xl font-bold text-base active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
                >
-                   Xong
+                  {isUploading ? <Spinner size='sm' /> : 'Lưu'}
                </button>
           </div>
       </div>

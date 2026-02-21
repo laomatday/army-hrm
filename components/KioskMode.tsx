@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import QRCode from 'react-qr-code';
 import { db } from '../services/firebase';
 import { doCheckIn } from '../services/api';
+import { uploadToGoogleDrive } from '../services/googleDrive'; // Import the new upload function
 import { Employee, Kiosk } from '../types';
 import { getKioskById } from '../services/kiosk';
 
@@ -129,63 +130,78 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
     setIsCameraActive(false);
   };
 
-const takePictureAndSubmit = async () => {
+  const takePictureAndSubmit = async () => {
     if (!videoRef.current || !session || !kioskInfo) return;
-    
+
     const canvas = document.createElement('canvas');
     canvas.width = 640;
     canvas.height = 480;
     const ctx = canvas.getContext('2d');
     
     if (ctx) {
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
-      ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-      const base64 = canvas.toDataURL('image/webp', 0.5);
-      
-      stopCamera();
-      
-      const mockEmployee = { employee_id: session.employee_id, name: session.employee_name, center_id: kioskInfo.center_id } as Employee;
-      
-      if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-              async (position) => {
-                  try {
-                      const res = await doCheckIn({
-                          employeeId: session.employee_id,
-                          lat: position.coords.latitude,
-                          lng: position.coords.longitude,
-                          deviceId: kioskInfo.kiosk_id, 
-                          imageBase64: base64
-                      }, mockEmployee);
-                      
-                      if (res.success) {
-                          await db.collection('kiosk_sessions').doc(session.id).update({ status: 'completed' });
-                          setSession((prev: any) => ({ ...prev, status: 'completed' }));
-                      } else {
-                          await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: res.message });
-                          setSession((prev: any) => ({ ...prev, status: 'failed', error: res.message }));
-                      }
-                  } catch (err: any) {
-                      await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: "System Error" });
-                      setSession((prev: any) => ({ ...prev, status: 'failed', error: "System Error" }));
-                  }
-                  
-                  setTimeout(resetSession, 4000);
-              },
-              async (error) => {
-                  console.error("Kiosk GPS Error:", error);
-                  await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: "Lỗi GPS Kiosk: Vui lòng bật định vị cho thiết bị này." });
-                  setSession((prev: any) => ({ ...prev, status: 'failed', error: "Chưa cấp quyền GPS cho Kiosk" }));
-                  setTimeout(resetSession, 4000);
-              },
-              { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-          );
-      } else {
-          await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: "Thiết bị Kiosk không hỗ trợ định vị." });
-          setSession((prev: any) => ({ ...prev, status: 'failed', error: "Trình duyệt không hỗ trợ GPS" }));
-          setTimeout(resetSession, 4000);
-      }
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+        const base64 = canvas.toDataURL('image/jpeg', 0.8); // Use jpeg for broader compatibility
+        
+        stopCamera();
+
+        // Announce upload start
+        setSession((prev: any) => ({ ...prev, status: 'uploading' }));
+
+        // 1. Upload to Google Drive
+        const filename = `checkin_${session.employee_id}_${Date.now()}.jpg`;
+        const imageUrl = await uploadToGoogleDrive(filename, base64);
+
+        if (!imageUrl) {
+            await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: 'Lỗi tải ảnh lên Google Drive' });
+            setSession((prev: any) => ({ ...prev, status: 'failed', error: "Lỗi tải ảnh" }));
+            setTimeout(resetSession, 4000);
+            return;
+        }
+        
+        // 2. Proceed with check-in
+        const mockEmployee = { employee_id: session.employee_id, name: session.employee_name, center_id: kioskInfo.center_id } as Employee;
+        
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    try {
+                        const res = await doCheckIn({
+                            employeeId: session.employee_id,
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                            deviceId: kioskInfo.kiosk_id, 
+                            imageUrl: imageUrl // Pass the new URL
+                        }, mockEmployee);
+                        
+                        if (res.success) {
+                            await db.collection('kiosk_sessions').doc(session.id).update({ status: 'completed' });
+                            setSession((prev: any) => ({ ...prev, status: 'completed' }));
+                        } else {
+                            await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: res.message });
+                            setSession((prev: any) => ({ ...prev, status: 'failed', error: res.message }));
+                        }
+                    } catch (err: any) {
+                        await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: "Lỗi hệ thống khi chấm công" });
+                        setSession((prev: any) => ({ ...prev, status: 'failed', error: "Lỗi hệ thống" }));
+                    }
+                    
+                    setTimeout(resetSession, 4000);
+                },
+                async (error) => {
+                    console.error("Kiosk GPS Error:", error);
+                    await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: "Lỗi GPS: Vui lòng cấp quyền vị trí cho thiết bị kiosk." });
+                    setSession((prev: any) => ({ ...prev, status: 'failed', error: "Chưa cấp quyền GPS" }));
+                    setTimeout(resetSession, 4000);
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        } else {
+            await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: "Thiết bị kiosk không hỗ trợ định vị." });
+            setSession((prev: any) => ({ ...prev, status: 'failed', error: "Trình duyệt không hỗ trợ GPS" }));
+            setTimeout(resetSession, 4000);
+        }
     }
   };
 
@@ -207,12 +223,12 @@ const takePictureAndSubmit = async () => {
             <div className="w-full max-w-sm bg-slate-800 p-8 rounded-2xl border border-slate-700">
                 <div className="text-center mb-8">
                     <i className="fa-solid fa-gear text-emerald-500 text-4xl mb-3"></i>
-                    <h2 className="text-2xl font-bold">Kiosk Setup</h2>
+                    <h2 className="text-2xl font-bold">Cài đặt Kiosk</h2>
                 </div>
                 
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-2">Terminal ID</label>
+                        <label className="block text-sm font-medium text-slate-400 mb-2">Mã thiết bị</label>
                         <input 
                           type="text" 
                           value={tempKioskId}
@@ -227,13 +243,13 @@ const takePictureAndSubmit = async () => {
                           onClick={saveConfig}
                           className="flex-1 bg-emerald-600 hover:bg-emerald-700 font-bold py-3 rounded-lg"
                         >
-                          Initialize
+                          Khởi tạo
                         </button>
                         <button 
                           onClick={onExit}
                           className="px-6 bg-slate-700 hover:bg-slate-600 rounded-lg"
                         >
-                          Exit
+                          Thoát
                         </button>
                     </div>
                 </div>
@@ -251,8 +267,8 @@ const takePictureAndSubmit = async () => {
           <p className="text-xs text-slate-500">{kioskInfo?.name}</p>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-semibold">{currentTime.toLocaleTimeString('en-US', { hour12: false })}</div>
-          <button onClick={onExit} className="text-xs text-red-500 hover:underline">Terminate</button>
+          <div className="text-2xl font-semibold">{currentTime.toLocaleTimeString('vi-VN', { hour12: false })}</div>
+          <button onClick={onExit} className="text-xs text-red-500 hover:underline">Tắt Kiosk</button>
         </div>
       </header>
 
@@ -260,9 +276,9 @@ const takePictureAndSubmit = async () => {
           
         {!session && (
           <div className="text-center">
-            <h2 className="text-3xl font-bold mb-4">Scan to Authenticate</h2>
+            <h2 className="text-3xl font-bold mb-4">Quét QR để Chấm công</h2>
             <p className="text-slate-400 mb-8">
-              Use the mobile app to scan the QR code and begin.
+              Dùng ứng dụng di động Army HRM để quét mã.
             </p>
 
             <div className="p-6 bg-white rounded-xl">
@@ -271,7 +287,7 @@ const takePictureAndSubmit = async () => {
             
             <div className="mt-8">
                 <div className="text-lg font-mono tracking-widest text-emerald-400">{token}</div>
-                <div className="text-xs text-slate-500">ACTIVE TOKEN</div>
+                <div className="text-xs text-slate-500">MÃ PHIÊN</div>
             </div>
           </div>
         )}
@@ -281,23 +297,24 @@ const takePictureAndSubmit = async () => {
             <div className="relative w-full max-w-2xl aspect-video bg-black rounded-lg overflow-hidden border border-slate-700">
               <video ref={videoRef} className={`w-full h-full object-cover transform scale-x-[-1] ${isCameraActive ? 'opacity-100' : 'opacity-0'}`} autoPlay playsInline muted></video>
               
-              {!isCameraActive && (
+              {session.status !== 'camera_ready' && (
                  <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-12 h-12 border-4 border-slate-700 border-t-emerald-500 rounded-full animate-spin"></div>
                  </div>
               )}
 
               {session.status === 'camera_ready' && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-7xl font-bold text-white">{countdown}</div>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <div className="text-8xl font-bold text-white" style={{textShadow: '0 0 20px black'}}>{countdown}</div>
                 </div>
               )}
             </div>
             
-            <div className="mt-6">
+            <div className="mt-6 h-12 flex flex-col justify-center items-center">
                 <h2 className="text-2xl font-bold">{session.employee_name}</h2>
-                {session.status === 'completed' && <p className="text-emerald-500">Attendance Logged Successfully</p>}
-                {session.status === 'failed' && <p className="text-red-500">Verification Failed: {session.error}</p>}
+                {session.status === 'uploading' && <p className="text-amber-500">Đang tải ảnh lên...</p>}
+                {session.status === 'completed' && <p className="text-emerald-500">Chấm công thành công!</p>}
+                {session.status === 'failed' && <p className="text-red-500">Chấm công thất bại: {session.error}</p>}
             </div>
           </div>
         )}

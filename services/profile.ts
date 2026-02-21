@@ -1,23 +1,18 @@
-import { db, storage } from "./firebase";
+import { db } from "./firebase";
 import { Employee } from "../types";
 import { COLLECTIONS } from "./constants";
 import { hashPassword } from "../utils/helpers";
 
-export async function updateAvatar(employeeId: string, base64Image: string) {
+export async function updateProfileAvatar(employeeId: string, avatarUrl: string) {
     try {
         const usersRef = db.collection(COLLECTIONS.EMPLOYEES);
         const qId = usersRef.where("employee_id", "==", employeeId);
         const userSnap = await qId.get();
         if(userSnap.empty) return { success: false, message: "User not found" };
         
-        const storageRef = storage.ref(`avatars/${employeeId}_${Date.now()}.jpg`);
-        const response = await fetch(base64Image);
-        const blob = await response.blob();
-        await storageRef.put(blob);
-        const imageUrl = await storageRef.getDownloadURL();
-
-        await usersRef.doc(userSnap.docs[0].id).update({ face_ref_url: imageUrl });
-        return { success: true, message: "Cập nhật ảnh thành công!", url: imageUrl };
+        await usersRef.doc(userSnap.docs[0].id).update({ face_ref_url: avatarUrl });
+        
+        return { success: true, message: "Cập nhật ảnh thành công!" };
     } catch (e: any) {
         return { success: false, message: e.message };
     }

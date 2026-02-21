@@ -1,7 +1,7 @@
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { Employee } from '../types';
 import { getShortName, formatDateString, triggerHaptic } from '../utils/helpers';
-import { updateAvatar, changePassword } from '../services/api';
+import { updateProfileAvatar, changePassword } from '../services/api';
 import Avatar from './Avatar';
 import ImageCropper from './ImageCropper';
 import ConfirmDialog from './ConfirmDialog';
@@ -12,12 +12,13 @@ interface Props {
   locations: any[];
   contacts: Employee[];
   onLogout: () => void;
-  onUpdate: () => void;
+  onUpdate: (updatedUser: Partial<Employee>) => void;
   onClose: () => void;
   onAlert: (title: string, msg: string, type: 'success' | 'error' | 'warning') => void;
+  setShowImageCropper: (show: boolean) => void;
 }
 
-const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUpdate, onClose, onAlert }) => {
+const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUpdate, onClose, onAlert, setShowImageCropper }) => {
   const [showPwdModal, setShowPwdModal] = useState(false);
   const [loadingPwd, setLoadingPwd] = useState(false);
   const [passData, setPassData] = useState({ old: '', new: '', confirm: '' });
@@ -27,6 +28,10 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
   const [uploading, setUploading] = useState(false);
   
   const [croppingImage, setCroppingImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setShowImageCropper(!!croppingImage);
+  }, [croppingImage, setShowImageCropper]);
 
   const touchStart = useRef<{x: number, y: number} | null>(null);
   const touchEnd = useRef<{x: number, y: number} | null>(null);
@@ -64,15 +69,13 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
       e.target.value = '';
   };
 
-  const handleCropComplete = async (base64Image: string) => {
-      setCroppingImage(null); 
+  const handleCropComplete = async (url: string) => {
       setUploading(true);
-      
       try {
-          const res = await updateAvatar(user.employee_id, base64Image);
+          const res = await updateProfileAvatar(user.employee_id, url);
           if (res.success) {
               triggerHaptic('success');
-              onUpdate();
+              onUpdate({ face_ref_url: url });
               onAlert("Thành công", res.message, 'success');
           } else {
               triggerHaptic('error');
@@ -83,6 +86,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
           onAlert("Lỗi", "Lỗi xử lý ảnh.", 'error');
       } finally {
           setUploading(false);
+          setCroppingImage(null);
       }
   };
 
@@ -399,6 +403,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
         {croppingImage && (
             <ImageCropper 
                 imageSrc={croppingImage} 
+                userId={user.employee_id}
                 onCancel={() => { setCroppingImage(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
                 onCropComplete={handleCropComplete}
             />

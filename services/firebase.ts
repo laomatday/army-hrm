@@ -1,24 +1,15 @@
-
-// Use global firebase object from CDN (loaded in index.html) to avoid ESM/Compat module resolution issues
-declare global {
-  interface Window {
-    firebase: any;
-  }
-}
-
-const firebase = window.firebase;
-
-if (!firebase) {
-    console.error("Firebase SDK not loaded. Please check network connection or index.html scripts.");
-}
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
+import 'firebase/compat/messaging';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD0NtXfJf3RMaeX79BZzkcLqgBQKHskxlo",
-  authDomain: "army-hrm-70615.firebaseapp.com",
-  projectId: "army-hrm-70615",
-  storageBucket: "army-hrm-70615.firebasestorage.app",
-  messagingSenderId: "600287950138",
-  appId: "1:600287950138:web:21de7495932c5b5f5acc03"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 if (!firebase.apps.length) {
@@ -26,25 +17,11 @@ if (!firebase.apps.length) {
 }
 
 const db = firebase.firestore();
-// Attempt to enable persistence with multi-tab support
-try {
-    db.enablePersistence({ synchronizeTabs: true }).catch((err: any) => {
-        console.log("Persistence not available", err);
-    });
-} catch(e) {
-    console.log("Persistence setup failed", e);
-}
+const messaging = firebase.messaging.isSupported() ? firebase.messaging() : undefined;
+const app = firebase.app();
 
-const storage = firebase.storage();
+// Export the compat firebase object as the default export
+export default firebase;
 
-let messaging: any = null;
-try {
-  // Use function check for safety
-  if (typeof firebase.messaging === 'function' && firebase.messaging.isSupported()) {
-    messaging = firebase.messaging();
-  }
-} catch (e) {
-  console.log("Messaging not supported or blocked");
-}
-
-export { firebase, db, storage, messaging };
+// Export individual services for convenience
+export { db, messaging, app };

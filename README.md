@@ -27,7 +27,7 @@ Giao diện được tối ưu hóa cho trải nghiệm di động, hỗ trợ c
 #### 3. Báo cáo & Thống kê cá nhân
 *   **Dashboard trực quan:** Xem nhanh các chỉ số quan trọng: Công chuẩn, Công thực tế, Công nghỉ lễ và Phép năm.
 *   **Lịch sử chi tiết:** Nhật ký chấm công đầy đủ thông tin (Giờ vào/ra, Ca, Vị trí, Ảnh đối soát) theo tháng.
-*   **Quản lý Quỹ phép:** Tự động cập nhật và hiển thị số ngày phép năm đã dùng và còn lại.
+*   **Quản lý Quỹ phép:** Tự động cập nhật và hiển thị số ngày phép đã dùng và còn lại.
 
 #### 4. Tiện ích & Bảo mật
 *   **Danh bạ nội bộ:** Tìm kiếm đồng nghiệp theo tên/phòng ban, hỗ trợ gọi điện hoặc gửi email tức thì.
@@ -61,7 +61,8 @@ Hệ thống quản trị mạnh mẽ giúp HR vận hành doanh nghiệp hiệu
 ## 🛠️ Công nghệ sử dụng
 
 *   **Frontend:** React 19, TypeScript, Tailwind CSS (Mobile-First UI).
-*   **Backend (Serverless):** Google Firebase (Firestore, Auth, Storage, Cloud Messaging).
+*   **Backend (Serverless):** Google Firebase (Firestore, Auth, Cloud Messaging), Google App Script.
+*   **Lưu trữ Ảnh:** Google Drive.
 *   **PWA:** Service Workers hỗ trợ cài đặt ứng dụng lên màn hình chính và hoạt động mượt mà.
 *   **Tiện ích:** Haptic Feedback API, Geolocation API, Camera API, WebP compression.
 
@@ -71,7 +72,7 @@ Hệ thống quản trị mạnh mẽ giúp HR vận hành doanh nghiệp hiệu
 
 1. **Cài đặt môi trường:** Node.js v18+.
 2. **Cài đặt thư viện:** `npm install`.
-3. **Cấu hình Firebase:** Tạo file `.env` với các tham số `VITE_FIREBASE_*`.
+3. **Cấu hình biến môi trường:** Tạo file `.env` với các tham số `VITE_FIREBASE_*` và `VITE_GOOGLE_SCRIPT_URL`.
 4. **Firestore Indexes:** Tạo các chỉ mục phức hợp (Composite Indexes) cho `attendance`, `leave_requests`, và `explanations` theo hướng dẫn trong code.
 5. **Chạy ứng dụng:** `npm run dev`.
 
@@ -79,7 +80,8 @@ Hệ thống quản trị mạnh mẽ giúp HR vận hành doanh nghiệp hiệu
 
 ## 🔒 Chính sách bảo mật & Quyền riêng tư
 
-*   **Vị trí & Camera:** Chỉ truy cập khi người dùng thực hiện chấm công. Dữ liệu được bảo mật trên Firebase.
+*   **Vị trí & Camera:** Chỉ truy cập khi người dùng thực hiện chấm công hoặc cập nhật ảnh đại diện. Dữ liệu được bảo mật trên nền tảng Google.
+*   **Lưu trữ Ảnh:** Ảnh selfie chấm công và ảnh đại diện được tải lên và lưu trữ an toàn trên Google Drive cá nhân của doanh nghiệp, không phụ thuộc vào Firebase Storage.
 *   **Thiết bị tin cậy:** Ngăn chặn việc sử dụng nhiều thiết bị để chấm công hộ.
 *   **Quyền hạn:** Phân quyền rõ ràng (Admin, Manager, Employee) để đảm bảo an toàn dữ liệu nội bộ.
 

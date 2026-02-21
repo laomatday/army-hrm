@@ -29,7 +29,6 @@ interface Props {
 }
 
 const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
-  // --- UI STATE FOR ALERTS (Defined early for usage in hook) ---
   const [alertMessage, setAlertMessage] = useState<{title: string, msg: string, type: 'success' | 'error' | 'warning'} | null>(null);
 
   const handleShowAlert = (title: string, msg: string, type: 'success' | 'error' | 'warning' = 'success') => {
@@ -37,8 +36,6 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
       setAlertMessage({ title, msg, type }); 
   };
 
-  // --- CORE STATE ---
-  // Pass handleShowAlert as callback for in-app notifications
   const { data, loading, currentUser, refresh } = useDashboardData(
       user, 
       onLogout,
@@ -49,7 +46,6 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
   const [direction, setDirection] = useState<'left' | 'right'>('right');
   const [lastActiveTab, setLastActiveTab] = useState<TabType>('home');
   
-  // --- UI STATE ---
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [showCamera, setShowCamera] = useState(false);
@@ -57,36 +53,31 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkInStatus, setCheckInStatus] = useState("");
   const [showCheckoutConfirm, setShowCheckoutConfirm] = useState(false);
+  const [showImageCropper, setShowImageCropper] = useState(false);
   
-  // --- FEATURE STATE ---
   const [showCreateRequestModal, setShowCreateRequestModal] = useState(false);
   const [createRequestInitialData, setCreateRequestInitialData] = useState<{type: string, date: string, reason: string} | null>(null);
   const [contactsResetTrigger, setContactsResetTrigger] = useState(0);
-  const [contactsSearchTrigger, setContactsSearchTrigger] = useState(0); // Added for Header Search Action
+  const [contactsSearchTrigger, setContactsSearchTrigger] = useState(0); 
   const [seenNotiCount, setSeenNotiCount] = useState(() => {
       try { return parseInt(localStorage.getItem('army_seen_noti_count') || '0', 10); } catch { return 0; }
   });
 
-  // --- HEADER CONTROLS STATE ---
   const managerDate = new Date();
 
-  // --- HOOKS ---
   const { handleScroll } = useScrollControl(setIsNavVisible);
   const touchStart = useRef<{x: number, y: number} | null>(null);
   const touchEnd = useRef<{x: number, y: number} | null>(null);
   const minSwipeDistance = 50;
 
-  // --- EFFECTS ---
   useEffect(() => {
-    // Attach scroll listener to the main scroll container
     const scrollContainer = document.querySelector('.overflow-y-auto');
     if (scrollContainer) {
         scrollContainer.addEventListener('scroll', handleScroll as any, { passive: true });
         return () => scrollContainer.removeEventListener('scroll', handleScroll as any);
     }
-  }, [activeTab, loading]); // Re-attach when tab changes
+  }, [activeTab, loading]); 
 
-  // --- ACTIONS ---
   const handleTabChange = (tab: TabType) => {
       triggerHaptic('light');
       if (activeTab === tab && tab === 'contacts') {
@@ -108,23 +99,18 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
   };
 
   const handleCheckIn = async (base64: string, lat: number, lng: number) => {
-    // 1. Show processing state
     setCheckingIn(true);
     setCheckInStatus("Đang đồng bộ dữ liệu...");
     setShowCamera(false);
 
-    // 2. Call API
     const res = await doCheckIn({
         employeeId: currentUser.employee_id, lat, lng, deviceId: getDeviceId(), imageBase64: base64
     }, currentUser);
 
-    // 3. Optimistic Feedback: Close loading immediately
     setCheckingIn(false);
     
-    // 4. Show result
     handleShowAlert(res.success ? "Thành công" : "Lỗi", res.message, res.success ? 'success' : 'error');
 
-    // 5. Background Refresh (Don't await this to keep UI responsive)
     if(res.success) {
         refresh(); 
     }
@@ -144,9 +130,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
           setCheckingIn(true);
           setCheckInStatus("Đang xác thực vị trí...");
 
-          // Use watchPosition for faster fix if already warm
           navigator.geolocation.getCurrentPosition(async (pos) => {
-              // Verify location against office geofence
               if (data && data.locations) {
                   const userLoc = data.locations.find(l => l.center_id === currentUser.center_id);
                   if (userLoc) {
@@ -163,7 +147,6 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
 
               setCheckInStatus("Đang kết nối với Kiosk...");
 
-              // Create session in Firestore
               const sessionRef = await db.collection('kiosk_sessions').add({
                   kiosk_id: targetKioskId,
                   token: qrData.token,
@@ -172,18 +155,15 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
                   center_id: currentUser.center_id,
                   status: 'pending',
                   created_at: new Date().toISOString(),
-                  // Store verified location from personal device
                   user_lat: pos.coords.latitude,
                   user_lng: pos.coords.longitude
               });
 
-              // Timeout for safety
               const timeoutId = setTimeout(() => {
                   setCheckingIn(false);
                   handleShowAlert("Hết thời gian", "Kiosk không phản hồi. Vui lòng thử lại.", "error");
               }, 45000);
 
-              // Listen for completion
               const unsubscribe = db.collection('kiosk_sessions').doc(sessionRef.id)
                   .onSnapshot(async (doc) => {
                       const session = doc.data();
@@ -195,12 +175,10 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
                           clearTimeout(timeoutId);
                           unsubscribe();
                           
-                          // Optimistic UI update
                           setCheckingIn(false);
                           triggerHaptic('success');
                           handleShowAlert("Thành công", "Đã ghi nhận chấm công từ Kiosk", "success");
                           
-                          // Background refresh
                           refresh();
                       } else if (session.status === 'failed') {
                           clearTimeout(timeoutId);
@@ -242,11 +220,9 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
           setCheckInStatus("Đang gửi yêu cầu Check-out...");
           const res = await doCheckOut(currentUser.employee_id, pos.coords.latitude, pos.coords.longitude);
           
-          // Optimistic UI
           setCheckingIn(false);
           handleShowAlert(res.success ? "Thành công" : "Lỗi", res.message, res.success ? 'success' : 'error');
           
-          // Background Refresh
           if(res.success) refresh(); 
 
       }, (err) => {
@@ -255,10 +231,8 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
       }, { enableHighAccuracy: true, timeout: 8000 });
   };
 
-  // --- SWIPE LOGIC ---
   const onTouchStart = (e: React.TouchEvent) => {
     const x = e.targetTouches[0].clientX;
-    // Edge Protection: Ignore swipes starting from edges (30px threshold)
     if (x < 30 || x > window.innerWidth - 30) {
         touchStart.current = null;
         return;
@@ -275,7 +249,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
     if (Math.abs(dX) > Math.abs(dY)) {
          const tabs: TabType[] = ['home', 'history', 'requests', 'contacts'];
          if (['Admin', 'Manager'].includes(currentUser.role || '')) tabs.push('manager');
-         tabs.push('notifications'); // Add notifications to swipe flow
+         tabs.push('notifications'); 
          
          const idx = tabs.indexOf(activeTab);
          if (dX > minSwipeDistance && idx < tabs.length - 1 && idx >= 0) handleTabChange(tabs[idx + 1]);
@@ -286,14 +260,12 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
     }
   };
 
-  // --- RENDER HELPERS ---
   const rawNotiCount = (data?.notifications.approvals.length || 0) + 
                        (data?.notifications.explanationApprovals.length || 0) + 
                        (data?.notifications.myRequests.filter(r => r.status !== 'Pending').length || 0) + 
                        (data?.notifications.myExplanations.filter(r => r.status !== 'Pending').length || 0);
   const badgeCount = Math.max(0, rawNotiCount - seenNotiCount);
 
-  // Loading Skeleton
   if (loading) return <DashboardSkeleton />;
 
   return (
@@ -309,7 +281,6 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
                {checkInStatus || "Vui lòng đợi trong giây lát"}
              </p>
-             {/* Disable cancel during critical sync */}
              <button 
                onClick={() => setCheckingIn(false)}
                className="mt-8 text-slate-400 text-xs font-bold uppercase tracking-widest hover:text-slate-600 transition-colors"
@@ -327,7 +298,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
               onOpenProfile={() => setActiveTab('profile')} 
               setIsNavVisible={setIsNavVisible}
               onCreateRequest={() => setShowCreateRequestModal(true)}
-              onContactSearch={() => setContactsSearchTrigger(prev => prev + 1)} // PASS SEARCH ACTION
+              onContactSearch={() => setContactsSearchTrigger(prev => prev + 1)}
            />
        )}
 
@@ -358,7 +329,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
                 <TabContacts 
                     data={data} 
                     resetTrigger={contactsResetTrigger} 
-                    searchTrigger={contactsSearchTrigger} // PASS TRIGGER DOWN
+                    searchTrigger={contactsSearchTrigger} 
                     onClose={() => handleTabChange('home')} 
                     setIsNavVisible={setIsNavVisible}
                     setIsHeaderVisible={setIsHeaderVisible}
@@ -376,6 +347,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
                     onUpdate={refresh} 
                     onClose={() => {setDirection('left'); setActiveTab(lastActiveTab);}}
                     onAlert={handleShowAlert}
+                    setShowImageCropper={setShowImageCropper}
                   />
               )}
               {activeTab === 'notifications' && (
@@ -389,7 +361,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
             onSuccess={refresh} onAlert={handleShowAlert} initialData={createRequestInitialData}
        />
 
-       {!showCamera && !showCheckoutConfirm && !alertMessage && (
+       {!showCamera && !showCheckoutConfirm && !alertMessage && !showImageCropper && (
            <BottomNav activeTab={activeTab} onChange={handleTabChange} isVisible={isNavVisible} user={currentUser} notiCount={badgeCount} onOpenNoti={() => activeTab === 'notifications' ? setActiveTab(lastActiveTab) : setActiveTab('notifications')}/>
        )}
 
