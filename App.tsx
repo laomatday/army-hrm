@@ -116,7 +116,7 @@ function AppContent() {
               }
           }
       } catch (error) {
-          console.log("Notification registration skipped:", error);
+          // Silent fail or minimal logging if needed
       }
   };
 

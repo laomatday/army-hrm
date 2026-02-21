@@ -67,7 +67,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
   });
 
   // --- HEADER CONTROLS STATE ---
-  const [managerDate, setManagerDate] = useState(new Date());
+  const managerDate = new Date();
 
   // --- HOOKS ---
   const { handleScroll } = useScrollControl(setIsNavVisible);
