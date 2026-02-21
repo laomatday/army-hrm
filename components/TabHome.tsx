@@ -475,7 +475,9 @@ const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onScan
                 {/* MONTH FILTER (MODERNIZED CAPSULE) */}
                 <div className="flex items-center justify-between mb-3 px-1">
                     {/* Update Stats Header to text-[11px] font-extrabold */}
-                    <h3 className="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest ml-1">Thống kê</h3>
+                    <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest ml-2 flex items-center gap-2">
+                        <i className="fa-solid fa-chart-pie text-[10px]"></i> Thống kê
+                    </h3>
                     <div className="flex items-center bg-white dark:bg-slate-800 rounded-full shadow-sm border border-slate-100 dark:border-slate-700 pl-1 pr-1 py-1">
                         <button onClick={() => changeMonth(-1)} className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 active:bg-slate-100 dark:active:bg-slate-600 transition-colors">
                             <i className="fa-solid fa-chevron-left text-[10px]"></i>

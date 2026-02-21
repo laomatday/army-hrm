@@ -148,10 +148,11 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
             
             {/* --- SECTION 1: CALENDAR --- */}
             <div>
-                 {/* Calendar Title - Consistent Style */}
-                 <h4 className="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-1 tracking-widest">
+                 {/* Calendar Title - Standardized with TabContacts */}
+                 <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
+                     <i className="fa-solid fa-calendar-days text-[10px]"></i>
                      Lịch nghỉ nhân viên
-                 </h4>
+                 </h3>
 
                  <div className="bg-white dark:bg-slate-800 p-4 rounded-[24px] shadow-sm border border-slate-100 dark:border-slate-700">
                      <div className="grid grid-cols-7 mb-3">
@@ -188,15 +189,16 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
 
             {/* --- SECTION 2: APPROVALS --- */}
             <div>
-                {/* Approval Header - Consistent Style */}
-                <h4 className="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-1 tracking-widest flex items-center gap-2">
+                {/* Approval Header - Standardized */}
+                <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
+                    <i className="fa-solid fa-clipboard-check text-[10px]"></i>
                     Cần duyệt 
                     {totalPending > 0 && (
                         <span className={`bg-red-500 text-white text-[10px] font-bold h-5 flex items-center justify-center rounded-full shadow-sm shadow-red-200 dark:shadow-red-900/50 ${totalPending < 10 ? 'w-5' : 'px-1.5 min-w-[20px]'}`}>
                             {totalPending}
                         </span>
                     )}
-                </h4>
+                </h3>
 
                 {totalPending === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-600 opacity-60 bg-white dark:bg-slate-800 rounded-[24px] border border-dashed border-slate-200 dark:border-slate-700">

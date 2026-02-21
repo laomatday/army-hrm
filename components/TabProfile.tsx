@@ -252,7 +252,10 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                 {/* INFO GROUPS */}
                 
                 {/* 1. Cong viec */}
-                <h3 className="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-1 tracking-widest">Thông tin công việc</h3>
+                <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
+                    <i className="fa-solid fa-briefcase text-[10px]"></i>
+                    Thông tin công việc
+                </h3>
                 <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
                     <ProfileRow 
                         icon="fa-location-dot" 
@@ -275,7 +278,10 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                 </div>
 
                 {/* 2. Ca nhan */}
-                <h3 className="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-1 tracking-widest">Thông tin cá nhân</h3>
+                <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
+                    <i className="fa-solid fa-address-card text-[10px]"></i>
+                    Thông tin cá nhân
+                </h3>
                 <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
                     <ProfileRow 
                         icon="fa-envelope" 
@@ -298,7 +304,10 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                 </div>
 
                 {/* 3. Tai khoan */}
-                <h3 className="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-1 tracking-widest">Tài khoản</h3>
+                <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
+                    <i className="fa-solid fa-user-shield text-[10px]"></i>
+                    Tài khoản
+                </h3>
                 <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
                     <ProfileRow 
                         icon="fa-key" 

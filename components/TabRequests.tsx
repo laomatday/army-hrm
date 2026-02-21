@@ -114,7 +114,10 @@ const TabRequests: React.FC<Props> = ({ data, onCreateClick, onRefresh, user }) 
                 {viewMode === 'leaves' && (
                     <div className="animate-slide-up">
                         {/* Updated Header: text-[11px] font-extrabold */}
-                        <h4 className="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase ml-1 mb-3 tracking-widest">Danh sách đơn nghỉ phép</h4>
+                        <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase ml-2 mb-3 tracking-widest flex items-center gap-2">
+                            <i className="fa-solid fa-umbrella-beach text-[10px]"></i>
+                            Danh sách đơn nghỉ phép
+                        </h3>
                         {requests.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-600 opacity-60 bg-white dark:bg-slate-800 rounded-[24px] border border-dashed border-slate-200 dark:border-slate-700">
                                 <div className="w-16 h-16 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center mb-3">
@@ -186,7 +189,10 @@ const TabRequests: React.FC<Props> = ({ data, onCreateClick, onRefresh, user }) 
                 {viewMode === 'explanations' && (
                     <div className="animate-slide-up">
                         {/* Updated Header: text-[11px] font-extrabold */}
-                        <h4 className="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase ml-1 mb-3 tracking-widest">Danh sách giải trình</h4>
+                        <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase ml-2 mb-3 tracking-widest flex items-center gap-2">
+                            <i className="fa-solid fa-file-signature text-[10px]"></i>
+                            Danh sách giải trình
+                        </h3>
                         {explanations.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-600 opacity-60 bg-white dark:bg-slate-800 rounded-[24px] border border-dashed border-slate-200 dark:border-slate-700">
                                 <div className="w-16 h-16 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center mb-3">

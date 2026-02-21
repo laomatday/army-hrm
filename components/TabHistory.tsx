@@ -418,9 +418,10 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
             {/* CONTROL ROW (Section Title + Date Navigator) */}
             <div className="flex items-center justify-between mb-4">
                 {/* Fixed font class to text-[11px] font-extrabold */}
-                <h4 className="text-[11px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase ml-1 tracking-widest">
+                <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase ml-2 tracking-widest flex items-center gap-2">
+                    <i className="fa-solid fa-clock-rotate-left text-[10px]"></i>
                     {viewMode === 'month' ? 'Nhật ký tháng' : 'Nhật ký tuần'}
-                </h4>
+                </h3>
                 
                 {/* Modern Date Navigator */}
                 <div className="flex items-center bg-white dark:bg-slate-800 rounded-full shadow-sm border border-slate-100 dark:border-slate-700 pl-1 pr-1 py-1">
