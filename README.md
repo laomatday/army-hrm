@@ -1,7 +1,7 @@
 
 # Army HRM V2026 - Hệ thống Quản lý Nhân sự & Chấm công Thông minh
 
-![Army HRM Logo](https://firebasestorage.googleapis.com/v0/b/army-hrm-70615.firebasestorage.app/o/logo%2Flogo_white.png?alt=media)
+![Army HRM Logo](https://lh3.googleusercontent.com/d/1r_FuqN4QJbch0FYXAwX8efW9s0ucreiO=w500)
 
 **Army HRM V2026** là giải pháp quản lý nhân sự toàn diện, được thiết kế theo tư duy **Mobile-First** và vận hành dưới dạng **Progressive Web App (PWA)**. Hệ thống cung cấp giải pháp chấm công hiện đại kết hợp định vị GPS và xác thực khuôn mặt (Face ID), cùng với hệ thống quản trị dữ liệu (CMS) mạnh mẽ dành cho doanh nghiệp.
 
