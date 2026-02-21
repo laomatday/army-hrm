@@ -1,56 +1,56 @@
 
 import React from 'react';
 
-const SkeletonItem = ({ className }: { className: string }) => (
-  <div className={`bg-slate-200 dark:bg-slate-800 animate-pulse ${className}`}></div>
-);
-
 export const DashboardSkeleton = () => {
   return (
-    <div className="h-full w-full bg-slate-50 dark:bg-slate-900 flex flex-col relative overflow-hidden font-sans">
-      
-      {/* Header Skeleton */}
-      <div className="pt-safe pt-2 px-4 pb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-               <SkeletonItem className="w-12 h-12 rounded-full" />
-               <SkeletonItem className="w-24 h-6 rounded-lg" />
-          </div>
-          <SkeletonItem className="w-10 h-10 rounded-full" />
-      </div>
+    <div className="h-full w-full bg-slate-50 dark:bg-slate-900 flex flex-col relative overflow-hidden">
+        {/* HEADER SKELETON */}
+        <div className="h-16 px-4 flex items-center justify-between mt-2 pt-safe">
+            <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-800 animate-pulse"></div>
+                <div className="h-6 w-32 bg-slate-200 dark:bg-slate-800 rounded-lg animate-pulse"></div>
+            </div>
+            <div className="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-800 animate-pulse"></div>
+        </div>
 
-      <div className="flex-1 px-4 pt-10 flex flex-col items-center">
-          
-          {/* Clock Area */}
-          <div className="flex flex-col items-center mb-8 w-full">
-              <SkeletonItem className="w-48 h-20 mb-2 rounded-2xl" /> {/* Time */}
-              <SkeletonItem className="w-32 h-4 mb-6 rounded-md" /> {/* Date */}
-              <SkeletonItem className="w-40 h-10 rounded-full" /> {/* Status Pill */}
-          </div>
+        {/* CONTENT SKELETON */}
+        <div className="flex-1 px-4 pt-10 pb-32 flex flex-col items-center">
+            
+            {/* CLOCK AREA */}
+            <div className="flex flex-col items-center mb-8 w-full">
+                {/* Time */}
+                <div className="h-20 w-48 bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse mb-3"></div>
+                {/* Date */}
+                <div className="h-4 w-32 bg-slate-200 dark:bg-slate-800 rounded-full animate-pulse mb-6"></div>
+                {/* Status Pill */}
+                <div className="h-10 w-40 bg-slate-200 dark:bg-slate-800 rounded-full animate-pulse"></div>
+            </div>
 
-          {/* Main Button */}
-          <div className="mb-10">
-              <SkeletonItem className="w-44 h-44 rounded-full shadow-sm" />
-          </div>
+            {/* ACTION BUTTON */}
+            <div className="mb-10">
+                <div className="w-44 h-44 rounded-full bg-slate-200 dark:bg-slate-800 animate-pulse ring-4 ring-white dark:ring-slate-900"></div>
+            </div>
 
-          {/* Stats Grid */}
-          <div className="w-full grid grid-cols-2 gap-3 mb-8">
-              <SkeletonItem className="h-28 rounded-[24px]" />
-              <SkeletonItem className="h-28 rounded-[24px]" />
-              <SkeletonItem className="h-28 rounded-[24px]" />
-              <SkeletonItem className="h-28 rounded-[24px]" />
-          </div>
-      </div>
+            {/* STATS HEADER */}
+            <div className="w-full flex justify-between items-center mb-3 px-1">
+                <div className="h-4 w-20 bg-slate-200 dark:bg-slate-800 rounded-full animate-pulse"></div>
+                <div className="h-8 w-28 bg-slate-200 dark:bg-slate-800 rounded-full animate-pulse"></div>
+            </div>
 
-      {/* Bottom Nav Skeleton */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100]">
-          <div className="bg-white dark:bg-slate-800 rounded-full shadow-sm flex items-center justify-between px-2 py-2 border border-slate-100 dark:border-slate-700 gap-1.5 w-[300px] h-[64px]">
-             <SkeletonItem className="w-12 h-12 rounded-full" />
-             <SkeletonItem className="w-12 h-12 rounded-full" />
-             <SkeletonItem className="w-12 h-12 rounded-full" />
-             <SkeletonItem className="w-12 h-12 rounded-full" />
-             <SkeletonItem className="w-12 h-12 rounded-full" />
-          </div>
-      </div>
+            {/* STATS GRID */}
+            <div className="w-full grid grid-cols-2 gap-3">
+                {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-28 bg-slate-200 dark:bg-slate-800 rounded-[24px] animate-pulse"></div>
+                ))}
+            </div>
+        </div>
+
+        {/* BOTTOM NAV SKELETON */}
+        <div className="fixed bottom-6 left-4 right-4 h-[72px] bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl rounded-[24px] flex justify-around items-center px-2">
+             {[1, 2, 3, 4, 5].map((i) => (
+                 <div key={i} className="w-10 h-10 rounded-full bg-slate-200/50 dark:bg-slate-700/50 animate-pulse"></div>
+             ))}
+        </div>
     </div>
   );
 };

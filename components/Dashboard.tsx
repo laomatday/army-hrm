@@ -62,6 +62,7 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
   const [showCreateRequestModal, setShowCreateRequestModal] = useState(false);
   const [createRequestInitialData, setCreateRequestInitialData] = useState<{type: string, date: string, reason: string} | null>(null);
   const [contactsResetTrigger, setContactsResetTrigger] = useState(0);
+  const [contactsSearchTrigger, setContactsSearchTrigger] = useState(0); // Added for Header Search Action
   const [seenNotiCount, setSeenNotiCount] = useState(() => {
       try { return parseInt(localStorage.getItem('army_seen_noti_count') || '0', 10); } catch { return 0; }
   });
@@ -255,6 +256,17 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
   };
 
   // --- SWIPE LOGIC ---
+  const onTouchStart = (e: React.TouchEvent) => {
+    const x = e.targetTouches[0].clientX;
+    // Edge Protection: Ignore swipes starting from edges (30px threshold)
+    if (x < 30 || x > window.innerWidth - 30) {
+        touchStart.current = null;
+        return;
+    }
+    touchEnd.current = null; 
+    touchStart.current = { x, y: e.targetTouches[0].clientY }; 
+  };
+
   const onTouchEnd = () => {
     if (!touchStart.current || !touchEnd.current) return;
     const dX = touchStart.current.x - touchEnd.current.x;
@@ -314,12 +326,14 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
               activeTab={activeTab}
               onOpenProfile={() => setActiveTab('profile')} 
               setIsNavVisible={setIsNavVisible}
+              onCreateRequest={() => setShowCreateRequestModal(true)}
+              onContactSearch={() => setContactsSearchTrigger(prev => prev + 1)} // PASS SEARCH ACTION
            />
        )}
 
        <div 
          className="flex-1 relative overflow-hidden bg-slate-50 dark:bg-slate-900"
-         onTouchStart={(e) => { touchEnd.current = null; touchStart.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY }; }}
+         onTouchStart={onTouchStart}
          onTouchMove={(e) => { touchEnd.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY }; }}
          onTouchEnd={onTouchEnd}
        >
@@ -338,12 +352,13 @@ const Dashboard: React.FC<Props> = ({ user, onLogout }) => {
                 />
               )}
               {activeTab === 'requests' && (
-                <TabRequests data={data} user={currentUser} onRefresh={refresh} onCreateClick={() => setShowCreateRequestModal(true)} />
+                <TabRequests data={data} user={currentUser} onRefresh={refresh} />
               )}
               {activeTab === 'contacts' && (
                 <TabContacts 
                     data={data} 
                     resetTrigger={contactsResetTrigger} 
+                    searchTrigger={contactsSearchTrigger} // PASS TRIGGER DOWN
                     onClose={() => handleTabChange('home')} 
                     setIsNavVisible={setIsNavVisible}
                     setIsHeaderVisible={setIsHeaderVisible}

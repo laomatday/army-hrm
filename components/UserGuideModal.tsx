@@ -213,8 +213,14 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
   const touchEnd = useRef<{x: number, y: number} | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    const x = e.targetTouches[0].clientX;
+    // Edge Protection
+    if (x < 30 || x > window.innerWidth - 30) {
+        touchStart.current = null;
+        return;
+    }
     touchEnd.current = null;
-    touchStart.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY };
+    touchStart.current = { x, y: e.targetTouches[0].clientY };
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {

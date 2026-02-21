@@ -1,7 +1,7 @@
 
-
 import React, { useState, useEffect, useRef } from 'react';
 import UserGuideModal from './UserGuideModal';
+import ModalHeader from './ModalHeader';
 
 interface Props {
   isOpen: boolean;
@@ -112,42 +112,36 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
 
   return (
     <>
-    <div className="fixed inset-0 z-[60] bg-slate-50 dark:bg-slate-900 flex flex-col font-sans animate-slide-up">
+    <div className="fixed inset-0 z-[60] bg-white dark:bg-slate-900 flex flex-col font-sans animate-slide-up">
         {/* Background Blobs (Consistent with Login/App) */}
         <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-[20%] left-[-10%] w-80 h-80 bg-blue-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
-        {/* HEADER AREA */}
-        <div className="pt-safe pt-2 px-4 pb-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl sticky top-0 z-10 border-b border-slate-100/50 dark:border-slate-800/50">
-            <div className="flex justify-between items-center h-16 mb-2">
-                <div>
-                     <h1 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight ml-1">Cài đặt</h1>
-                </div>
-                <button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors shadow-sm active:scale-95">
-                    <i className="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
-
-            {/* Search Pill - Matched to TabContacts style */}
-            <div className="relative group">
-                <i className="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400 group-focus-within:text-emerald-500 transition-colors"></i>
-                <input 
-                    type="text" 
-                    placeholder="Tìm kiếm cài đặt..."
-                    className="w-full h-12 bg-slate-100 dark:bg-slate-800 rounded-2xl pl-11 pr-4 text-base font-bold text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/20 border border-transparent transition-all shadow-sm"
-                />
-            </div>
-        </div>
+        <ModalHeader 
+            title="Cài đặt" 
+            onClose={onClose} 
+            bgClass="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800"
+        />
 
         {/* SCROLLABLE CONTENT */}
         <div className="flex-1 overflow-y-auto px-4 pb-32 space-y-6 pt-4 relative z-0" onScroll={handleScroll}>
             
+            {/* Search Pill - Standardized style */}
+            <div className="relative group mb-2">
+                <i className="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400 group-focus-within:text-emerald-500 transition-colors"></i>
+                <input 
+                    type="text" 
+                    placeholder="Tìm kiếm cài đặt..."
+                    className="w-full h-11 bg-slate-50 dark:bg-slate-800 rounded-2xl pl-11 pr-4 text-base font-bold text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/20 border border-transparent transition-all shadow-sm focus:bg-white"
+                />
+            </div>
+
             {/* SECTION 1: GENERAL */}
             <div className="space-y-3">
                 <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase ml-2 tracking-widest flex items-center gap-2">
                     <i className="fa-solid fa-sliders text-[10px]"></i> Tùy chọn chung
                 </h3>
-                <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700">
+                <div className="bg-slate-50 dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
                     <SettingItem 
                         icon="fa-moon" 
                         colorClass="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"
@@ -180,7 +174,7 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
                 <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase ml-2 tracking-widest flex items-center gap-2">
                     <i className="fa-solid fa-headset text-[10px]"></i> Trợ giúp & Hỗ trợ
                 </h3>
-                <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700">
+                <div className="bg-slate-50 dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
                     <a href="tel:19001234" className="no-underline block">
                         <SettingItem 
                             icon="fa-phone-volume" 
@@ -212,14 +206,14 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
                 <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase ml-2 tracking-widest flex items-center gap-2">
                     <i className="fa-solid fa-circle-info text-[10px]"></i> Thông tin ứng dụng
                 </h3>
-                <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700">
-                    <div className="p-6 flex flex-col items-center justify-center text-center gap-3 bg-gradient-to-b from-slate-50/50 dark:from-slate-800/50 to-white dark:to-slate-800">
+                <div className="bg-slate-50 dark:bg-slate-800 rounded-[24px] overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
+                    <div className="p-6 flex flex-col items-center justify-center text-center gap-3 bg-gradient-to-b from-white/50 dark:from-slate-700/50 to-slate-50 dark:to-slate-800">
                         <div className="w-20 h-20 bg-white dark:bg-slate-700 rounded-[20px] shadow-lg shadow-emerald-500/10 border border-slate-100 dark:border-slate-600 p-3 mb-1 animate-scale-in">
                              <img src={LOGO_URL} className="w-full h-full object-contain" alt="Logo" />
                         </div>
                         <div>
                             <h4 className="text-xl font-black text-slate-800 dark:text-white tracking-tight">Army HRM</h4>
-                            <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-md inline-block mt-1">v2026.2.0 (Build 890)</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider bg-white dark:bg-slate-700 px-2 py-1 rounded-md inline-block mt-1">v2026.2.0 (Build 890)</p>
                         </div>
                     </div>
                     

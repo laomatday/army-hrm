@@ -13,15 +13,15 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
   
   // GPS State
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
-  const [gpsError, setGpsError] = useState<string>("");
+  const [isHighAccuracy, setIsHighAccuracy] = useState(true);
 
   useEffect(() => {
     // 1. SETUP CAMERA
     const constraints = {
         video: { 
             facingMode: 'user',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
+            width: { ideal: 640 }, // Giảm yêu cầu đầu vào
+            height: { ideal: 480 }
         }
     };
 
@@ -37,57 +37,77 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
         onClose();
       });
 
-    // 2. PRE-FETCH GPS (Critical for speed)
-    // Bắt đầu lấy vị trí ngay khi mở camera, không đợi bấm nút chụp
-    const watchId = navigator.geolocation.watchPosition(
+    // 2. PRE-FETCH GPS (Hybrid Strategy)
+    // Thử High Accuracy trước
+    let watchId = navigator.geolocation.watchPosition(
         (pos) => {
             setLocation({
                 lat: pos.coords.latitude,
                 lng: pos.coords.longitude
             });
-            setGpsError("");
         },
         (err) => {
-            console.warn("GPS Pre-fetch warning:", err);
-            // Không báo lỗi ngay, đợi lúc chụp mới kiểm tra lại nếu chưa có vị trí
+            console.warn("GPS High Accuracy failed, switching to Low Accuracy...");
+            setIsHighAccuracy(false);
         },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+        { enableHighAccuracy: true, timeout: 3000, maximumAge: 10000 }
     );
+
+    // Sau 3s nếu chưa có tọa độ, hủy watch cũ và ép dùng Low Accuracy (Wifi/Cell)
+    const fallbackTimer = setTimeout(() => {
+        if (!location) {
+            navigator.geolocation.clearWatch(watchId);
+            setIsHighAccuracy(false);
+            watchId = navigator.geolocation.watchPosition(
+                (pos) => {
+                    setLocation({
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude
+                    });
+                },
+                (err) => {
+                    console.error("GPS Low Accuracy also failed:", err);
+                },
+                { enableHighAccuracy: false, timeout: 5000, maximumAge: 30000 }
+            );
+        }
+    }, 3000);
 
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(t => t.stop());
       }
       navigator.geolocation.clearWatch(watchId);
+      clearTimeout(fallbackTimer);
     };
-  }, []);
+  }, [location]); // Re-run effect only if location state logic needs check (actually dependencies should be empty array for setup)
 
   const takePicture = () => {
     if (!videoRef.current) return;
 
-    // Kiểm tra GPS trước
+    // Last resort GPS check
     if (!location) {
-        // Nếu chưa có vị trí từ watchPosition, thử gọi getCurrentPosition lần cuối
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 captureProcess(pos.coords.latitude, pos.coords.longitude);
             },
             (err) => {
-                onError("Không thể định vị. Vui lòng bật GPS và thử lại.");
+                onError("Không thể định vị. Vui lòng kiểm tra GPS/Wifi.");
             },
-            { enableHighAccuracy: true, timeout: 5000 }
+            { enableHighAccuracy: false, timeout: 3000 } // Force Low Accuracy for speed
         );
         return;
     }
 
-    // Nếu đã có vị trí sẵn, xử lý ngay tức thì
     captureProcess(location.lat, location.lng);
   };
 
   const captureProcess = (lat: number, lng: number) => {
     if (!videoRef.current) return;
 
-    const MAX_WIDTH = 640;
+    // --- ULTRA OPTIMIZATION ---
+    // Resize xuống 320px width - Đủ để nhận diện khuôn mặt, dung lượng siêu nhỏ (~30KB)
+    const MAX_WIDTH = 320; 
     const videoWidth = videoRef.current.videoWidth;
     const videoHeight = videoRef.current.videoHeight;
     
@@ -103,8 +123,9 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
     if (ctx) {
         ctx.drawImage(videoRef.current, 0, 0, finalWidth, finalHeight);
         
-        // Tối ưu hóa: Giảm chất lượng xuống 0.4 (vẫn rõ nét nhưng nhẹ hơn nhiều)
-        const base64 = canvas.toDataURL('image/webp', 0.4);
+        // Nén WebP 0.5 -> Dung lượng khoảng 20-40KB
+        // Upload cực nhanh ngay cả mạng E/3G
+        const base64 = canvas.toDataURL('image/webp', 0.5);
         onCapture(base64, lat, lng);
     }
   };
@@ -114,17 +135,15 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
       <div className="relative flex-1 overflow-hidden bg-black">
           <video ref={videoRef} className="w-full h-full object-cover" autoPlay playsInline muted></video>
           
-          {/* Guide Overlay */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="w-64 h-64 border-2 border-white/30 rounded-full border-dashed"></div>
           </div>
 
-          {/* GPS Indicator (UX Enhancement) */}
           <div className="absolute top-4 right-4 z-10">
               <div className={`px-3 py-1 rounded-full backdrop-blur-md flex items-center gap-2 ${location ? 'bg-emerald-500/20 border border-emerald-500/30' : 'bg-red-500/20 border border-red-500/30'}`}>
                   <div className={`w-2 h-2 rounded-full ${location ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></div>
                   <span className={`text-[10px] font-bold uppercase tracking-wide ${location ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {location ? 'GPS Sẵn sàng' : 'Đang tìm GPS...'}
+                      {location ? (isHighAccuracy ? 'GPS Chính xác' : 'GPS Tương đối') : 'Đang tìm vị trí...'}
                   </span>
               </div>
           </div>

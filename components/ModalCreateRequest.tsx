@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Employee } from '../types';
 import { submitRequest } from '../services/api';
 import { formatDateString } from '../utils/helpers';
+import ModalHeader from './ModalHeader';
 
 interface Props {
   user: Employee;
@@ -92,6 +93,15 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
   // Use z-[50] to sit above standard content (z-0) and header (z-40) but below BottomNav (z-100)
   return (
     <div className="fixed inset-0 z-[50] bg-slate-50 flex flex-col animate-slide-up overflow-y-auto no-scrollbar pb-32 pt-safe">
+        
+        {/* CLOSE BUTTON HEADER */}
+        <div className="fixed top-0 left-0 w-full z-[60] pointer-events-auto">
+             <ModalHeader 
+                onClose={onClose} 
+                bgClass="bg-transparent border-none shadow-none" 
+             />
+        </div>
+
         <div className="relative">
             <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-br from-emerald-500/10 to-teal-500/10"></div>
             

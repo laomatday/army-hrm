@@ -8,10 +8,10 @@ interface Props {
   data: DashboardData | null;
   user: Employee;
   onRefresh: () => Promise<void>;
-  onCreateClick: () => void;
+  // onCreateClick removed as it is now in Header
 }
 
-const TabRequests: React.FC<Props> = ({ data, onCreateClick, onRefresh, user }) => {
+const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
   const [viewMode, setViewMode] = useState<'leaves' | 'explanations'>('leaves');
 
   // Sort requests by created_at desc
@@ -252,14 +252,6 @@ const TabRequests: React.FC<Props> = ({ data, onCreateClick, onRefresh, user }) 
                 )}
             </div>
         </PullToRefresh>
-
-        {/* FLOATING ACTION BUTTON */}
-        <button 
-            onClick={() => { triggerHaptic('light'); onCreateClick(); }}
-            className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom))] right-5 w-12 h-12 bg-emerald-600 rounded-full shadow-xl shadow-emerald-500/30 flex items-center justify-center text-white text-xl active:scale-90 transition-transform z-50 hover:bg-emerald-500 ring-4 ring-white dark:ring-slate-800"
-        >
-            <i className="fa-solid fa-plus"></i>
-        </button>
     </>
   );
 };

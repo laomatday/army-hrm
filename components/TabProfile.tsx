@@ -6,6 +6,7 @@ import { updateAvatar, changePassword } from '../services/api';
 import Avatar from './Avatar';
 import ImageCropper from './ImageCropper';
 import ConfirmDialog from './ConfirmDialog';
+import ModalHeader from './ModalHeader';
 
 interface Props {
   user: Employee;
@@ -123,8 +124,14 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
 
   // --- SWIPE HANDLERS ---
   const onTouchStart = (e: React.TouchEvent) => {
+    const x = e.targetTouches[0].clientX;
+    // Edge Protection
+    if (x < 30 || x > window.innerWidth - 30) {
+        touchStart.current = null;
+        return;
+    }
     touchEnd.current = null;
-    touchStart.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY };
+    touchStart.current = { x, y: e.targetTouches[0].clientY };
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
@@ -134,13 +141,13 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
   const onTouchEnd = () => {
     if (!touchStart.current || !touchEnd.current) return;
     
-    const distanceX = touchStart.current.x - touchEnd.current.x;
+    const distanceX = touchStart.current.x - touchEnd.current.x; // dX < 0 is L-to-R (Back)
     const distanceY = touchStart.current.y - touchEnd.current.y;
     
     // Check for horizontal swipe
     if (Math.abs(distanceX) > Math.abs(distanceY)) {
-         // Allow swipe in both directions to dismiss (consistent with Contact Detail)
-         if (Math.abs(distanceX) > 60) {
+         // Allow only L-to-R swipe (Back gesture)
+         if (distanceX < -60) {
              triggerHaptic('light');
              onClose();
          }
@@ -194,21 +201,20 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
         onTouchEnd={onTouchEnd}
     >
         
-        {/* HEADER - No Background, No Text, Correct Height */}
-        <div className="fixed top-0 left-0 w-full z-40 pt-safe pt-2 pointer-events-none">
-            <div className="flex items-center justify-end px-4 h-16 relative pointer-events-auto">
-                <button onClick={() => { triggerHaptic('light'); onClose(); }} className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shadow-sm active:scale-95 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
-                     <i className="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
+        {/* HEADER - Consistent Modal Header with Transparent BG */}
+        <div className="fixed top-0 left-0 w-full z-40">
+            <ModalHeader 
+                onClose={() => { triggerHaptic('light'); onClose(); }} 
+                bgClass="bg-transparent border-none shadow-none" 
+            />
         </div>
 
         {/* SCROLLABLE CONTENT */}
-        <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-28">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-14">
             <div className="animate-fade-in">
                 
                 {/* Profile Card */}
-                <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 shadow-sm border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors">
+                <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 shadow-sm border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors mt-4">
                     <div className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-br ${gradientClass} rounded-t-[32px] transition-colors duration-500`}></div>
                     
                     <div className="relative z-10 flex flex-col items-center">

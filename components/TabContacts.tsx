@@ -3,16 +3,18 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { DashboardData, Employee } from '../types';
 import { getShortName, triggerHaptic } from '../utils/helpers';
 import Avatar from './Avatar';
+import ModalHeader from './ModalHeader';
 
 interface Props {
   data: DashboardData | null;
   resetTrigger?: number;
+  searchTrigger?: number; // Header Search Trigger
   onClose: () => void;
   setIsNavVisible?: (visible: boolean) => void;
   setIsHeaderVisible?: (visible: boolean) => void;
 }
 
-const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, onClose, setIsNavVisible, setIsHeaderVisible }) => {
+const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 0, onClose, setIsNavVisible, setIsHeaderVisible }) => {
   const [term, setTerm] = useState('');
   const [debouncedTerm, setDebouncedTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -34,6 +36,13 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, onClose, setIsNa
   // Ref for Swipe Detection
   const touchStart = useRef<{x: number, y: number} | null>(null);
   const touchEnd = useRef<{x: number, y: number} | null>(null);
+
+  // TRIGGER SEARCH FROM HEADER
+  useEffect(() => {
+      if (searchTrigger > 0) {
+          handleStartSearch();
+      }
+  }, [searchTrigger]);
 
   // RESET VIEW WHEN BOTTOM NAV CLICKED
   useEffect(() => {
@@ -210,8 +219,14 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, onClose, setIsNa
 
   // --- SWIPE HANDLERS FOR MODAL ---
   const onTouchStart = (e: React.TouchEvent) => {
+    const x = e.targetTouches[0].clientX;
+    // Edge Protection
+    if (x < 30 || x > window.innerWidth - 30) {
+        touchStart.current = null;
+        return;
+    }
     touchEnd.current = null;
-    touchStart.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY };
+    touchStart.current = { x, y: e.targetTouches[0].clientY };
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
@@ -221,13 +236,13 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, onClose, setIsNa
   const onTouchEnd = () => {
     if (!touchStart.current || !touchEnd.current) return;
     
-    const distanceX = touchStart.current.x - touchEnd.current.x;
+    const distanceX = touchStart.current.x - touchEnd.current.x; // dX > 0: R-to-L, dX < 0: L-to-R
     const distanceY = touchStart.current.y - touchEnd.current.y;
     
-    // Check for horizontal swipe (Back Gesture)
+    // Check for horizontal swipe
     if (Math.abs(distanceX) > Math.abs(distanceY)) {
-         // Allow both Swipe Right-to-Left (asked) and Left-to-Right (standard back) to dismiss
-         if (Math.abs(distanceX) > 60) {
+         // Only allow Left-to-Right swipe (Back gesture) to close
+         if (distanceX < -60) {
              handleCloseContact();
          }
     }
@@ -433,20 +448,19 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, onClose, setIsNa
                 onTouchEnd={onTouchEnd}
             >
                  {/* HEADER - No Background, No Text, Correct Height */}
-                 <div className="fixed top-0 left-0 w-full z-[95] pt-safe pt-2 pointer-events-none">
-                     <div className="flex items-center justify-end px-4 h-16 relative pointer-events-auto">
-                         <button onClick={handleCloseContact} className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shadow-sm active:scale-95 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
-                             <i className="fa-solid fa-xmark text-xl"></i>
-                         </button>
-                     </div>
+                 <div className="fixed top-0 left-0 w-full z-[95]">
+                     <ModalHeader 
+                        onClose={handleCloseContact}
+                        bgClass="bg-transparent border-none shadow-none"
+                     />
                  </div>
 
                  {/* SCROLLABLE CONTENT */}
                  <div 
-                    className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-28"
+                    className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-14"
                     onScroll={handleScroll}
                  >
-                      <div className="animate-fade-in">
+                      <div className="animate-fade-in mt-4">
                           {/* Profile Header Card */}
                           <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 shadow-sm border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors">
                                <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20 rounded-t-[32px] transition-colors duration-500"></div>
