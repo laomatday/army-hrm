@@ -135,13 +135,14 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
     setIsCameraActive(false);
   };
 
-  const takePictureAndSubmit = async () => {
+const takePictureAndSubmit = async () => {
     if (!videoRef.current || !session || !kioskInfo) return;
     
     const canvas = document.createElement('canvas');
     canvas.width = 640;
     canvas.height = 480;
     const ctx = canvas.getContext('2d');
+    
     if (ctx) {
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
@@ -152,25 +153,49 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
       
       const mockEmployee = { employee_id: session.employee_id, name: session.employee_name, center_id: kioskInfo.center_id } as Employee;
       
-      try {
-          const res = await doCheckIn({
-              employeeId: session.employee_id,
-              lat: 10, lng: 10, deviceId: kioskInfo.kiosk_id, imageBase64: base64
-          }, mockEmployee);
-          
-          if (res.success) {
-              await db.collection('kiosk_sessions').doc(session.id).update({ status: 'completed' });
-              setSession((prev: any) => ({ ...prev, status: 'completed' }));
-          } else {
-              await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: res.message });
-              setSession((prev: any) => ({ ...prev, status: 'failed', error: res.message }));
-          }
-      } catch (err: any) {
-          await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: "System Error" });
-          setSession((prev: any) => ({ ...prev, status: 'failed', error: "System Error" }));
+      // BẮT ĐẦU SỬA: Lấy GPS thực tế của máy Kiosk thay vì số 10
+      if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+              async (position) => {
+                  try {
+                      // Gửi tọa độ THẬT lên API
+                      const res = await doCheckIn({
+                          employeeId: session.employee_id,
+                          lat: position.coords.latitude,
+                          lng: position.coords.longitude,
+                          deviceId: kioskInfo.kiosk_id, 
+                          imageBase64: base64
+                      }, mockEmployee);
+                      
+                      if (res.success) {
+                          await db.collection('kiosk_sessions').doc(session.id).update({ status: 'completed' });
+                          setSession((prev: any) => ({ ...prev, status: 'completed' }));
+                      } else {
+                          await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: res.message });
+                          setSession((prev: any) => ({ ...prev, status: 'failed', error: res.message }));
+                      }
+                  } catch (err: any) {
+                      await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: "System Error" });
+                      setSession((prev: any) => ({ ...prev, status: 'failed', error: "System Error" }));
+                  }
+                  
+                  setTimeout(resetSession, 4000);
+              },
+              async (error) => {
+                  // Xử lý nếu máy Kiosk chưa được cấp quyền truy cập Vị trí
+                  console.error("Kiosk GPS Error:", error);
+                  await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: "Lỗi GPS Kiosk: Vui lòng bật định vị cho thiết bị này." });
+                  setSession((prev: any) => ({ ...prev, status: 'failed', error: "Chưa cấp quyền GPS cho Kiosk" }));
+                  setTimeout(resetSession, 4000);
+              },
+              { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+          );
+      } else {
+          // Trình duyệt không hỗ trợ GPS
+          await db.collection('kiosk_sessions').doc(session.id).update({ status: 'failed', error: "Thiết bị Kiosk không hỗ trợ định vị." });
+          setSession((prev: any) => ({ ...prev, status: 'failed', error: "Trình duyệt không hỗ trợ GPS" }));
+          setTimeout(resetSession, 4000);
       }
-      
-      setTimeout(resetSession, 4000);
     }
   };
 
