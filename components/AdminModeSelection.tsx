@@ -26,8 +26,8 @@ const AdminModeSelection: React.FC<Props> = ({ onSelectMode, onLogout }) => {
                          <i className="fa-solid fa-mobile-screen"></i>
                      </div>
                      <div className="text-left">
-                         <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1 group-hover:text-emerald-700 dark:group-hover:text-emerald-400">Ứng dụng Chấm công</h3>
-                         <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Giao diện mobile cho việc check-in, check-out và xem báo cáo cá nhân.</p>
+                         <h3 className="text-base font-bold text-slate-800 dark:text-white mb-1 group-hover:text-emerald-700 dark:group-hover:text-emerald-400">Ứng dụng Chấm công</h3>
+                         <p className="text-sm text-slate-400 dark:text-slate-500 font-medium">Giao diện mobile cho việc check-in, check-out và xem báo cáo cá nhân.</p>
                      </div>
                  </button>
 
@@ -39,8 +39,8 @@ const AdminModeSelection: React.FC<Props> = ({ onSelectMode, onLogout }) => {
                          <i className="fa-solid fa-display"></i>
                      </div>
                      <div className="text-left">
-                         <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1 group-hover:text-blue-700 dark:group-hover:text-blue-400">Trạm Kiosk</h3>
-                         <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Chế độ đặt tại quầy lễ tân để nhân viên quét QR và chụp ảnh bằng chứng.</p>
+                         <h3 className="text-base font-bold text-slate-800 dark:text-white mb-1 group-hover:text-blue-700 dark:group-hover:text-blue-400">Trạm Kiosk</h3>
+                         <p className="text-sm text-slate-400 dark:text-slate-500 font-medium">Chế độ đặt tại quầy lễ tân để nhân viên quét QR và chụp ảnh bằng chứng.</p>
                      </div>
                  </button>
 
@@ -52,13 +52,13 @@ const AdminModeSelection: React.FC<Props> = ({ onSelectMode, onLogout }) => {
                          <i className="fa-solid fa-database"></i>
                      </div>
                      <div className="text-left">
-                         <h3 className="text-lg font-bold text-white mb-1">Quản trị Dữ liệu</h3>
-                         <p className="text-xs text-slate-400 font-medium">Giao diện Desktop (CMS) để quản lý toàn bộ cơ sở dữ liệu hệ thống.</p>
+                         <h3 className="text-base font-bold text-white mb-1">Quản trị Dữ liệu</h3>
+                         <p className="text-sm text-slate-400 font-medium">Giao diện Desktop (CMS) để quản lý toàn bộ cơ sở dữ liệu hệ thống.</p>
                      </div>
                  </button>
              </div>
              
-             <button onClick={onLogout} className="mt-10 text-slate-400 text-sm font-bold hover:text-red-500 transition-colors">
+             <button onClick={onLogout} className="mt-10 text-slate-400 text-sm font-bold hover:text-red-500 transition-colors uppercase tracking-wide">
                  <i className="fa-solid fa-arrow-right-from-bracket mr-2"></i> Đăng xuất
              </button>
          </div>

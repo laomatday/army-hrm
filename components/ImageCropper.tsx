@@ -164,14 +164,14 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, onCancel, onCropComplete }) =
           <div className="flex gap-4">
                <button 
                   onClick={onCancel} 
-                  className="flex-1 py-3.5 bg-slate-800 text-slate-300 rounded-2xl font-bold text-sm border border-slate-700 active:scale-95 transition-all"
+                  className="flex-1 py-4 bg-slate-800 text-slate-300 rounded-2xl font-bold text-base border border-slate-700 active:scale-95 transition-all"
                >
                    Hủy
                </button>
                <button 
                   onClick={processCrop}
                   disabled={!imageLoaded}
-                  className="flex-1 py-3.5 bg-emerald-500 text-white rounded-2xl font-bold text-sm active:scale-95 transition-all disabled:opacity-50"
+                  className="flex-1 py-4 bg-emerald-500 text-white rounded-2xl font-bold text-base active:scale-95 transition-all disabled:opacity-50"
                >
                    Xong
                </button>

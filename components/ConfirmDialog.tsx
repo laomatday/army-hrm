@@ -78,7 +78,7 @@ const ConfirmDialog: React.FC<Props> = ({
                     <button 
                         onClick={onCancel} 
                         disabled={isLoading} 
-                        className="py-3 px-4 rounded-xl text-sm font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 transition-colors disabled:opacity-50 active:scale-[0.98]"
+                        className="py-3.5 px-4 rounded-xl text-base font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 transition-colors disabled:opacity-50 active:scale-[0.98]"
                     >
                         {cancelLabel}
                     </button>
@@ -87,7 +87,7 @@ const ConfirmDialog: React.FC<Props> = ({
                 <button 
                     onClick={onConfirm} 
                     disabled={isLoading} 
-                    className={`py-3 px-4 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.98] ${theme.btn} ${isSingleButton ? 'w-full' : ''}`}
+                    className={`py-3.5 px-4 rounded-xl text-base font-bold text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.98] ${theme.btn} ${isSingleButton ? 'w-full' : ''}`}
                 >
                     {isLoading && <i className="fa-solid fa-circle-notch fa-spin"></i>}
                     {confirmLabel}

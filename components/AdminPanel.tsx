@@ -707,10 +707,10 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                          <p className="text-xs text-slate-500 font-bold uppercase tracking-wide">Administrator</p>
                      </div>
                  </div>
-                 <button onClick={onBackToApp} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors text-sm font-bold mb-1 uppercase tracking-wide">
+                 <button onClick={onBackToApp} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors text-sm font-bold mb-1 uppercase tracking-wide">
                      <i className="fa-solid fa-mobile-screen w-5 text-center"></i> Về Ứng dụng
                  </button>
-                 <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-colors text-sm font-bold uppercase tracking-wide">
+                 <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-colors text-sm font-bold uppercase tracking-wide">
                      <i className="fa-solid fa-right-from-bracket w-5 text-center"></i> Đăng xuất
                  </button>
             </div>
@@ -728,7 +728,7 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                 
                 <div className="flex items-center gap-3">
                     {selectedIds.size > 0 && (
-                        <button onClick={handleBulkDelete} className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 px-4 py-2.5 rounded-2xl text-xs font-extrabold hover:bg-red-100 dark:hover:bg-red-900/30 flex items-center gap-2 transition-all animate-scale-in uppercase tracking-wide">
+                        <button onClick={handleBulkDelete} className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 px-5 py-3 rounded-2xl text-sm font-extrabold hover:bg-red-100 dark:hover:bg-red-900/30 flex items-center gap-2 transition-all animate-scale-in uppercase tracking-wide">
                             <i className="fa-solid fa-trash-can"></i> <span className="hidden md:inline">Xóa {selectedIds.size} mục</span>
                         </button>
                     )}
@@ -742,17 +742,17 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                     </div>
                     
                     <div className="flex items-center bg-white dark:bg-slate-800 rounded-2xl p-1 border border-slate-200 dark:border-slate-700 hidden md:flex">
-                        <button onClick={() => fileInputRef.current?.click()} className="px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl flex items-center gap-1 transition-colors uppercase tracking-wide">
+                        <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl flex items-center gap-1 transition-colors uppercase tracking-wide">
                             <i className="fa-solid fa-file-import text-blue-500 dark:text-blue-400"></i> Import
                         </button>
                         <div className="w-[1px] h-4 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-                        <button onClick={handleExport} className="px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl flex items-center gap-1 transition-colors uppercase tracking-wide">
+                        <button onClick={handleExport} className="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl flex items-center gap-1 transition-colors uppercase tracking-wide">
                             <i className="fa-solid fa-file-excel text-emerald-500 dark:text-emerald-400"></i> Export
                         </button>
                         <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx, .xls" onChange={handleFileChange} />
                     </div>
 
-                    <button onClick={handleCreate} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 py-2.5 rounded-2xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-slate-100 flex items-center gap-2 ml-2 transition-all active:scale-95 uppercase tracking-wide">
+                    <button onClick={handleCreate} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-2xl text-sm font-bold hover:bg-slate-800 dark:hover:bg-slate-100 flex items-center gap-2 ml-2 transition-all active:scale-95 uppercase tracking-wide">
                         <i className="fa-solid fa-plus"></i> <span className="hidden md:inline">Tạo mới</span>
                     </button>
                 </div>
@@ -774,7 +774,7 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                                         <input type="checkbox" className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 cursor-pointer accent-emerald-600 bg-white dark:bg-slate-700"
                                             checked={paginatedData.length > 0 && paginatedData.every(item => selectedIds.has(String(item.id)))} onChange={toggleSelectAll} />
                                     </th>
-                                    <th className="px-4 py-4 text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase w-24 border-b border-slate-200 dark:border-slate-700 tracking-wide">Thao tác</th>
+                                    <th className="px-4 py-4 text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase w-28 border-b border-slate-200 dark:border-slate-700 tracking-wide">Thao tác</th>
                                     {headers.map(h => {
                                         const schema = SCHEMAS[selectedCollection];
                                         const label = schema?.fields?.[h]?.label || h.replace(/_/g, ' ');
@@ -802,11 +802,11 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                                         </td>
                                         <td className="px-4 py-4 whitespace-nowrap border-b border-transparent dark:border-slate-800">
                                             <div className="flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => handleEdit(item)} className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 flex items-center justify-center transition-colors">
-                                                    <i className="fa-solid fa-pen text-xs"></i>
+                                                <button onClick={() => handleEdit(item)} className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 flex items-center justify-center transition-colors">
+                                                    <i className="fa-solid fa-pen text-sm"></i>
                                                 </button>
-                                                <button onClick={() => handleDelete(String(item.id))} className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 flex items-center justify-center transition-colors">
-                                                    <i className="fa-solid fa-trash text-xs"></i>
+                                                <button onClick={() => handleDelete(String(item.id))} className="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 flex items-center justify-center transition-colors">
+                                                    <i className="fa-solid fa-trash text-sm"></i>
                                                 </button>
                                             </div>
                                         </td>
@@ -850,16 +850,16 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                              <div className="flex items-center gap-1">
                                  <button 
                                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
-                                    className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                                    className="w-10 h-10 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                                  >
-                                     <i className="fa-solid fa-chevron-left text-xs"></i>
+                                     <i className="fa-solid fa-chevron-left text-sm"></i>
                                  </button>
                                  <span className="px-3 text-xs font-bold text-slate-700 dark:text-slate-300">Trang {currentPage}</span>
                                  <button 
                                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages || totalPages === 0}
-                                    className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                                    className="w-10 h-10 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                                  >
-                                     <i className="fa-solid fa-chevron-right text-xs"></i>
+                                     <i className="fa-solid fa-chevron-right text-sm"></i>
                                  </button>
                              </div>
                          </div>
@@ -876,7 +876,7 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                              <h3 className="text-xl font-black text-slate-800 dark:text-white tracking-tight">{editingItem ? 'Cập nhật thông tin' : 'Thêm mới bản ghi'}</h3>
                              <p className="text-xs text-slate-500 dark:text-slate-400 font-bold mt-1 uppercase tracking-wide">{COLLECTIONS.find(c => c.id === selectedCollection)?.name}</p>
                         </div>
-                        <button onClick={() => setIsModalOpen(false)} className="w-9 h-9 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-600 flex items-center justify-center transition-colors">
+                        <button onClick={() => setIsModalOpen(false)} className="w-10 h-10 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-300 hover:text-slate-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-600 flex items-center justify-center transition-colors">
                             <i className="fa-solid fa-xmark"></i>
                         </button>
                     </div>
@@ -886,10 +886,10 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                     </div>
 
                     <div className="px-8 py-5 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30 rounded-b-[24px] flex justify-end gap-3">
-                        <button onClick={() => setIsModalOpen(false)} className="px-6 py-3 rounded-2xl text-sm font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all uppercase tracking-wide">
+                        <button onClick={() => setIsModalOpen(false)} className="px-8 py-4 rounded-2xl text-base font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all uppercase tracking-wide">
                             Hủy bỏ
                         </button>
-                        <button onClick={handleSave} className="px-6 py-3 rounded-2xl text-sm font-bold bg-slate-900 dark:bg-emerald-600 text-white hover:bg-slate-800 dark:hover:bg-emerald-700 transition-all active:scale-95 uppercase tracking-wide">
+                        <button onClick={handleSave} className="px-8 py-4 rounded-2xl text-base font-bold bg-slate-900 dark:bg-emerald-600 text-white hover:bg-slate-800 dark:hover:bg-emerald-700 transition-all active:scale-95 uppercase tracking-wide">
                             {editingItem ? 'Lưu thay đổi' : 'Tạo mới'}
                         </button>
                     </div>

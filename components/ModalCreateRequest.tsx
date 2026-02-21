@@ -265,7 +265,7 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
                      <button 
                         onClick={handleSubmit} 
                         disabled={loading} 
-                        className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-400 text-white font-bold py-4 rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-wide mt-2"
+                        className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-400 text-white font-extrabold py-4 rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-widest mt-2"
                      >
                             {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : <>Gửi đề xuất <i className="fa-solid fa-paper-plane"></i></>}
                      </button>
