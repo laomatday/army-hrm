@@ -408,29 +408,33 @@ const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onScan
                         <div className="w-44 h-44 flex items-center justify-center"><Spinner size="lg" /></div>
                     ) : (
                         <div className="relative w-44 h-44 flex items-center justify-center animate-scale-in">
-                             {/* Animations - CORRECTED */}
+                             {/* Animations */}
                             {working && !paused && ( // Check out button - red
                                 <>
-                                    <div className="absolute inset-0 bg-red-200/30 dark:bg-red-500/10 rounded-full blur-xl animate-pulse"></div>
-                                    <div className="absolute inset-0 border border-red-500/20 rounded-full animate-spin-slow"></div>
+                                    <div className="absolute inset-0 rounded-full bg-red-500/40 animate-ripple" style={{animationDuration: '3s', animationDelay: '0s'}}></div>
+                                    <div className="absolute inset-0 rounded-full bg-red-500/40 animate-ripple" style={{animationDuration: '3s', animationDelay: '1s'}}></div>
+                                    <div className="absolute inset-0 rounded-full bg-red-500/40 animate-ripple" style={{animationDuration: '3s', animationDelay: '2s'}}></div>
                                 </>
                             )}
                             {working && paused && ( // Paused button - orange
                                 <>
-                                    <div className="absolute inset-0 bg-orange-200/30 dark:bg-orange-500/10 rounded-full blur-xl animate-pulse"></div>
-                                    <div className="absolute inset-0 border border-orange-500/20 rounded-full animate-spin-slow"></div>
+                                    <div className="absolute inset-0 rounded-full bg-orange-500/40 animate-ripple" style={{animationDuration: '3s', animationDelay: '0s'}}></div>
+                                    <div className="absolute inset-0 rounded-full bg-orange-500/40 animate-ripple" style={{animationDuration: '3s', animationDelay: '1s'}}></div>
+                                    <div className="absolute inset-0 rounded-full bg-orange-500/40 animate-ripple" style={{animationDuration: '3s', animationDelay: '2s'}}></div>
                                 </>
                             )}
                             {!working && !dayIsOver && ( // Check in button - emerald
                                 <>
-                                    <div className="absolute inset-0 bg-emerald-200/30 dark:bg-emerald-500/10 rounded-full blur-xl animate-pulse"></div>
-                                    <div className="absolute inset-0 border border-emerald-500/20 rounded-full animate-spin-slow"></div>
+                                    <div className="absolute inset-0 rounded-full bg-emerald-500/40 animate-ripple" style={{animationDuration: '3s', animationDelay: '0s'}}></div>
+                                    <div className="absolute inset-0 rounded-full bg-emerald-500/40 animate-ripple" style={{animationDuration: '3s', animationDelay: '1s'}}></div>
+                                    <div className="absolute inset-0 rounded-full bg-emerald-500/40 animate-ripple" style={{animationDuration: '3s', animationDelay: '2s'}}></div>
                                 </>
                             )}
                             {!working && dayIsOver && ( // Day is over button - slate
                                 <>
-                                    <div className="absolute inset-0 bg-slate-300/30 dark:bg-slate-500/10 rounded-full blur-xl animate-pulse"></div>
-                                    <div className="absolute inset-0 border border-slate-400/20 rounded-full animate-spin-slow"></div>
+                                    <div className="absolute inset-0 rounded-full bg-slate-400/40 animate-ripple" style={{animationDuration: '3s', animationDelay: '0s'}}></div>
+                                    <div className="absolute inset-0 rounded-full bg-slate-400/40 animate-ripple" style={{animationDuration: '3s', animationDelay: '1s'}}></div>
+                                    <div className="absolute inset-0 rounded-full bg-slate-400/40 animate-ripple" style={{animationDuration: '3s', animationDelay: '2s'}}></div>
                                 </>
                             )}
 
@@ -524,12 +528,23 @@ const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onScan
            </div>
         )}
         <style>{`
-            .animate-spin-slow {
-                animation: spin 15s linear infinite;
+            .animate-ripple {
+                animation-name: ripple;
+                animation-iteration-count: infinite;
+                opacity: 0;
             }
-            @keyframes spin {
-                from { transform: rotate(0deg); }
-                to { transform: rotate(360deg); }
+            @keyframes ripple {
+                0% {
+                    transform: scale(0.8);
+                    opacity: 0.5;
+                }
+                50% {
+                    opacity: 0.8;
+                }
+                100% {
+                    transform: scale(1.6);
+                    opacity: 0;
+                }
             }
         `}</style>
     </>
