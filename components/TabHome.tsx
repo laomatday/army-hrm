@@ -403,45 +403,64 @@ const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onScan
                     </div>
                 </div>
 
-                <div className="flex flex-col items-center mb-6">
+                <div className="flex flex-col items-center mb-6 py-6">
                     {loading || isPausing ? (
-                        <div className="w-40 h-40 flex items-center justify-center"><Spinner size="lg" /></div>
-                    ) : working ? (
-                        paused ? (
-                            <div className="relative flex justify-center items-center py-6 animate-scale-in">
-                                <button onClick={handlePauseToggle} className="w-44 h-44 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex flex-col items-center justify-center text-white relative z-10 active:scale-95 transition-all group border-[6px] border-white dark:border-slate-800 ring-1 ring-slate-100 dark:ring-slate-700">
-                                    <i className="fa-solid fa-play text-4xl mb-2 ml-1"></i>
-                                    <span className="text-base font-extrabold uppercase tracking-widest">Tiếp tục</span>
-                                    <span className="text-[10px] font-bold opacity-80 mt-1 uppercase tracking-wide">Làm việc</span>
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="relative flex flex-col items-center py-6 animate-scale-in">
-                                <div className="relative">
-                                    <button onClick={handleCheckOutClick} className="w-44 h-44 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex flex-col items-center justify-center text-white relative z-10 active:scale-95 transition-all group border-[6px] border-white dark:border-slate-800 ring-1 ring-slate-100 dark:ring-slate-700">
+                        <div className="w-44 h-44 flex items-center justify-center"><Spinner size="lg" /></div>
+                    ) : (
+                        <div className="relative w-44 h-44 flex items-center justify-center animate-scale-in">
+                             {/* Animations - CORRECTED */}
+                            {working && !paused && ( // Check out button - red
+                                <>
+                                    <div className="absolute inset-0 bg-red-200/30 dark:bg-red-500/10 rounded-full blur-xl animate-pulse"></div>
+                                    <div className="absolute inset-0 border border-red-500/20 rounded-full animate-spin-slow"></div>
+                                </>
+                            )}
+                            {working && paused && ( // Paused button - orange
+                                <>
+                                    <div className="absolute inset-0 bg-orange-200/30 dark:bg-orange-500/10 rounded-full blur-xl animate-pulse"></div>
+                                    <div className="absolute inset-0 border border-orange-500/20 rounded-full animate-spin-slow"></div>
+                                </>
+                            )}
+                            {!working && !dayIsOver && ( // Check in button - emerald
+                                <>
+                                    <div className="absolute inset-0 bg-emerald-200/30 dark:bg-emerald-500/10 rounded-full blur-xl animate-pulse"></div>
+                                    <div className="absolute inset-0 border border-emerald-500/20 rounded-full animate-spin-slow"></div>
+                                </>
+                            )}
+                            {!working && dayIsOver && ( // Day is over button - slate
+                                <>
+                                    <div className="absolute inset-0 bg-slate-300/30 dark:bg-slate-500/10 rounded-full blur-xl animate-pulse"></div>
+                                    <div className="absolute inset-0 border border-slate-400/20 rounded-full animate-spin-slow"></div>
+                                </>
+                            )}
+
+                            {/* Buttons */}  
+                            {working ? (
+                                paused ? (
+                                    <button onClick={handlePauseToggle} className="w-full h-full rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex flex-col items-center justify-center text-white relative z-10 active:scale-95 transition-all group border-[6px] border-white dark:border-slate-800 ring-1 ring-slate-100 dark:ring-slate-700">
+                                        <i className="fa-solid fa-play text-4xl mb-2 ml-1"></i>
+                                        <span className="text-base font-extrabold uppercase tracking-widest">Tiếp tục</span>
+                                        <span className="text-[10px] font-bold opacity-80 mt-1 uppercase tracking-wide">Làm việc</span>
+                                    </button>
+                                ) : (
+                                    <button onClick={handleCheckOutClick} className="w-full h-full rounded-full bg-gradient-to-br from-red-500 to-red-600 flex flex-col items-center justify-center text-white relative z-10 active:scale-95 transition-all group border-[6px] border-white dark:border-slate-800 ring-1 ring-slate-100 dark:ring-slate-700">
                                         <i className="fa-solid fa-person-walking-arrow-right text-4xl mb-2 group-hover:translate-x-1 transition-transform"></i>
                                         <span className="text-base font-extrabold uppercase tracking-widest">Ra về</span>
                                         <span className="text-[10px] font-bold opacity-80 mt-1 uppercase tracking-wide">Kết thúc ca</span>
                                     </button>
+                                )
+                            ) : dayIsOver ? (
+                                <div className="w-full h-full rounded-full bg-gradient-to-br from-slate-400 to-slate-500 flex flex-col items-center justify-center text-white relative z-10 border-[6px] border-white dark:border-slate-800 ring-1 ring-slate-100 dark:ring-slate-700">
+                                    <i className="fa-solid fa-house-chimney text-4xl mb-2"></i>
+                                    <span className="text-base font-extrabold uppercase tracking-widest">ĐÃ VỀ</span>
+                                    <span className="text-[10px] font-bold opacity-80 mt-1 uppercase tracking-wide">Hẹn mai gặp lại</span>
                                 </div>
-                            </div>
-                        )
-                    ) : (
-                        <div className="relative flex flex-col items-center py-6 animate-scale-in">
-                            <div className="relative">
-                                {dayIsOver ? (
-                                    <div className="w-44 h-44 rounded-full bg-gradient-to-br from-slate-400 to-slate-500 flex flex-col items-center justify-center text-white relative z-10 border-[6px] border-white dark:border-slate-800 ring-1 ring-slate-100 dark:ring-slate-700">
-                                        <i className="fa-solid fa-house-chimney text-4xl mb-2"></i>
-                                        <span className="text-base font-extrabold uppercase tracking-widest">ĐÃ VỀ</span>
-                                        <span className="text-[10px] font-bold opacity-80 mt-1 uppercase tracking-wide">Hẹn mai gặp lại</span>
-                                    </div>
-                                ) : (
-                                    <button onClick={handleCheckInClick} className="w-44 h-44 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex flex-col items-center justify-center text-white relative z-10 active:scale-95 transition-all group border-[6px] border-white dark:border-slate-800 ring-1 ring-slate-100 dark:ring-slate-700">
-                                        <i className="fa-solid fa-qrcode text-6xl mb-3"></i>
-                                        <span className="text-base font-extrabold uppercase tracking-widest">Chấm công</span>
-                                    </button>
-                                )}
-                            </div>
+                            ) : (
+                                <button onClick={handleCheckInClick} className="w-full h-full rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex flex-col items-center justify-center text-white relative z-10 active:scale-95 transition-all group border-[6px] border-white dark:border-slate-800 ring-1 ring-slate-100 dark:ring-slate-700">
+                                    <i className="fa-solid fa-qrcode text-6xl mb-3"></i>
+                                    <span className="text-base font-extrabold uppercase tracking-widest">Chấm công</span>
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>
@@ -504,6 +523,15 @@ const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onScan
                </div>
            </div>
         )}
+        <style>{`
+            .animate-spin-slow {
+                animation: spin 15s linear infinite;
+            }
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+        `}</style>
     </>
   );
 };
