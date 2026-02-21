@@ -1,4 +1,3 @@
-
 import { db, storage } from "./firebase";
 import { Employee, Attendance, LocationConfig } from "../types";
 import { COLLECTIONS } from "./constants";
@@ -64,7 +63,27 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
         await batch.commit();
     }
     
-    // 1. Multi-Branch Logic & Geofencing (Nearest Geofencing)
+    // ==========================================
+    // 1. CHUẨN HÓA & KIỂM TRA TỌA ĐỘ TỪ FRONTEND
+    // ==========================================
+    let userLat = Number(data.lat);
+    let userLng = Number(data.lng);
+
+    if (isNaN(userLat) || isNaN(userLng)) {
+        return { success: false, message: "Dữ liệu GPS từ thiết bị không hợp lệ (Bị rỗng hoặc NaN)." };
+    }
+
+    // Auto-fix lỗi ngược tọa độ (Đặc thù địa lý VN: Lng luôn lớn hơn Lat)
+    if (userLat > userLng) {
+        console.warn("⚠️ CẢNH BÁO: Tọa độ từ Frontend bị ngược! Hệ thống đang tự động đảo lại.");
+        const temp = userLat;
+        userLat = userLng;
+        userLng = temp;
+    }
+
+    // ==========================================
+    // 2. MULTI-BRANCH & GEOFENCING LOGIC
+    // ==========================================
     const locationsSnap = await db.collection(COLLECTIONS.LOCATIONS).get();
     const allLocations = locationsSnap.docs.map(d => d.data() as LocationConfig);
     
@@ -73,18 +92,13 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
     const userAllowed = user.allowed_locations || [];
     
     if (!userAllowed.includes("ALL")) {
-        // Fix: Nếu allowed_locations trống, mặc định lấy center_id của user
+        // Nếu allowed_locations trống, mặc định lấy center_id của user
         const allowedIds = userAllowed.length > 0 ? userAllowed : [user.center_id];
-        
-        // Ensure ids are cleaned for comparison
         const cleanAllowedIds = allowedIds.filter(id => !!id).map(id => String(id).trim());
         
         allowedLocations = allLocations.filter(loc => 
             cleanAllowedIds.includes(String(loc.center_id).trim())
         );
-        
-        console.log("Debug Attendance - Allowed IDs:", cleanAllowedIds);
-        console.log("Debug Attendance - Filtered Locations Count:", allowedLocations.length);
     }
 
     if (allowedLocations.length === 0) {
@@ -94,21 +108,20 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
         };
     }
 
-    // Find nearest chi nhánh
+    // Tìm chi nhánh gần nhất
     let nearestLoc: LocationConfig | null = null;
     let minDistance = Infinity;
 
     allowedLocations.forEach(loc => {
-        // Ensure coords are numbers
         const locLat = Number(loc.latitude);
         const locLng = Number(loc.longitude);
         
         if (isNaN(locLat) || isNaN(locLng) || (locLat === 0 && locLng === 0)) {
-            console.warn(`Location ${loc.location_name} has invalid coordinates:`, loc.latitude, loc.longitude);
+            console.warn(`Bỏ qua chi nhánh ${loc.location_name} do tọa độ DB sai.`);
             return;
         }
 
-        const dist = calculateDistance(data.lat, data.lng, locLat, locLng);
+        const dist = calculateDistance(userLat, userLng, locLat, locLng);
         if (dist < minDistance) {
             minDistance = dist;
             nearestLoc = loc;
@@ -118,24 +131,26 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
     if (!nearestLoc) {
         return { 
             success: false, 
-            message: "Không tìm thấy chi nhánh hợp lệ hoặc tọa độ chi nhánh chưa được thiết lập." 
+            message: "Không tìm thấy chi nhánh hợp lệ trong danh sách phân quyền của bạn." 
         };
     }
 
-    const allowedRadius = nearestLoc.radius_meters || sysConfig.MAX_DISTANCE_METERS || 200;
+    const allowedRadius = Number(nearestLoc.radius_meters) || sysConfig.MAX_DISTANCE_METERS || 200;
+    
+    // Kiểm tra Bán kính (Geofence Validation)
     if (minDistance > allowedRadius) {
-        // Log for debugging
-        console.log("Geofence Check Failed:", {
-            userCoords: { lat: data.lat, lng: data.lng },
-            targetLoc: nearestLoc.location_name,
-            targetCoords: { lat: nearestLoc.latitude, lng: nearestLoc.longitude },
-            distance: minDistance,
-            allowed: allowedRadius
+        console.error("❌ GEOFENCE CHECK-IN FAILED:", {
+            employee: user.employee_id,
+            userCoords: `${userLat}, ${userLng}`,
+            nearestBranch: nearestLoc.location_name,
+            branchCoords: `${nearestLoc.latitude}, ${nearestLoc.longitude}`,
+            calculatedDistance: minDistance,
+            allowedRadius: allowedRadius
         });
 
         return { 
             success: false, 
-            message: `Bạn đang ở quá xa chi nhánh ${nearestLoc.location_name} (${Math.round(minDistance)}m). Vui lòng kiểm tra lại GPS hoặc liên hệ kỹ thuật. (Vị trí: ${data.lat.toFixed(4)}, ${data.lng.toFixed(4)})` 
+            message: `Bạn đang ở quá xa chi nhánh ${nearestLoc.location_name} (${Math.round(minDistance)}m). Bán kính cho phép là ${allowedRadius}m. Vui lòng di chuyển lại gần! (Vị trí: ${userLat.toFixed(4)}, ${userLng.toFixed(4)})` 
         };
     }
 
@@ -144,7 +159,9 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
        imageUrl = await uploadSelfie(data.employeeId, data.imageBase64);
     }
 
-    // 2. Determine Shift & Calculate Lateness
+    // ==========================================
+    // 3. Determine Shift & Calculate Lateness
+    // ==========================================
     const shifts = await getShifts();
     const nowTimeStr = getCurrentTimeStr();
     const currentShift = determineShift(nowTimeStr, shifts);
@@ -171,8 +188,8 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
         time_in: nowTimeStr,
         time_out: "",
         checkin_type: 'GPS',
-        checkin_lat: data.lat,
-        checkin_lng: data.lng,
+        checkin_lat: userLat, // Dùng tọa độ đã chuẩn hóa
+        checkin_lng: userLng, // Dùng tọa độ đã chuẩn hóa
         distance_meters: minDistance,
         device_id: data.deviceId,
         selfie_url: imageUrl,
@@ -187,7 +204,6 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
     };
 
     await db.collection(COLLECTIONS.ATTENDANCE).doc(docId).set(newAttendance);
-
     await calculateAndSaveMonthlyStats(user.employee_id, todayStr);
 
     return { success: true, message: `Check-in thành công tại ${nearestLoc.location_name}! (${currentShift.name})` };
@@ -218,21 +234,53 @@ export async function doCheckOut(employeeId: string, lat?: number, lng?: number)
     const nowTimeStr = getCurrentTimeStr();
     const sysConfig = await getSystemConfig();
 
+    // ==========================================
     // 1. Verify checkout location if GPS provided
+    // ==========================================
     let checkoutDistance = 0;
-    if (lat && lng) {
+    let finalCheckoutLat = lat;
+    let finalCheckoutLng = lng;
+
+    if (lat !== undefined && lng !== undefined) {
+        let userLat = Number(lat);
+        let userLng = Number(lng);
+
+        if (isNaN(userLat) || isNaN(userLng)) {
+            return { success: false, message: "Dữ liệu GPS Check-out không hợp lệ." };
+        }
+
+        if (userLat > userLng) {
+            console.warn("⚠️ CẢNH BÁO: Tọa độ Check-out bị ngược! Tự động đảo lại.");
+            const temp = userLat;
+            userLat = userLng;
+            userLng = temp;
+        }
+
+        finalCheckoutLat = userLat;
+        finalCheckoutLng = userLng;
+
         const locSnap = await db.collection(COLLECTIONS.LOCATIONS).where("center_id", "==", openDoc.center_id).get();
         if (!locSnap.empty) {
             const loc = locSnap.docs[0].data() as LocationConfig;
-            checkoutDistance = calculateDistance(lat, lng, Number(loc.latitude), Number(loc.longitude));
-            const allowedRadius = loc.radius_meters || sysConfig.MAX_DISTANCE_METERS || 200;
+            checkoutDistance = calculateDistance(userLat, userLng, Number(loc.latitude), Number(loc.longitude));
+            const allowedRadius = Number(loc.radius_meters) || sysConfig.MAX_DISTANCE_METERS || 200;
+            
             if (checkoutDistance > allowedRadius) {
-                 return { success: false, message: `Check-out thất bại: Bạn đang ở quá xa chi nhánh đã check-in (${Math.round(checkoutDistance)}m). (Vị trí: ${lat.toFixed(4)}, ${lng.toFixed(4)})` };
+                 console.error("❌ GEOFENCE CHECK-OUT FAILED:", {
+                     employee: employeeId,
+                     userCoords: `${userLat}, ${userLng}`,
+                     branch: loc.location_name,
+                     distance: checkoutDistance,
+                     allowedRadius: allowedRadius
+                 });
+                 return { success: false, message: `Check-out thất bại: Bạn đang ở quá xa chi nhánh ${loc.location_name} (${Math.round(checkoutDistance)}m). Bán kính cho phép: ${allowedRadius}m.` };
             }
         }
     }
 
+    // ==========================================
     // 2. Calculate Net Hours accounting for Shifts and Breaks
+    // ==========================================
     const netHoursStr = calculateNetWorkHours(
         openDoc.time_in, 
         nowTimeStr, 
@@ -269,8 +317,8 @@ export async function doCheckOut(employeeId: string, lat?: number, lng?: number)
 
     await attRef.doc(openDoc.id).update({
         time_out: nowTimeStr,
-        checkout_lat: lat,
-        checkout_lng: lng,
+        checkout_lat: finalCheckoutLat, // Dùng tọa độ chuẩn
+        checkout_lng: finalCheckoutLng, // Dùng tọa độ chuẩn
         checkout_distance: checkoutDistance,
         work_hours: parseFloat(netHours.toFixed(2)),
         early_minutes: earlyMins,
