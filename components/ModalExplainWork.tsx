@@ -184,13 +184,13 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
                                 onClick={() => { triggerHaptic('light'); setIsDropdownOpen(!isDropdownOpen); }}
                                 className={`w-full min-h-[56px] px-4 py-3 flex justify-between items-center bg-slate-50 dark:bg-slate-900 border rounded-2xl text-sm font-bold outline-none transition-all ${isDropdownOpen ? 'border-orange-500 dark:border-orange-500 ring-2 ring-orange-500/20' : 'border-slate-200 dark:border-slate-700'}`}
                             >
-                                <div className="text-left flex-1 flex flex-col gap-2">
+                                <div className="text-left flex-1 flex items-center gap-3">
                                     {selectedItem ? (
                                         <>
-                                            <span className="block text-slate-800 dark:text-white font-bold">
+                                            <ReasonDisplay reasons={selectedItem.explainReason} />
+                                            <span className="block text-slate-800 dark:text-white font-bold ml-auto">
                                                 {formatDateString(selectedDate)}
                                             </span>
-                                            <ReasonDisplay reasons={selectedItem.explainReason} />
                                         </>
                                     ) : (
                                         <span className="text-slate-400 dark:text-slate-500">Chọn ngày...</span>
@@ -219,11 +219,11 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
                                                     : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                                                 }`}
                                             >
-                                                <div className="flex-1 flex flex-col gap-2">
-                                                     <span className={`font-bold text-sm ${selectedDate === item.date ? 'text-orange-800 dark:text-orange-200' : ''}`}>
+                                                <div className="flex-1 flex items-center gap-3">
+                                                    <ReasonDisplay reasons={item.explainReason} />
+                                                     <span className={`font-bold text-sm ml-auto ${selectedDate === item.date ? 'text-orange-800 dark:text-orange-200' : ''}`}>
                                                         {formatDateString(item.date)}
                                                     </span>
-                                                    <ReasonDisplay reasons={item.explainReason} />
                                                 </div>
                                                 {selectedDate === item.date && (
                                                     <i className="fa-solid fa-check text-orange-600 dark:text-orange-400 ml-3"></i>
