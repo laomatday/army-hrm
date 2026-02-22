@@ -35,6 +35,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
 
   const touchStart = useRef<{x: number, y: number} | null>(null);
   const touchEnd = useRef<{x: number, y: number} | null>(null);
+  const minSwipeDistance = 60;
 
   const bgClass = 'bg-emerald-500';
   const gradientClass = 'from-emerald-500/10 to-teal-500/10';
@@ -143,7 +144,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
     const distanceY = touchStart.current.y - touchEnd.current.y;
     
     if (Math.abs(distanceX) > Math.abs(distanceY)) {
-         if (distanceX < -60) {
+         if (distanceX > minSwipeDistance) {
              triggerHaptic('light');
              onClose();
          }

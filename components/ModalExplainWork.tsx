@@ -14,17 +14,46 @@ interface Props {
   user: Employee;
   initialData?: { date: string, reason: string };
   explainableItems: { date: string, explainReason: string }[];
+  setIsNavVisible: (visible: boolean) => void;
 }
 
-const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert, user, initialData, explainableItems }) => {
+const ReasonBadge = ({ reason }: { reason: string }) => {
+    let badgeClass = 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300';
+
+    if (reason.includes('Vắng') || reason.includes('Quên')) {
+        badgeClass = 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400';
+    } else if (reason.includes('Trễ')) {
+        badgeClass = 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400';
+    } else if (reason.includes('sớm')) {
+        badgeClass = 'bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400';
+    }
+
+    return (
+        <span className={`px-2 py-1 text-[10px] font-extrabold rounded-md leading-none whitespace-nowrap ${badgeClass}`}>
+            {reason}
+        </span>
+    );
+};
+
+const ReasonDisplay = ({ reasons }: { reasons: string }) => {
+    const reasonList = reasons.split(', ').map(r => r.trim());
+    return (
+        <div className="flex items-center gap-2 flex-wrap">
+            {reasonList.map((reason, index) => (
+                <ReasonBadge key={index} reason={reason} />
+            ))}
+        </div>
+    );
+};
+
+const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert, user, initialData, explainableItems, setIsNavVisible }) => {
   const [selectedDate, setSelectedDate] = useState(initialData?.date || '');
   const [reason, setReason] = useState(initialData?.reason || '');
   const [confirmDialog, setConfirmDialog] = useState<{isOpen: boolean, isPastMonth: boolean}>({ isOpen: false, isPastMonth: false });
   const [loading, setLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isSubmitVisible, setIsSubmitVisible] = useState(true);
 
-  const { handleScroll } = useScrollControl(setIsSubmitVisible);
+  const { handleScroll } = useScrollControl(setIsNavVisible);
 
   const touchStart = useRef<{x: number, y: number} | null>(null);
   const touchEnd = useRef<{x: number, y: number} | null>(null);
@@ -34,7 +63,7 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
     if (isOpen) {
         setSelectedDate(initialData?.date || '');
         setReason(initialData?.reason || '');
-        setIsSubmitVisible(true);
+        setIsNavVisible(true);
     }
   }, [isOpen, initialData]);
 
@@ -100,7 +129,7 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
     const distanceY = touchStart.current.y - touchEnd.current.y;
     
     if (Math.abs(distanceX) > Math.abs(distanceY)) {
-         if (distanceX < -minSwipeDistance) {
+         if (distanceX > minSwipeDistance) {
              triggerHaptic('light');
              onClose();
          }
@@ -109,15 +138,17 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
 
   if (!isOpen) return null;
 
+  const selectedItem = selectedDate ? explainableItems.find(i => i.date === selectedDate) : null;
+
   return (
     <>
         <div 
-          className="fixed inset-0 z-[2000] bg-slate-50 dark:bg-slate-900 flex flex-col animate-slide-up transition-colors duration-300"
+          className="fixed inset-0 z-[80] bg-slate-50 dark:bg-slate-900 flex flex-col animate-slide-up transition-colors duration-300"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-            <div className="fixed top-0 left-0 w-full z-[2010]">
+            <div className="fixed top-0 left-0 w-full z-[90]">
                     <ModalHeader 
                     onClose={onClose} 
                     bgClass="bg-transparent border-none"
@@ -153,19 +184,19 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
                                 onClick={() => { triggerHaptic('light'); setIsDropdownOpen(!isDropdownOpen); }}
                                 className={`w-full min-h-[56px] px-4 py-3 flex justify-between items-center bg-slate-50 dark:bg-slate-900 border rounded-2xl text-sm font-bold outline-none transition-all ${isDropdownOpen ? 'border-orange-500 dark:border-orange-500 ring-2 ring-orange-500/20' : 'border-slate-200 dark:border-slate-700'}`}
                             >
-                                <div className="text-left">
-                                    {selectedDate ? (
+                                <div className="text-left flex-1 flex flex-col gap-2">
+                                    {selectedItem ? (
                                         <>
-                                            <span className="block text-slate-800 dark:text-white">{formatDateString(selectedDate)}</span>
-                                            <span className="text-xs text-slate-400 dark:text-slate-500 font-normal">
-                                                {explainableItems.find(i => i.date === selectedDate)?.explainReason || "Chọn ngày..."}
+                                            <span className="block text-slate-800 dark:text-white font-bold">
+                                                {formatDateString(selectedDate)}
                                             </span>
+                                            <ReasonDisplay reasons={selectedItem.explainReason} />
                                         </>
                                     ) : (
                                         <span className="text-slate-400 dark:text-slate-500">Chọn ngày...</span>
                                     )}
                                 </div>
-                                <i className={`fa-solid fa-chevron-down text-slate-400 dark:text-slate-500 text-xs transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}></i>
+                                <i className={`fa-solid fa-chevron-down text-slate-400 dark:text-slate-500 text-xs transition-transform ml-3 ${isDropdownOpen ? 'rotate-180' : ''}`}></i>
                             </button>
                             
                             {isDropdownOpen && (
@@ -184,16 +215,18 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
                                                 }}
                                                 className={`flex items-center justify-between p-3.5 rounded-xl cursor-pointer transition-all ${
                                                     selectedDate === item.date 
-                                                    ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400' 
+                                                    ? 'bg-orange-50 dark:bg-orange-900/30' 
                                                     : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                                                 }`}
                                             >
-                                                <div>
-                                                    <span className="font-bold text-sm block">{formatDateString(item.date)}</span>
-                                                    <span className="text-[10px] opacity-70">{item.explainReason}</span>
+                                                <div className="flex-1 flex flex-col gap-2">
+                                                     <span className={`font-bold text-sm ${selectedDate === item.date ? 'text-orange-800 dark:text-orange-200' : ''}`}>
+                                                        {formatDateString(item.date)}
+                                                    </span>
+                                                    <ReasonDisplay reasons={item.explainReason} />
                                                 </div>
                                                 {selectedDate === item.date && (
-                                                    <i className="fa-solid fa-check text-orange-600 dark:text-orange-400"></i>
+                                                    <i className="fa-solid fa-check text-orange-600 dark:text-orange-400 ml-3"></i>
                                                 )}
                                             </div>
                                         ))
@@ -213,17 +246,16 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
                             ></textarea>
                         </div>
 
+                        <button 
+                            onClick={handlePreSubmit}
+                            disabled={loading}
+                            className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-400 text-white font-extrabold py-4 rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-widest mt-2 shadow-lg shadow-orange-500/20"
+                        >
+                            {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : <>Gửi giải trình <i className="fa-solid fa-paper-plane"></i></>}
+                        </button>
+
                     </div>
                 </div>
-            </div>
-
-            <div className={`fixed bottom-0 left-0 right-0 z-[2010] p-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg border-t border-slate-100 dark:border-slate-700 transition-transform duration-300 ${isSubmitVisible ? 'translate-y-0' : 'translate-y-full'}`}>
-                <button 
-                    onClick={handlePreSubmit}
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-extrabold py-4 rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
-                >
-                    Gửi giải trình <i className="fa-solid fa-paper-plane"></i>
-                </button>
             </div>
         </div>
 
@@ -233,7 +265,7 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
             message={confirmDialog.isPastMonth ? 
                 <span className="text-red-500 font-bold"><i className="fa-solid fa-triangle-exclamation mr-1"></i> Bạn đang giải trình cho tháng trước. Đơn này có thể bị tính là trễ hạn.</span> 
                 : 
-                <span>Hệ thống sẽ ghi nhận giải trình của bạn cho ngày <span className="text-slate-800 dark:text-white font-bold">{formatDateString(selectedDate)}</span>.</span>
+                <span>Hệ thống sẽ ghi nhận giải trình của bạn cho ngày <span className="text-slate-800 dark:text-white font-bold"> {formatDateString(selectedDate)}</span>.</span>
             }
             confirmLabel="Xác nhận gửi"
             onConfirm={handleSubmitExplanation}

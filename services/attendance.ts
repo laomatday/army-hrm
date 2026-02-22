@@ -5,7 +5,7 @@ import { getSystemConfig, getShifts, determineShift } from "./config";
 import { calculateAndSaveMonthlyStats } from "./stats";
 import { calculateDistance, getCurrentTimeStr, timeToMinutes, calculateNetWorkHours } from "../utils/helpers";
 
-export async function doCheckIn(data: { employeeId: string, lat: number, lng: number, deviceId: string, imageUrl: string }, user: Employee) {
+export async function doCheckIn(data: { employeeId: string, lat: number, lng: number, deviceId: string, imageUrl: string, checkinType?: string }, user: Employee) {
   try {
     const [sysConfig, openSessionQuery, shifts] = await Promise.all([
         getSystemConfig(),
@@ -46,16 +46,11 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
         await batch.commit();
     }
     
-    let userLat = Number(data.lat);
-    let userLng = Number(data.lng);
+    const userLat = Number(data.lat);
+    const userLng = Number(data.lng);
 
     if (isNaN(userLat) || isNaN(userLng)) {
         return { success: false, message: "Dữ liệu GPS từ thiết bị không hợp lệ (Bị rỗng hoặc NaN)." };
-    }
-
-    if (userLat > userLng) {
-        console.warn("⚠️ CẢNH BÁO: Tọa độ từ Frontend bị ngược! Hệ thống đang tự động đảo lại.");
-        [userLat, userLng] = [userLng, userLat];
     }
 
     let locationsQuery = db.collection(COLLECTIONS.LOCATIONS);
@@ -66,11 +61,9 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
         const cleanAllowedIds = allowedIds.filter(id => !!id).map(id => String(id).trim());
 
         if (cleanAllowedIds.length > 0) {
-            // Firestore 'in' query supports up to 10 elements. If array is larger, chunking is needed.
-            // Assuming the number of allowed locations per user is reasonably small.
+            // Firestore 'in' query supports up to 30 elements in latest versions.
             locationsQuery = locationsQuery.where('center_id', 'in', cleanAllowedIds);
         } else {
-            // If no allowed IDs, create a query that returns nothing.
             locationsQuery = locationsQuery.where('center_id', 'in', ['__EMPTY__']);
         }
     }
@@ -143,7 +136,7 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
         shift_end: currentShift.end,
         time_in: nowTimeStr,
         time_out: "",
-        checkin_type: 'Kiosk',
+        checkin_type: data.checkinType || 'Mobile',
         checkin_lat: userLat,
         checkin_lng: userLng,
         distance_meters: minDistance,
@@ -161,7 +154,6 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
 
     await db.collection(COLLECTIONS.ATTENDANCE).doc(docId).set(newAttendance);
 
-    // Run in background - DO NOT await this
     calculateAndSaveMonthlyStats(user.employee_id, todayStr);
 
     return { success: true, message: `Check-in thành công tại ${nearestLoc.location_name}! (${currentShift.name})` };
@@ -189,23 +181,27 @@ export async function doCheckOut(employeeId: string, lat?: number, lng?: number)
         return { success: false, message: "Không tìm thấy phiên làm việc để Check-out." };
     }
 
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (openDoc.date !== todayStr) {
+        return { 
+            success: false, 
+            message: `Bạn đang cố gắng Check-out cho một phiên làm việc cũ (${openDoc.date}). Vui lòng liên hệ quản lý để được hỗ trợ.` 
+        };
+    }
+
     const nowTimeStr = getCurrentTimeStr();
     const sysConfig = await getSystemConfig();
 
     let checkoutDistance = 0;
-    let finalCheckoutLat = lat;
-    let finalCheckoutLng = lng;
+    let finalCheckoutLat: number | undefined = undefined;
+    let finalCheckoutLng: number | undefined = undefined;
 
     if (lat !== undefined && lng !== undefined) {
-        let userLat = Number(lat);
-        let userLng = Number(lng);
+        const userLat = Number(lat);
+        const userLng = Number(lng);
 
         if (isNaN(userLat) || isNaN(userLng)) {
             return { success: false, message: "Dữ liệu GPS Check-out không hợp lệ." };
-        }
-
-        if (userLat > userLng) {
-            [userLat, userLng] = [userLng, userLat];
         }
 
         finalCheckoutLat = userLat;
@@ -263,7 +259,6 @@ export async function doCheckOut(employeeId: string, lat?: number, lng?: number)
         last_updated: new Date().toISOString()
     });
 
-    // Run in background
     calculateAndSaveMonthlyStats(employeeId, openDoc.date);
 
     return { success: true, message: `Check-out thành công! Công: ${netHours.toFixed(2)}h` };

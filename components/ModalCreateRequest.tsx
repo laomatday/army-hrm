@@ -120,7 +120,7 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
     const distanceY = touchStart.current.y - touchEnd.current.y;
     
     if (Math.abs(distanceX) > Math.abs(distanceY)) {
-         if (distanceX < -minSwipeDistance) {
+         if (distanceX > minSwipeDistance) {
              triggerHaptic('light');
              onClose();
          }

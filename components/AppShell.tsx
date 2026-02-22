@@ -113,6 +113,7 @@ const AppShell: React.FC<Props> = ({ user, onLogout }) => {
           localStorage.setItem('army_seen_noti_count', String(rawNotiCount));
       }
       if (showCreateRequestModal) setShowCreateRequestModal(false);
+      if (showExplainWorkModal) setShowExplainWorkModal(false);
   };
 
   const handleCheckIn = async (base64: string, lat: number, lng: number) => {
@@ -121,7 +122,7 @@ const AppShell: React.FC<Props> = ({ user, onLogout }) => {
     setShowCamera(false);
 
     const res = await doCheckIn({
-        employeeId: currentUser.employee_id, lat, lng, deviceId: getDeviceId(), imageBase64: base64
+        employeeId: currentUser.employee_id, lat, lng, deviceId: getDeviceId(), imageBase64: base64, checkinType: 'Mobile'
     }, currentUser);
 
     setCheckingIn(false);
@@ -294,48 +295,70 @@ const AppShell: React.FC<Props> = ({ user, onLogout }) => {
                        (data?.notifications.myExplanations.filter(r => r.status !== 'Pending').length || 0);
   const badgeCount = Math.max(0, rawNotiCount - seenNotiCount);
 
-  const explainableItems = React.useMemo(() => {
+ const explainableItems = React.useMemo(() => {
     if (!data) return [];
+    
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const list = [];
+    
     const loopPtr = new Date();
-    loopPtr.setDate(loopPtr.getDate() - 45); // Check last 45 days
+    loopPtr.setDate(loopPtr.getDate() - 45);
 
     while(loopPtr <= today) {
         const dateStr = loopPtr.toISOString().split('T')[0];
         const dailyRecords = data.history.history.filter(h => h.date === dateStr);
-        let explainReason = '';
-        let showExplain = false;
+        let reasons: string[] = [];
 
         if (dailyRecords.length > 0) {
             const hasMissingOut = dailyRecords.some(r => !r.time_out);
             if (hasMissingOut && dateStr !== today.toISOString().split('T')[0]) {
-                showExplain = true;
-                explainReason = "[Lỗi] ";
+                reasons.push("Quên Check-out");
             }
+            
             const totalLate = dailyRecords.reduce((sum, r) => sum + Number(r.late_minutes || 0), 0);
             if (totalLate > 0) {
-                showExplain = true;
-                if (!explainReason) explainReason = "[Trễ] ";
+                reasons.push(`Trễ ${totalLate} phút`);
             }
+
+            const totalEarly = dailyRecords.reduce((sum, r) => sum + Number(r.early_minutes || 0), 0);
+            if (totalEarly > 0) {
+                reasons.push(`Về sớm ${totalEarly} phút`);
+            }
+
         } else {
-            const offDays = Array.isArray(data.systemConfig?.OFF_DAYS) ? data.systemConfig.OFF_DAYS : [0];
+            const offDays = Array.isArray(data.systemConfig?.OFF_DAYS) ? data.systemConfig.OFF_DAYS : [0, 6];
             if (!offDays.includes(loopPtr.getDay())) {
-                 showExplain = true;
-                 explainReason = "[Vắng] ";
+                 reasons.push("Vắng");
             }
         }
 
         const isExplained = data.myExplanations.some(r => r.date === dateStr && r.status !== 'Rejected');
+        const isRequested = data.myRequests.some(r => {
+            const from = new Date(r.fromDate + 'T00:00:00');
+            const to = new Date(r.toDate + 'T00:00:00');
+            const current = new Date(dateStr + 'T00:00:00');
+            return current >= from && current <= to && r.status === 'Approved';
+        });
 
-        if (showExplain && !isExplained) {
-            list.push({ date: dateStr, explainReason });
+        if (reasons.length > 0 && !isExplained && !isRequested) {
+            list.push({ date: dateStr, explainReason: reasons.join(', ') });
         }
 
         loopPtr.setDate(loopPtr.getDate() + 1);
     }
-    return list;
+    
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+
+    const filterStartDate = new Date(currentYear, currentMonth, 1);
+    const filterEndDate = new Date(currentYear, currentMonth + 1, 5);
+    filterEndDate.setHours(23, 59, 59, 999); 
+
+    return list.filter(item => {
+        const itemDate = new Date(item.date + 'T00:00:00');
+        return itemDate >= filterStartDate && itemDate <= filterEndDate;
+    });
   }, [data]);
 
   if (loading) return <DashboardSkeleton />;
@@ -453,9 +476,10 @@ const AppShell: React.FC<Props> = ({ user, onLogout }) => {
             onAlert={handleShowAlert}
             initialData={explainWorkInitialData || undefined}
             explainableItems={explainableItems}
+            setIsNavVisible={setIsNavVisible}
         />
 
-       {!showCamera && !showCheckoutConfirm && !alertMessage && !showImageCropper && !showExplainWorkModal && (
+       {!showCamera && !showCheckoutConfirm && !alertMessage && !showImageCropper && (
            <BottomNav activeTab={activeTab} onChange={handleTabChange} isVisible={isNavVisible} user={currentUser} notiCount={badgeCount} onOpenNoti={() => activeTab === 'notifications' ? setActiveTab(lastActiveTab) : setActiveTab('notifications')}/>
        )}
 
