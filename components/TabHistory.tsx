@@ -4,6 +4,7 @@ import { submitExplanation } from '../services/api';
 import { formatDateString, triggerHaptic } from '../utils/helpers';
 import PullToRefresh from './PullToRefresh';
 import ConfirmDialog from './ConfirmDialog';
+import ModalHeader from './ModalHeader';
 
 interface Props {
   data: DashboardData | null;
@@ -33,6 +34,22 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
       isOpen: false, isPastMonth: false
   });
   const [loading, setLoading] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleSuggestionClick = (suggestion: string) => {
+      const newReason = explainModal.reason + suggestion + " ";
+      setExplainModal(prev => ({ ...prev, reason: newReason }));
+      
+      // Focus and move cursor to end
+      setTimeout(() => {
+          const textarea = document.getElementById('explain-reason-textarea') as HTMLTextAreaElement;
+          if (textarea) {
+              textarea.focus();
+              const len = textarea.value.length;
+              textarea.setSelectionRange(len, len);
+          }
+      }, 0);
+  };
 
   const formatDateISO = (d: Date) => {
       const year = d.getFullYear();
@@ -104,15 +121,17 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
           date: explainModal.date,
           reason: explainModal.reason
       });
-      setLoading(false);
-
-      setConfirmDialog({ isOpen: false, isPastMonth: false });
-      setExplainModal({ isOpen: false, date: '', reason: '' });
-
-      onAlert(res.success ? "Thành công" : "Lỗi", res.message, res.success ? 'success' : 'error');
+      
       if (res.success) {
-          onRefresh();
+          await onRefresh(); 
+          setExplainModal(prev => ({ ...prev, reason: '' }));
+          onAlert("Thành công", "Đã gửi giải trình.", 'success');
+      } else {
+          onAlert("Lỗi", res.message, 'error');
       }
+      
+      setLoading(false);
+      setConfirmDialog({ isOpen: false, isPastMonth: false });
   };
 
   const processedData = useMemo(() => {
@@ -268,21 +287,21 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
                           dayItem.isMissingCheckout = true;
                           stats.errors += 1;
                           dayItem.showExplain = true;
-                          dayItem.explainReason = "Quên Check-out";
+                          dayItem.explainReason = "[Lỗi] ";
                           dayItem.dotClass = 'bg-red-500';
                       }
                       
                       if (totalLate > 0) {
                           dayItem.isLate = true;
                           dayItem.showExplain = true;
-                          if (!dayItem.explainReason) dayItem.explainReason = `Đi muộn ${totalLate} phút`;
+                          if (!dayItem.explainReason) dayItem.explainReason = "[Trễ] ";
                           if (!dayItem.isMissingCheckout) dayItem.dotClass = 'bg-orange-500';
                       }
 
                       if (totalEarly > 0) {
                           dayItem.isEarly = true;
                           dayItem.showExplain = true;
-                          if (!dayItem.explainReason) dayItem.explainReason = `Về sớm ${totalEarly} phút`;
+                          if (!dayItem.explainReason) dayItem.explainReason = "[Sớm] ";
                           if (!dayItem.isMissingCheckout && !dayItem.isLate) dayItem.dotClass = 'bg-orange-500';
                       }
                   } else {
@@ -296,7 +315,7 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
                           dayItem.status = 'Absent';
                           dayItem.shiftInfo = "Vắng mặt"; 
                           dayItem.showExplain = true;
-                          dayItem.explainReason = "Quên chấm công";
+                          dayItem.explainReason = "[Vắng] ";
                           dayItem.icon = 'fa-xmark';
                           dayItem.iconClass = 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400';
                           dayItem.dotClass = 'bg-red-500';
@@ -365,6 +384,10 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
   const getDayName = (idx: number) => ["CN", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"][idx];
 
   const { stats, list, title, calendarGrid } = processedData;
+
+  const explainableItems = useMemo(() => {
+      return list.filter(item => item.showExplain && !item.isExplained);
+  }, [list]);
 
   const displayList = (viewMode === 'week' 
         ? list 
@@ -463,158 +486,230 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
                 </div>
             )}
             
-            <div className="flex flex-col gap-3 pb-12">
-                {displayList.length === 0 ? (
-                        <div className="w-full text-center py-12 text-sm font-bold text-slate-400 dark:text-slate-600 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
-                            {viewMode === 'month' ? 'Chọn ngày để xem chi tiết' : 'Không có dữ liệu'}
-                        </div>
-                ) : displayList.map((item, idx) => {
-                    const isExpanded = expandedDate === item.date;
-                    
-                    return (
-                    <div key={idx} 
-                        onClick={() => { triggerHaptic('light'); setExpandedDate(isExpanded ? null : item.date); }}
-                        className="w-full bg-white dark:bg-slate-800 rounded-[24px] border border-slate-100 dark:border-slate-700 overflow-hidden animate-slide-up transition-all active:scale-[0.99]"
-                    >
-                        <div className="p-5 flex items-center justify-between">
-                            <div className="flex flex-col items-center justify-center w-14 border-r border-slate-100 dark:border-slate-700 pr-4 mr-1">
-                                <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase leading-none mb-1.5 tracking-wide">{getDayName(item.dayOfWeek)}</span>
-                                <span className={`text-2xl font-black leading-none tabular-nums tracking-tighter ${item.dayOfWeek === 0 ? 'text-red-500 dark:text-red-400' : 'text-slate-800 dark:text-white'}`}>{item.dayNum}</span>
-                            </div>
+            {displayList.length === 0 ? (
+                <div className="w-full text-center py-12 text-sm font-bold text-slate-400 dark:text-slate-600 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700 mb-12">
+                    {viewMode === 'month' ? 'Chọn ngày để xem chi tiết' : 'Không có dữ liệu'}
+                </div>
+            ) : (
+                <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700 mb-12 shadow-sm animate-slide-up">
+                    {displayList.map((item, idx) => {
+                        const isExpanded = expandedDate === item.date;
+                        
+                        return (
+                        <div key={idx} 
+                            onClick={() => { triggerHaptic('light'); setExpandedDate(isExpanded ? null : item.date); }}
+                            className="w-full bg-white dark:bg-slate-800 overflow-hidden transition-colors active:bg-slate-50 dark:active:bg-slate-700/50"
+                        >
+                            <div className="p-5 flex items-center justify-between">
+                                <div className="flex flex-col items-center justify-center w-14 border-r border-slate-100 dark:border-slate-700 pr-4 mr-1">
+                                    <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase leading-none mb-1.5 tracking-wide">{getDayName(item.dayOfWeek)}</span>
+                                    <span className={`text-2xl font-black leading-none tabular-nums tracking-tighter ${item.dayOfWeek === 0 ? 'text-red-500 dark:text-red-400' : 'text-slate-800 dark:text-white'}`}>{item.dayNum}</span>
+                                </div>
 
-                            <div className="flex-1 pl-3">
-                                <h4 className="text-base font-bold text-slate-800 dark:text-white mb-1.5">{item.shiftInfo}</h4>
-                                
-                                <div className="flex flex-wrap gap-1.5 items-center">
-                                    {item.status !== 'Future' && item.status !== 'Absent' && item.status !== 'Weekend' && (
-                                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 flex items-center gap-1 uppercase tracking-wider">
-                                            <i className="fa-regular fa-clock mr-1"></i> {item.workHours.toFixed(1)}h
-                                        </span>
-                                    )}
-
-                                    {item.isLate && (
-                                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/30 flex items-center gap-1 uppercase tracking-wider">
-                                            <i className="fa-solid fa-person-running mr-1"></i> Trễ {item.lateMins}p
-                                        </span>
-                                    )}
-
-                                    {item.isEarly && (
-                                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30 flex items-center gap-1 uppercase tracking-wider">
-                                            <i className="fa-solid fa-person-walking-arrow-right mr-1"></i> Sớm {item.earlyMins}p
-                                        </span>
-                                    )}
-
-                                    {item.isMissingCheckout && (
-                                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30 flex items-center gap-1 uppercase tracking-wider">
-                                            <i className="fa-solid fa-circle-exclamation mr-1"></i> Thiếu giờ ra
-                                        </span>
-                                    )}
-
-                                    {(item.status === 'Holiday') && (
-                                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-pink-50 dark:bg-pink-900/20 text-pink-500 dark:text-pink-400 border border-pink-100 dark:border-pink-900/30 uppercase tracking-wider flex items-center gap-1">
-                                            <i className="fa-solid fa-champagne-glasses"></i> Lễ
-                                        </span>
-                                    )}
-
-                                    {item.status === 'Leave' && (
-                                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30 uppercase tracking-wider">
-                                            <i className="fa-solid fa-umbrella-beach mr-1"></i> {item.leaveType}
-                                        </span>
-                                    )}
+                                <div className="flex-1 pl-3">
+                                    <h4 className="text-base font-bold text-slate-800 dark:text-white mb-1.5">{item.shiftInfo}</h4>
                                     
-                                    {item.showExplain && (
-                                        item.isExplained ? (
-                                            <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 text-[10px] font-extrabold border border-slate-200 dark:border-slate-600 uppercase tracking-wider">
-                                                <i className="fa-solid fa-check text-[10px] mr-1"></i> Đã giải trình
+                                    <div className="flex flex-wrap gap-1.5 items-center">
+                                        {item.status !== 'Future' && item.status !== 'Absent' && item.status !== 'Weekend' && (
+                                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 flex items-center gap-1 uppercase tracking-wider">
+                                                <i className="fa-regular fa-clock mr-1"></i> {item.workHours.toFixed(1)}h
                                             </span>
-                                        ) : (
-                                            <button 
-                                                onClick={(e) => handleExplainClick(e, item.date, item.explainReason)}
-                                                className="px-2.5 py-0.5 rounded-md bg-orange-500 text-white text-[10px] font-extrabold active:scale-95 transition-all uppercase tracking-wider"
-                                            >
-                                                Giải trình
-                                            </button>
-                                        )
-                                    )}
+                                        )}
+
+                                        {item.isLate && (
+                                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/30 flex items-center gap-1 uppercase tracking-wider">
+                                                <i className="fa-solid fa-person-running mr-1"></i> Trễ {item.lateMins}p
+                                            </span>
+                                        )}
+
+                                        {item.isEarly && (
+                                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30 flex items-center gap-1 uppercase tracking-wider">
+                                                <i className="fa-solid fa-person-walking-arrow-right mr-1"></i> Sớm {item.earlyMins}p
+                                            </span>
+                                        )}
+
+                                        {item.isMissingCheckout && (
+                                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30 flex items-center gap-1 uppercase tracking-wider">
+                                                <i className="fa-solid fa-circle-exclamation mr-1"></i> Thiếu giờ ra
+                                            </span>
+                                        )}
+
+                                        {(item.status === 'Holiday') && (
+                                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-pink-50 dark:bg-pink-900/20 text-pink-500 dark:text-pink-400 border border-pink-100 dark:border-pink-900/30 uppercase tracking-wider flex items-center gap-1">
+                                                <i className="fa-solid fa-champagne-glasses"></i> Lễ
+                                            </span>
+                                        )}
+
+                                        {item.status === 'Leave' && (
+                                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-900/30 uppercase tracking-wider">
+                                                <i className="fa-solid fa-umbrella-beach mr-1"></i> {item.leaveType}
+                                            </span>
+                                        )}
+                                        
+                                        {item.showExplain && (
+                                            item.isExplained ? (
+                                                <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-400 text-[10px] font-extrabold border border-slate-200 dark:border-slate-600 uppercase tracking-wider">
+                                                    <i className="fa-solid fa-check text-[10px] mr-1"></i> Đã giải trình
+                                                </span>
+                                            ) : (
+                                                <button 
+                                                    onClick={(e) => handleExplainClick(e, item.date, item.explainReason)}
+                                                    className="px-2.5 py-0.5 rounded-md bg-orange-500 text-white text-[10px] font-extrabold active:scale-95 transition-all uppercase tracking-wider"
+                                                >
+                                                    Giải trình
+                                                </button>
+                                            )
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ml-2 transition-transform duration-300 ${item.iconClass} ${isExpanded ? 'rotate-180' : ''}`}>
+                                    {isExpanded ? <i className="fa-solid fa-chevron-down text-lg"></i> : <i className={`fa-solid ${item.icon} text-lg`}></i>}
                                 </div>
                             </div>
 
-                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ml-2 transition-transform duration-300 ${item.iconClass} ${isExpanded ? 'rotate-180' : ''}`}>
-                                {isExpanded ? <i className="fa-solid fa-chevron-down text-lg"></i> : <i className={`fa-solid ${item.icon} text-lg`}></i>}
-                            </div>
+                            {isExpanded && item.raw && (
+                                <div className="bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 p-5 animate-fade-in text-sm text-slate-600 dark:text-slate-400 space-y-3">
+                                     <div className="grid grid-cols-2 gap-4">
+                                         <div>
+                                             <p className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase mb-1 tracking-wide">Giờ vào</p>
+                                             <p className="font-bold text-slate-800 dark:text-slate-200 text-base">{item.raw.time_in}</p>
+                                         </div>
+                                         <div>
+                                             <p className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase mb-1 tracking-wide">Giờ ra</p>
+                                             <p className="font-bold text-slate-800 dark:text-slate-200 text-base">{item.raw.time_out || "--:--"}</p>
+                                         </div>
+                                     </div>
+                                     
+                                     {(item.raw.checkin_lat || item.raw.checkout_lat) && (
+                                         <div>
+                                             <p className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase mb-1 tracking-wide">Vị trí check-in</p>
+                                             <p className="font-medium text-slate-700 dark:text-slate-300 text-xs truncate">
+                                                 {item.raw.checkin_lat}, {item.raw.checkin_lng}
+                                             </p>
+                                         </div>
+                                     )}
+
+                                     {item.raw.selfie_url && (
+                                         <div className="pt-2">
+                                              <a href={item.raw.selfie_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-xs uppercase bg-white dark:bg-slate-700 border border-emerald-100 dark:border-emerald-900/30 px-3 py-2 rounded-xl tracking-wide">
+                                                  <i className="fa-solid fa-image"></i> Xem ảnh Check-in
+                                              </a>
+                                         </div>
+                                     )}
+                                </div>
+                            )}
                         </div>
-
-                        {isExpanded && item.raw && (
-                            <div className="bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 p-5 animate-fade-in text-sm text-slate-600 dark:text-slate-400 space-y-3">
-                                 <div className="grid grid-cols-2 gap-4">
-                                     <div>
-                                         <p className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase mb-1 tracking-wide">Giờ vào</p>
-                                         <p className="font-bold text-slate-800 dark:text-slate-200 text-base">{item.raw.time_in}</p>
-                                     </div>
-                                     <div>
-                                         <p className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase mb-1 tracking-wide">Giờ ra</p>
-                                         <p className="font-bold text-slate-800 dark:text-slate-200 text-base">{item.raw.time_out || "--:--"}</p>
-                                     </div>
-                                 </div>
-                                 
-                                 {(item.raw.checkin_lat || item.raw.checkout_lat) && (
-                                     <div>
-                                         <p className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase mb-1 tracking-wide">Vị trí check-in</p>
-                                         <p className="font-medium text-slate-700 dark:text-slate-300 text-xs truncate">
-                                             {item.raw.checkin_lat}, {item.raw.checkin_lng}
-                                         </p>
-                                     </div>
-                                 )}
-
-                                 {item.raw.selfie_url && (
-                                     <div className="pt-2">
-                                          <a href={item.raw.selfie_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold text-xs uppercase bg-white dark:bg-slate-700 border border-emerald-100 dark:border-emerald-900/30 px-3 py-2 rounded-xl tracking-wide">
-                                              <i className="fa-solid fa-image"></i> Xem ảnh Check-in
-                                          </a>
-                                     </div>
-                                 )}
-                            </div>
-                        )}
-                    </div>
-                )})}
-            </div>
+                    )})}
+                </div>
+            )}
         </div>
 
         {explainModal.isOpen && (
-            <div className="fixed inset-0 z-[2000] bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm flex flex-col justify-end animate-fade-in">
-                <div className="bg-white dark:bg-slate-900 rounded-t-[32px] p-6 animate-slide-up pb-safe">
-                    <div className="flex justify-between items-center mb-6">
-                        <div>
-                            <h3 className="text-xl font-extrabold text-slate-800 dark:text-white uppercase tracking-tight">Giải trình công</h3>
-                            <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-1 uppercase tracking-wide">
-                                <i className="fa-regular fa-calendar-check mr-1"></i>
-                                {formatDateString(explainModal.date)}
-                            </p>
+            <div className="fixed inset-0 z-[2000] bg-slate-50 dark:bg-slate-900 flex flex-col animate-slide-up transition-colors duration-300">
+                <div className="fixed top-0 left-0 w-full z-[2010]">
+                     <ModalHeader 
+                        onClose={() => setExplainModal({...explainModal, isOpen: false})} 
+                        bgClass="bg-transparent border-none"
+                     />
+                </div>
+
+                <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-14">
+                    <div className="animate-fade-in mt-4">
+                        <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors">
+                            <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-orange-500/10 to-amber-500/10 dark:from-orange-500/20 dark:to-amber-500/20 rounded-t-[32px] transition-colors duration-500"></div>
+                            
+                            <div className="relative z-10 flex flex-col items-center">
+                                <div className="w-28 h-28 rounded-full p-1.5 bg-white dark:bg-slate-800 mb-4 mt-2 relative transition-colors">
+                                    <div className="w-full h-full rounded-full bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center border border-orange-100 dark:border-orange-800/50 text-orange-500 dark:text-orange-400">
+                                        <i className="fa-solid fa-file-pen text-4xl ml-1"></i>
+                                    </div>
+                                </div>
+                                <h2 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight leading-tight">Giải Trình Công</h2>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 font-bold mt-2 uppercase tracking-wide">Bổ sung thông tin chấm công</p>
+                            </div>
                         </div>
-                        <button onClick={() => setExplainModal({...explainModal, isOpen: false})} className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700">
-                            <i className="fa-solid fa-xmark"></i>
-                        </button>
-                    </div>
 
-                    <div className="space-y-4 mb-6">
-                         <div>
-                             <label className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase mb-2 block tracking-wide">Lý do</label>
-                             <textarea 
-                                autoFocus
-                                className="w-full p-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-base font-medium text-slate-800 dark:text-white outline-none h-32 resize-none focus:bg-white dark:focus:bg-slate-900 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all placeholder:text-slate-400 placeholder:font-normal"
-                                placeholder="Nhập lý do chi tiết..."
-                                value={explainModal.reason}
-                                onChange={e => setExplainModal({...explainModal, reason: e.target.value})}
-                             ></textarea>
-                         </div>
-                    </div>
+                        <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
+                            <i className="fa-solid fa-list-check text-[10px]"></i>
+                            Thông tin chi tiết
+                        </h3>
 
-                    <button 
-                        onClick={handlePreSubmit}
-                        className="w-full py-4 rounded-2xl bg-orange-500 text-white font-extrabold text-base active:scale-[0.98] transition-all flex items-center justify-center gap-2 uppercase tracking-wide"
-                    >
-                        Gửi giải trình <i className="fa-solid fa-paper-plane"></i>
-                    </button>
+                        <div className="bg-white dark:bg-slate-800 rounded-[32px] p-6 border border-slate-100 dark:border-slate-700 space-y-5 transition-colors mb-8">
+                            
+                            <div className="relative">
+                                <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1 block mb-1.5">Chọn ngày cần giải trình</label>
+                                <button 
+                                    onClick={() => { triggerHaptic('light'); setIsDropdownOpen(!isDropdownOpen); }}
+                                    className={`w-full min-h-[56px] px-4 py-3 flex justify-between items-center bg-slate-50 dark:bg-slate-900 border rounded-2xl text-sm font-bold outline-none transition-all ${isDropdownOpen ? 'border-orange-500 dark:border-orange-500 ring-2 ring-orange-500/20' : 'border-slate-200 dark:border-slate-700'}`}
+                                >
+                                    <div className="text-left">
+                                        {explainModal.date ? (
+                                            <>
+                                                <span className="block text-slate-800 dark:text-white">{formatDateString(explainModal.date)}</span>
+                                                <span className="text-xs text-slate-400 dark:text-slate-500 font-normal">
+                                                    {list.find(i => i.date === explainModal.date)?.explainReason || "Chọn ngày..."}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <span className="text-slate-400 dark:text-slate-500">Chọn ngày...</span>
+                                        )}
+                                    </div>
+                                    <i className={`fa-solid fa-chevron-down text-slate-400 dark:text-slate-500 text-xs transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}></i>
+                                </button>
+                                
+                                {isDropdownOpen && (
+                                    <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl z-50 overflow-hidden animate-fade-in p-2 space-y-1 shadow-xl max-h-60 overflow-y-auto no-scrollbar">
+                                        {explainableItems.length === 0 ? (
+                                            <div className="p-4 text-center text-xs text-slate-400 font-bold">Không có ngày nào cần giải trình</div>
+                                        ) : (
+                                            explainableItems.map((item) => (
+                                                <div 
+                                                    key={item.date}
+                                                    onClick={() => {
+                                                        triggerHaptic('light');
+                                                        setExplainModal({ ...explainModal, date: item.date, reason: item.explainReason || '' });
+                                                        setIsDropdownOpen(false);
+                                                    }}
+                                                    className={`flex items-center justify-between p-3.5 rounded-xl cursor-pointer transition-all ${
+                                                        explainModal.date === item.date 
+                                                        ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400' 
+                                                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                                    }`}
+                                                >
+                                                    <div>
+                                                        <span className="font-bold text-sm block">{formatDateString(item.date)}</span>
+                                                        <span className="text-[10px] opacity-70">{item.explainReason}</span>
+                                                    </div>
+                                                    {explainModal.date === item.date && (
+                                                        <i className="fa-solid fa-check text-orange-600 dark:text-orange-400"></i>
+                                                    )}
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div>
+                                <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1 block mb-1.5">Lý do giải trình</label>
+                                <textarea 
+                                    id="explain-reason-textarea"
+                                    className="w-full p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:text-white outline-none h-32 resize-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 dark:focus:border-orange-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" 
+                                    placeholder="Nhập lý do chi tiết..."
+                                    value={explainModal.reason} 
+                                    onChange={e => setExplainModal({...explainModal, reason: e.target.value})}
+                                ></textarea>
+                            </div>
+
+                            <button 
+                                onClick={handlePreSubmit}
+                                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-extrabold py-4 rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-widest mt-2"
+                            >
+                                Gửi giải trình <i className="fa-solid fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         )}
