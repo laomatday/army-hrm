@@ -12,13 +12,12 @@ export const useDashboardData = (
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState(user);
   
-  // Use a ref to store the stringified version of data to avoid expensive stringify on every render
-  // and to prevent infinite re-render loops caused by new object references from API.
   const prevDataJson = useRef<string>("");
 
-  const fetchData = async () => {
-    // Silent update if data exists, loading spinner only for first load
-    if (!data && prevDataJson.current === "") setLoading(true);
+  const fetchData = async (isInitial = false) => {
+    if (isInitial) {
+        setLoading(true);
+    }
     
     try {
         const res = await getDashboardData(currentUser);
@@ -28,7 +27,6 @@ export const useDashboardData = (
               return;
           }
           
-          // OPTIMIZATION: Only update currentUser if the data actually changed.
           if (res.data.userProfile) {
               const isProfileChanged = JSON.stringify(res.data.userProfile) !== JSON.stringify(currentUser);
               if (isProfileChanged) {
@@ -36,9 +34,6 @@ export const useDashboardData = (
               }
           }
 
-          // CRITICAL FIX: Deep compare dashboard data before calling setData
-          // This prevents React from re-rendering the entire tree when data content is identical
-          // but object reference is different (which happens on every API call).
           const newDataJson = JSON.stringify(res.data);
           if (newDataJson !== prevDataJson.current) {
               prevDataJson.current = newDataJson;
@@ -49,7 +44,7 @@ export const useDashboardData = (
     } catch (e) {
         console.error("Dashboard data fetch error", e);
     } finally {
-        setLoading(false);
+        if (isInitial) setLoading(false);
     }
   };
 
@@ -69,15 +64,6 @@ export const useDashboardData = (
                   const title = "Nhắc nhở Check-out";
                   const body = `Ca làm việc của bạn đã kết thúc lúc ${activeSession.shift_end}. Vui lòng Check-out!`;
 
-                  // 1. Browser Push Notification
-                  if (Notification.permission === 'granted') {
-                      new Notification(title, {
-                          body: body,
-                          icon: "https://firebasestorage.googleapis.com/v0/b/army-hrm-70615.firebasestorage.app/o/logo%2Flogo_white.png?alt=media"
-                      });
-                  }
-
-                  // 2. In-App Alert via Callback
                   if (onNotification) {
                       triggerHaptic('warning');
                       onNotification(title, body);
@@ -90,8 +76,8 @@ export const useDashboardData = (
   };
 
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 30000);
+    fetchData(true);
+    const interval = setInterval(fetchData, 120000);
     return () => clearInterval(interval);
   }, [currentUser.employee_id]);
 

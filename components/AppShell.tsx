@@ -70,6 +70,19 @@ const AppShell: React.FC<Props> = ({ user, onLogout }) => {
   const touchEnd = useRef<{x: number, y: number} | null>(null);
   const minSwipeDistance = 50;
 
+  // Ref to hold kiosk listener cleanup functions
+  const kioskListenerUnsub = useRef<(() => void) | null>(null);
+
+  // Main cleanup effect for the component
+  useEffect(() => {
+    return () => {
+      if (kioskListenerUnsub.current) {
+        console.log("Cleaning up active Kiosk listener on component unmount.");
+        kioskListenerUnsub.current();
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const scrollContainer = document.querySelector('.overflow-y-auto');
     if (scrollContainer) {
@@ -117,84 +130,95 @@ const AppShell: React.FC<Props> = ({ user, onLogout }) => {
   };
 
   const handleQRScan = async (qrString: string) => {
-      setShowQRScanner(false);
-      try {
-          const qrData = JSON.parse(qrString);
-          const targetKioskId = qrData.kiosk_id || 'KIOSK_01';
-          
-          if (!qrData.token) {
-              handleShowAlert("Lỗi", "Mã QR thiếu Token xác thực", "error");
-              return;
-          }
+    setShowQRScanner(false);
+    if (kioskListenerUnsub.current) {
+        kioskListenerUnsub.current(); // Clean up any previous listener
+    }
 
-          setCheckingIn(true);
-          setCheckInStatus("Đang xác thực vị trí...");
+    try {
+        const qrData = JSON.parse(qrString);
+        const targetKioskId = qrData.kiosk_id || 'KIOSK_01';
+        
+        if (!qrData.token) {
+            handleShowAlert("Lỗi", "Mã QR thiếu Token xác thực", "error");
+            return;
+        }
 
-          navigator.geolocation.getCurrentPosition(async (pos) => {
-              if (data && data.locations) {
-                  const userLoc = data.locations.find(l => l.center_id === currentUser.center_id);
-                  if (userLoc) {
-                      const dist = calculateDistance(pos.coords.latitude, pos.coords.longitude, userLoc.latitude, userLoc.longitude);
-                      const maxDist = userLoc.radius_meters || data.systemConfig?.MAX_DISTANCE_METERS || 200;
-                      
-                      if (dist > maxDist) {
-                          setCheckingIn(false);
-                          handleShowAlert("Sai vị trí", `Bạn cần ở văn phòng để chấm công Kiosk. Khoảng cách hiện tại: ${Math.round(dist)}m.`, 'error');
-                          return;
-                      }
-                  }
-              }
+        setCheckingIn(true);
+        setCheckInStatus("Đang xác thực vị trí...");
 
-              setCheckInStatus("Đang kết nối với Kiosk...");
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            if (data && data.locations) {
+                const userLoc = data.locations.find(l => l.center_id === currentUser.center_id);
+                if (userLoc) {
+                    const dist = calculateDistance(pos.coords.latitude, pos.coords.longitude, userLoc.latitude, userLoc.longitude);
+                    const maxDist = userLoc.radius_meters || data.systemConfig?.MAX_DISTANCE_METERS || 200;
+                    if (dist > maxDist) {
+                        setCheckingIn(false);
+                        handleShowAlert("Sai vị trí", `Bạn cần ở văn phòng để chấm công Kiosk. Khoảng cách hiện tại: ${Math.round(dist)}m.`, 'error');
+                        return;
+                    }
+                }
+            }
 
-              const sessionRef = await db.collection('kiosk_sessions').add({
-                  kiosk_id: targetKioskId,
-                  token: qrData.token,
-                  employee_id: currentUser.employee_id,
-                  employee_name: currentUser.name,
-                  center_id: currentUser.center_id,
-                  status: 'pending',
-                  created_at: new Date().toISOString(),
-                  user_lat: pos.coords.latitude,
-                  user_lng: pos.coords.longitude
-              });
+            setCheckInStatus("Đang kết nối với Kiosk...");
 
-              const timeoutId = setTimeout(() => {
-                  setCheckingIn(false);
-                  handleShowAlert("Hết thời gian", "Kiosk không phản hồi. Vui lòng thử lại.", "error");
-              }, 45000);
+            const sessionRef = await db.collection('kiosk_sessions').add({
+                kiosk_id: targetKioskId,
+                token: qrData.token,
+                employee_id: currentUser.employee_id,
+                employee_name: currentUser.name,
+                center_id: currentUser.center_id,
+                status: 'pending',
+                created_at: new Date().toISOString(),
+                user_lat: pos.coords.latitude,
+                user_lng: pos.coords.longitude
+            });
 
-              const unsubscribe = db.collection('kiosk_sessions').doc(sessionRef.id)
-                  .onSnapshot(async (doc) => {
-                      const session = doc.data();
-                      if (!session) return;
+            const timeoutId = setTimeout(() => {
+                handleShowAlert("Hết thời gian", "Kiosk không phản hồi. Vui lòng thử lại.", "error");
+                if (kioskListenerUnsub.current) {
+                  kioskListenerUnsub.current();
+                  kioskListenerUnsub.current = null;
+                }
+                setCheckingIn(false);
+            }, 45000);
 
-                      if (session.status === 'camera_ready') {
-                          setCheckInStatus("Kiosk đã sẵn sàng. Vui lòng nhìn vào camera trên Kiosk!");
-                      } else if (session.status === 'completed') {
-                          clearTimeout(timeoutId);
-                          unsubscribe();
-                          
-                          setCheckingIn(false);
-                          triggerHaptic('success');
-                          handleShowAlert("Thành công", "Đã ghi nhận chấm công từ Kiosk", "success");
-                          
-                          refresh();
-                      } else if (session.status === 'failed') {
-                          clearTimeout(timeoutId);
-                          unsubscribe();
-                          setCheckingIn(false);
-                          handleShowAlert("Lỗi", session.error || "Chấm công thất bại", "error");
-                      }
-                  });
-          }, (err) => {
-              setCheckingIn(false);
-              handleShowAlert("Lỗi định vị", "Vui lòng bật GPS để xác thực vị trí khi quét mã Kiosk.", 'error');
-          }, { enableHighAccuracy: true, timeout: 8000 });
+            const unsubscribe = db.collection('kiosk_sessions').doc(sessionRef.id)
+                .onSnapshot((doc) => {
+                    const session = doc.data();
+                    if (!session) return;
 
-      } catch (e) {
-          handleShowAlert("Lỗi", "Không thể đọc mã QR", "error");
-      }
+                    const cleanup = () => {
+                        clearTimeout(timeoutId);
+                        unsubscribe();
+                        kioskListenerUnsub.current = null;
+                        setCheckingIn(false);
+                    };
+
+                    if (session.status === 'camera_ready') {
+                        setCheckInStatus("Kiosk đã sẵn sàng. Vui lòng nhìn vào camera trên Kiosk!");
+                    } else if (session.status === 'completed') {
+                        handleShowAlert("Thành công", "Đã ghi nhận chấm công từ Kiosk", "success");
+                        refresh();
+                        cleanup();
+                    } else if (session.status === 'failed') {
+                        handleShowAlert("Lỗi", session.error || "Chấm công thất bại", "error");
+                        cleanup();
+                    }
+                });
+            
+            kioskListenerUnsub.current = unsubscribe;
+
+        }, (err) => {
+            setCheckingIn(false);
+            handleShowAlert("Lỗi định vị", "Vui lòng bật GPS để xác thực vị trí khi quét mã Kiosk.", 'error');
+        }, { enableHighAccuracy: true, timeout: 8000 });
+
+    } catch (e) {
+        handleShowAlert("Lỗi", "Không thể đọc mã QR", "error");
+        setCheckingIn(false);
+    }
   };
 
   const processCheckOut = async () => {

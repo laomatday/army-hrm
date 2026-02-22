@@ -61,18 +61,23 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-      if (user) {
-          if (user.role === 'Admin') {
-             if (appMode !== 'app' && appMode !== 'admin' && appMode !== 'kiosk') {
-                 setAppMode('selection');
-             }
-          } else if (user.role === 'Kiosk') {
-              setAppMode('kiosk');
-          } else {
-             setAppMode('app');
-          }
-      }
-  }, [user, appMode]);
+    if (!user) return;
+
+    if (user.role === 'Admin') {
+        const validAdminModes: AppMode[] = ['app', 'admin', 'kiosk', 'selection'];
+        if (!validAdminModes.includes(appMode)) {
+            setAppMode('selection');
+        }
+    } else if (user.role === 'Kiosk') {
+        if (appMode !== 'kiosk') {
+            setAppMode('kiosk');
+        }
+    } else { // Staff, Manager, HR
+        if (appMode !== 'app') {
+            setAppMode('app');
+        }
+    }
+}, [user, appMode]);
 
   const handleLoginSuccess = (userData: Employee) => {
     localStorage.setItem('army_user_v2026', JSON.stringify(userData));
