@@ -80,6 +80,11 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
   };
 
   const onTouchStart = (e: React.TouchEvent) => {
+    const x = e.targetTouches[0].clientX;
+    if (x < 30 || x > window.innerWidth - 30) {
+        touchStart.current = null;
+        return;
+    }
     touchEnd.current = null;
     touchStart.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY };
   };
@@ -94,8 +99,8 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
     const distanceX = touchStart.current.x - touchEnd.current.x;
     const distanceY = touchStart.current.y - touchEnd.current.y;
     
-    if (Math.abs(distanceY) > Math.abs(distanceX)) {
-         if (distanceY < -minSwipeDistance) {
+    if (Math.abs(distanceX) > Math.abs(distanceY)) {
+         if (distanceX < -minSwipeDistance) {
              triggerHaptic('light');
              onClose();
          }

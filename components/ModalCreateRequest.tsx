@@ -99,9 +99,14 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
     return formatDateString(dateStr);
   };
 
-  const onTouchStart = (e: React.TouchEvent) => {
+ const onTouchStart = (e: React.TouchEvent) => {
+    const x = e.targetTouches[0].clientX;
+    if (x < 30 || x > window.innerWidth - 30) {
+        touchStart.current = null;
+        return;
+    }
     touchEnd.current = null;
-    touchStart.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY };
+    touchStart.current = { x, y: e.targetTouches[0].clientY };
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
@@ -114,10 +119,8 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
     const distanceX = touchStart.current.x - touchEnd.current.x;
     const distanceY = touchStart.current.y - touchEnd.current.y;
     
-    // Check if the swipe is mostly vertical (for closing the modal)
-    if (Math.abs(distanceY) > Math.abs(distanceX)) {
-         // Check for a downward swipe
-         if (distanceY < -minSwipeDistance) {
+    if (Math.abs(distanceX) > Math.abs(distanceY)) {
+         if (distanceX < -minSwipeDistance) {
              triggerHaptic('light');
              onClose();
          }
