@@ -34,7 +34,7 @@ const SCHEMAS: any = {
             email: { label: 'Email', type: 'email', required: true, colSpan: 1 },
             password: { label: 'Mật khẩu', type: 'password', colSpan: 1 },
             phone: { label: 'Số điện thoại', type: 'text', colSpan: 1 },
-            role: { label: 'Vai trò', type: 'select', options: ['Staff', 'Manager', 'Admin', 'HR'], colSpan: 1 },
+            role: { label: 'Vai trò', type: 'select', options: ['Staff', 'Manager', 'Admin', 'HR', 'Kiosk'], colSpan: 1 },
             center_id: { label: 'Văn phòng chính', type: 'reference', collection: 'config_locations', valueField: 'center_id', labelField: 'location_name', colSpan: 1 },
             allowed_locations: { label: 'Chi nhánh được phép', type: 'multi-select', collection: 'config_locations', valueField: 'center_id', labelField: 'location_name', colSpan: 2 },
             department: { label: 'Phòng ban', type: 'text', colSpan: 1 },

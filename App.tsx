@@ -66,6 +66,8 @@ function AppContent() {
              if (appMode !== 'app' && appMode !== 'admin' && appMode !== 'kiosk') {
                  setAppMode('selection');
              }
+          } else if (user.role === 'Kiosk') {
+              setAppMode('kiosk');
           } else {
              setAppMode('app');
           }
@@ -79,6 +81,9 @@ function AppContent() {
     if (userData.role === 'Admin') {
         setAppMode('selection');
         localStorage.setItem('army_app_mode', 'selection');
+    } else if (userData.role === 'Kiosk') {
+        setAppMode('kiosk');
+        localStorage.setItem('army_app_mode', 'kiosk');
     } else {
         setAppMode('app');
         localStorage.setItem('army_app_mode', 'app');
@@ -96,6 +101,14 @@ function AppContent() {
       setAppMode(mode);
       localStorage.setItem('army_app_mode', mode);
   };
+  
+  const handleExitKiosk = () => {
+      if (user?.role === 'Kiosk') {
+          handleLogout();
+      } else {
+          handleModeSelect('selection');
+      }
+  }
 
   const initNotifications = async (empId: string) => {
       if (!messaging) return;
@@ -145,7 +158,7 @@ function AppContent() {
   }, [user, showToast]);
 
   useEffect(() => {
-      if (user && messaging) {
+      if (user && messaging && user.role !== 'Kiosk') {
           initNotifications(user.employee_id);
           
           const unsubscribe = messaging.onMessage((payload) => {
@@ -173,8 +186,8 @@ function AppContent() {
       return <AdminPanel user={user} onLogout={handleLogout} onBackToApp={() => handleModeSelect('app')} />;
   }
 
-  if (appMode === 'kiosk' && user.role === 'Admin') {
-      return <KioskMode onExit={() => handleModeSelect('selection')} />;
+  if (appMode === 'kiosk' && (user.role === 'Admin' || user.role === 'Kiosk')) {
+      return <KioskMode onExit={handleExitKiosk} />;
   }
 
   return <AppShell user={user} onLogout={handleLogout} />;
