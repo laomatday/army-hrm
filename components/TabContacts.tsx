@@ -120,7 +120,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
       return () => clearTimeout(handler);
   }, [term]);
 
-  const contacts = (data?.contacts && data.contacts.length > 0) ? data.contacts : cachedContacts;
+  const contacts = ((data?.contacts && data.contacts.length > 0) ? data.contacts : cachedContacts).filter(c => c.role !== 'Kiosk');
 
   useEffect(() => {
       if (isSearching && inputRef.current && !selectedContact) {

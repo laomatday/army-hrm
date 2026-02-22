@@ -17,6 +17,7 @@ import ModalCamera from './ModalCamera';
 import ModalQRScanner from './ModalQRScanner';
 import NotificationsModal from './NotificationsModal';
 import ModalCreateRequest from './ModalCreateRequest';
+import ModalExplainWork from './ModalExplainWork';
 import BottomNav, { TabType } from './BottomNav';
 import Header from './Header';
 import Spinner from './Spinner';
@@ -56,7 +57,10 @@ const AppShell: React.FC<Props> = ({ user, onLogout }) => {
   const [showImageCropper, setShowImageCropper] = useState(false);
   
   const [showCreateRequestModal, setShowCreateRequestModal] = useState(false);
+  const [showExplainWorkModal, setShowExplainWorkModal] = useState(false);
   const [createRequestInitialData, setCreateRequestInitialData] = useState<{type: string, date: string, reason: string} | null>(null);
+  const [explainWorkInitialData, setExplainWorkInitialData] = useState<{date: string, reason: string} | null>(null);
+
   const [contactsResetTrigger, setContactsResetTrigger] = useState(0);
   const [contactsSearchTrigger, setContactsSearchTrigger] = useState(0); 
   const [seenNotiCount, setSeenNotiCount] = useState(() => {
@@ -290,6 +294,50 @@ const AppShell: React.FC<Props> = ({ user, onLogout }) => {
                        (data?.notifications.myExplanations.filter(r => r.status !== 'Pending').length || 0);
   const badgeCount = Math.max(0, rawNotiCount - seenNotiCount);
 
+  const explainableItems = React.useMemo(() => {
+    if (!data) return [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const list = [];
+    const loopPtr = new Date();
+    loopPtr.setDate(loopPtr.getDate() - 45); // Check last 45 days
+
+    while(loopPtr <= today) {
+        const dateStr = loopPtr.toISOString().split('T')[0];
+        const dailyRecords = data.history.history.filter(h => h.date === dateStr);
+        let explainReason = '';
+        let showExplain = false;
+
+        if (dailyRecords.length > 0) {
+            const hasMissingOut = dailyRecords.some(r => !r.time_out);
+            if (hasMissingOut && dateStr !== today.toISOString().split('T')[0]) {
+                showExplain = true;
+                explainReason = "[Lỗi] ";
+            }
+            const totalLate = dailyRecords.reduce((sum, r) => sum + Number(r.late_minutes || 0), 0);
+            if (totalLate > 0) {
+                showExplain = true;
+                if (!explainReason) explainReason = "[Trễ] ";
+            }
+        } else {
+            const offDays = Array.isArray(data.systemConfig?.OFF_DAYS) ? data.systemConfig.OFF_DAYS : [0];
+            if (!offDays.includes(loopPtr.getDay())) {
+                 showExplain = true;
+                 explainReason = "[Vắng] ";
+            }
+        }
+
+        const isExplained = data.myExplanations.some(r => r.date === dateStr && r.status !== 'Rejected');
+
+        if (showExplain && !isExplained) {
+            list.push({ date: dateStr, explainReason });
+        }
+
+        loopPtr.setDate(loopPtr.getDate() + 1);
+    }
+    return list;
+  }, [data]);
+
   if (loading) return <DashboardSkeleton />;
 
   return (
@@ -342,8 +390,15 @@ const AppShell: React.FC<Props> = ({ user, onLogout }) => {
                 />
               )}
               {activeTab === 'history' && (
-                <TabHistory data={data} user={currentUser} onRefresh={refresh} onAlert={handleShowAlert} 
-                    onExplain={(d, r) => { setCreateRequestInitialData({type: 'Giải trình công', date: d, reason: r}); setShowCreateRequestModal(true); }} 
+                <TabHistory 
+                    data={data} 
+                    user={currentUser} 
+                    onRefresh={refresh} 
+                    onAlert={handleShowAlert} 
+                    onExplain={(date, reason) => { 
+                        setExplainWorkInitialData({ date, reason });
+                        setShowExplainWorkModal(true);
+                    }} 
                 />
               )}
               {activeTab === 'requests' && (
@@ -381,11 +436,26 @@ const AppShell: React.FC<Props> = ({ user, onLogout }) => {
        </div>
 
        <ModalCreateRequest 
-            user={currentUser} isOpen={showCreateRequestModal} onClose={() => setShowCreateRequestModal(false)}
-            onSuccess={refresh} onAlert={handleShowAlert} initialData={createRequestInitialData}
+            user={currentUser} 
+            isOpen={showCreateRequestModal} 
+            onClose={() => setShowCreateRequestModal(false)}
+            onSuccess={refresh} 
+            onAlert={handleShowAlert} 
+            initialData={createRequestInitialData}
+            setIsNavVisible={setIsNavVisible}
        />
 
-       {!showCamera && !showCheckoutConfirm && !alertMessage && !showImageCropper && (
+        <ModalExplainWork
+            user={currentUser}
+            isOpen={showExplainWorkModal}
+            onClose={() => setShowExplainWorkModal(false)}
+            onSuccess={refresh}
+            onAlert={handleShowAlert}
+            initialData={explainWorkInitialData || undefined}
+            explainableItems={explainableItems}
+        />
+
+       {!showCamera && !showCheckoutConfirm && !alertMessage && !showImageCropper && !showExplainWorkModal && (
            <BottomNav activeTab={activeTab} onChange={handleTabChange} isVisible={isNavVisible} user={currentUser} notiCount={badgeCount} onOpenNoti={() => activeTab === 'notifications' ? setActiveTab(lastActiveTab) : setActiveTab('notifications')}/>
        )}
 

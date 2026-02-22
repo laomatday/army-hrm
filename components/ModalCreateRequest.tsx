@@ -3,6 +3,7 @@ import { Employee } from '../types';
 import { submitRequest } from '../services/api';
 import { formatDateString, triggerHaptic } from '../utils/helpers';
 import ModalHeader from './ModalHeader';
+import { useScrollControl } from '../hooks/useScrollControl';
 
 interface Props {
   user: Employee;
@@ -11,9 +12,10 @@ interface Props {
   onSuccess: () => void;
   onAlert: (title: string, msg: string, type: 'success' | 'error' | 'warning') => void;
   initialData?: { type: string, date: string, reason: string } | null;
+  setIsNavVisible: (visible: boolean) => void;
 }
 
-const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess, onAlert, initialData }) => {
+const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess, onAlert, initialData, setIsNavVisible }) => {
   const [formData, setFormData] = useState({
       type: 'Nghỉ phép năm',
       fromDate: '',
@@ -26,6 +28,9 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
 
   const touchStart = useRef<{x: number, y: number} | null>(null);
   const touchEnd = useRef<{x: number, y: number} | null>(null);
+  const minSwipeDistance = 60;
+  
+  const { handleScroll } = useScrollControl(setIsNavVisible);
 
   useEffect(() => {
     if (isOpen) {
@@ -95,13 +100,8 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
   };
 
   const onTouchStart = (e: React.TouchEvent) => {
-    const x = e.targetTouches[0].clientX;
-    if (x < 30 || x > window.innerWidth - 30) {
-        touchStart.current = null;
-        return;
-    }
     touchEnd.current = null;
-    touchStart.current = { x, y: e.targetTouches[0].clientY };
+    touchStart.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY };
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
@@ -114,8 +114,10 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
     const distanceX = touchStart.current.x - touchEnd.current.x;
     const distanceY = touchStart.current.y - touchEnd.current.y;
     
-    if (Math.abs(distanceX) > Math.abs(distanceY)) {
-         if (distanceX < -60) {
+    // Check if the swipe is mostly vertical (for closing the modal)
+    if (Math.abs(distanceY) > Math.abs(distanceX)) {
+         // Check for a downward swipe
+         if (distanceY < -minSwipeDistance) {
              triggerHaptic('light');
              onClose();
          }
@@ -140,7 +142,7 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
              />
         </div>
 
-        <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-14">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-14" onScroll={handleScroll}>
             <div className="animate-fade-in mt-4">
                 
                 <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors">
