@@ -7,13 +7,15 @@ import { calculateDistance, getCurrentTimeStr, timeToMinutes, calculateNetWorkHo
 
 export async function doCheckIn(data: { employeeId: string, lat: number, lng: number, deviceId: string, imageUrl: string }, user: Employee) {
   try {
-    const sysConfig = await getSystemConfig();
+    const [sysConfig, openSessionQuery, shifts] = await Promise.all([
+        getSystemConfig(),
+        db.collection(COLLECTIONS.ATTENDANCE)
+            .where("employee_id", "==", user.employee_id)
+            .where("time_out", "==", "")
+            .get(),
+        getShifts()
+    ]);
     
-    const openSessionQuery = await db.collection(COLLECTIONS.ATTENDANCE)
-        .where("employee_id", "==", user.employee_id)
-        .where("time_out", "==", "")
-        .get();
-
     const todayStr = new Date().toISOString().split('T')[0];
     
     if (!openSessionQuery.empty) {
@@ -56,20 +58,25 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
         [userLat, userLng] = [userLng, userLat];
     }
 
-    const locationsSnap = await db.collection(COLLECTIONS.LOCATIONS).get();
-    const allLocations = locationsSnap.docs.map(d => d.data() as LocationConfig);
-    
-    let allowedLocations = allLocations;
+    let locationsQuery = db.collection(COLLECTIONS.LOCATIONS);
     const userAllowed = user.allowed_locations || [];
-    
+
     if (!userAllowed.includes("ALL")) {
         const allowedIds = userAllowed.length > 0 ? userAllowed : [user.center_id];
         const cleanAllowedIds = allowedIds.filter(id => !!id).map(id => String(id).trim());
-        
-        allowedLocations = allLocations.filter(loc => 
-            cleanAllowedIds.includes(String(loc.center_id).trim())
-        );
+
+        if (cleanAllowedIds.length > 0) {
+            // Firestore 'in' query supports up to 10 elements. If array is larger, chunking is needed.
+            // Assuming the number of allowed locations per user is reasonably small.
+            locationsQuery = locationsQuery.where('center_id', 'in', cleanAllowedIds);
+        } else {
+            // If no allowed IDs, create a query that returns nothing.
+            locationsQuery = locationsQuery.where('center_id', 'in', ['__EMPTY__']);
+        }
     }
+
+    const locationsSnap = await locationsQuery.get();
+    const allowedLocations = locationsSnap.docs.map(d => d.data() as LocationConfig);
 
     if (allowedLocations.length === 0) {
         return { 
@@ -113,7 +120,6 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
         };
     }
 
-    const shifts = await getShifts();
     const nowTimeStr = getCurrentTimeStr();
     const currentShift = determineShift(nowTimeStr, shifts);
     
@@ -154,7 +160,9 @@ export async function doCheckIn(data: { employeeId: string, lat: number, lng: nu
     };
 
     await db.collection(COLLECTIONS.ATTENDANCE).doc(docId).set(newAttendance);
-    await calculateAndSaveMonthlyStats(user.employee_id, todayStr);
+
+    // Run in background - DO NOT await this
+    calculateAndSaveMonthlyStats(user.employee_id, todayStr);
 
     return { success: true, message: `Check-in thành công tại ${nearestLoc.location_name}! (${currentShift.name})` };
   } catch (e: any) {
@@ -255,7 +263,8 @@ export async function doCheckOut(employeeId: string, lat?: number, lng?: number)
         last_updated: new Date().toISOString()
     });
 
-    await calculateAndSaveMonthlyStats(employeeId, openDoc.date);
+    // Run in background
+    calculateAndSaveMonthlyStats(employeeId, openDoc.date);
 
     return { success: true, message: `Check-out thành công! Công: ${netHours.toFixed(2)}h` };
 
