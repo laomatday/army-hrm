@@ -77,6 +77,9 @@ html {
   -webkit-font-smoothing: antialiased; 
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+
+  /* Prevent pull-to-refresh and overscroll navigation */
+  overscroll-behavior-x: none;
 }
 
 body {
@@ -92,6 +95,7 @@ body {
   
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
   touch-action: manipulation;
 }
 
