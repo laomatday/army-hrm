@@ -1,7 +1,7 @@
-import { db, storage } from "./firebase";
+import { db } from "../services/firebase";
 import { Employee } from "../types";
-import { COLLECTIONS } from "./constants";
-import { hashPassword } from "../utils/helpers";
+import { COLLECTIONS } from "../services/constants";
+
 
 // --- SECURITY UTILS ---
 export async function hashPassword(str: string) {

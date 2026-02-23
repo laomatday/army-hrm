@@ -21,6 +21,13 @@
   --dark-text-primary: 248, 250, 252;
   --dark-text-secondary: 148, 163, 184;
 
+  /* Dark Mode: Dùng tông Slate (Xanh than) thay vì Gray (Xám) -> Sang trọng hơn */
+  --dark-bg: 2, 6, 23;               /* Slate 950 */
+  --dark-surface: 15, 23, 42;        /* Slate 900 */
+  --dark-border: 30, 41, 59;         /* Slate 800 */
+  --dark-text-primary: 241, 245, 249;
+  --dark-text-secondary: 148, 163, 184;
+
   /* Structural Variables */
   --radius-card: 28px;
   --radius-modal: 32px;

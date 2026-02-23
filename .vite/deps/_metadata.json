@@ -1,0 +1,79 @@
+{
+  "hash": "72543079",
+  "configHash": "59c2f294",
+  "lockfileHash": "0b7ddb0d",
+  "browserHash": "581e2837",
+  "optimized": {
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "eb029238",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "2a36d6f4",
+      "needsInterop": true
+    },
+    "firebase/compat/app": {
+      "src": "../../node_modules/firebase/compat/app/dist/esm/index.esm.js",
+      "file": "firebase_compat_app.js",
+      "fileHash": "5ff06b2d",
+      "needsInterop": false
+    },
+    "firebase/compat/auth": {
+      "src": "../../node_modules/firebase/compat/auth/dist/esm/index.esm.js",
+      "file": "firebase_compat_auth.js",
+      "fileHash": "24f65f9e",
+      "needsInterop": false
+    },
+    "firebase/compat/firestore": {
+      "src": "../../node_modules/firebase/compat/firestore/dist/esm/index.esm.js",
+      "file": "firebase_compat_firestore.js",
+      "fileHash": "8f400de1",
+      "needsInterop": false
+    },
+    "firebase/compat/messaging": {
+      "src": "../../node_modules/firebase/compat/messaging/dist/esm/index.esm.js",
+      "file": "firebase_compat_messaging.js",
+      "fileHash": "4af872aa",
+      "needsInterop": false
+    },
+    "firebase/compat/functions": {
+      "src": "../../node_modules/firebase/compat/functions/dist/esm/index.esm.js",
+      "file": "firebase_compat_functions.js",
+      "fileHash": "76659f6a",
+      "needsInterop": false
+    },
+    "react-qr-code": {
+      "src": "../../node_modules/react-qr-code/lib/index.js",
+      "file": "react-qr-code.js",
+      "fileHash": "7562f204",
+      "needsInterop": true
+    },
+    "xlsx": {
+      "src": "../../node_modules/xlsx/xlsx.mjs",
+      "file": "xlsx.js",
+      "fileHash": "edd307fa",
+      "needsInterop": false
+    },
+    "html5-qrcode": {
+      "src": "../../node_modules/html5-qrcode/esm/index.js",
+      "file": "html5-qrcode.js",
+      "fileHash": "010399f1",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-AIJUAX4S": {
+      "file": "chunk-AIJUAX4S.js"
+    },
+    "chunk-32E4H3EV": {
+      "file": "chunk-32E4H3EV.js"
+    },
+    "chunk-G3PMV62Z": {
+      "file": "chunk-G3PMV62Z.js"
+    }
+  }
+}

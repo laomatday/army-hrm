@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { triggerHaptic } from '../utils/helpers';
-import Spinner from './Spinner';
+import { triggerHaptic } from '../../utils/helpers';
+import Spinner from '../common/Spinner';
 
 interface Props {
   onRefresh: () => Promise<void>;

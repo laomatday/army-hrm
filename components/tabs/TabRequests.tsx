@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { DashboardData, Employee } from '../../types';
 import { formatDateString, triggerHaptic } from '../../utils/helpers';
-import PullToRefresh from '../ui/PullToRefresh';
+import PullToRefresh from '../layout/PullToRefresh';
 
 interface Props {
   data: DashboardData | null;
@@ -33,9 +33,11 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
   };
 
   const getTypeConfig = (type: string) => {
+      if (!type) return { icon: 'fa-file-lines', bg: 'bg-slate-50 dark:bg-dark-border/50', text: 'text-slate-500 dark:text-dark-text-secondary' };
       if (type.includes('Nghỉ phép')) return { icon: 'fa-umbrella-beach', bg: 'bg-primary/10 dark:bg-primary/20', text: 'text-primary dark:text-primary' };
       if (type.includes('Nghỉ ốm')) return { icon: 'fa-user-nurse', bg: 'bg-secondary-red/10 dark:bg-secondary-red/20', text: 'text-secondary-red dark:text-secondary-red' };
       if (type.includes('Công tác')) return { icon: 'fa-plane-departure', bg: 'bg-secondary-purple/10 dark:bg-secondary-purple/20', text: 'text-secondary-purple dark:text-secondary-purple' };
+      if (type.includes('Làm việc tại nhà')) return { icon: 'fa-house-laptop', bg: 'bg-primary/10 dark:bg-primary/20', text: 'text-primary dark:text-primary' };
       if (type.includes('Giải trình')) return { icon: 'fa-file-signature', bg: 'bg-secondary-yellow/10 dark:bg-secondary-yellow/20', text: 'text-secondary-yellow dark:text-secondary-yellow' };
       return { icon: 'fa-file-lines', bg: 'bg-slate-50 dark:bg-dark-border/50', text: 'text-slate-500 dark:text-dark-text-secondary' };
   };

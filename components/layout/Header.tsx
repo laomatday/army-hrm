@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Employee } from '../types';
-import Avatar from './Avatar';
+import { Employee } from '../../types';
+import Avatar from '../common/Avatar';
 import { TabType } from './BottomNav';
-import SettingsModal from './SettingsModal';
+import SettingsModal from '../modals/SettingsModal';
 
 interface Props {
   user: Employee;

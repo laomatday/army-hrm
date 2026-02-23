@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import QRCode from 'react-qr-code';
-import { db } from '../services/firebase';
-import { doCheckIn } from '../services/api';
-import { uploadToGoogleDrive } from '../services/googleDrive';
-import { Employee, Kiosk } from '../types';
-import { getKioskById } from '../services/kiosk';
+import { db } from '../../services/firebase';
+import { doCheckIn } from '../../services/api';
+import { uploadToGoogleDrive } from '../../services/googleDrive';
+import { Employee, Kiosk } from '../../types';
+import { getKioskById } from '../../services/kiosk';
 
 interface Props {
   onExit: () => void;

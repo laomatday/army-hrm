@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { DashboardData, Employee } from '../types';
-import { getShortName, triggerHaptic } from '../utils/helpers';
-import Avatar from './Avatar';
-import ModalContactDetail from './ModalContactDetail';
+import { DashboardData, Employee } from '../../types';
+import { getShortName, triggerHaptic } from '../../utils/helpers';
+import Avatar from '../common/Avatar';
+import ModalContactDetail from '../modals/ModalContactDetail';
 
 interface Props {
   data: DashboardData | null;

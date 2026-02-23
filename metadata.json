@@ -1,5 +1,5 @@
 {
-  "name": "Army HRM Ver 1.0",
+  "name": "Remix: Army HRM Ver 1.0",
   "description": "Ứng dụng chấm công bằng định vị và nhận diện khuôn mặt",
   "requestFramePermissions": [
     "camera",

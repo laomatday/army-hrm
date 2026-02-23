@@ -1,5 +1,6 @@
 
-import { db, firebase } from "./firebase";
+import firebase from "firebase/compat/app";
+import { db } from "./firebase";
 import { HolidayConfig, Attendance, LeaveRequest, Explanation, Employee, MonthlyStats } from "../types";
 import { getSystemConfig } from "./config";
 import { sendSystemNotification } from "./notification";

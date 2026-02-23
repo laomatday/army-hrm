@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { DashboardData, Employee } from '../../types';
 import { formatDateString, triggerHaptic } from '../../utils/helpers';
-import PullToRefresh from '../ui/PullToRefresh';
+import PullToRefresh from '../layout/PullToRefresh';
 
 interface Props {
   data: DashboardData | null;

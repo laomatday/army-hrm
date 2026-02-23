@@ -1,5 +1,5 @@
 import React from 'react';
-import { Employee } from '../types';
+import { Employee } from '../../types';
 
 export type TabType = 'home' | 'history' | 'requests' | 'contacts' | 'profile' | 'manager' | 'notifications';
 

@@ -1,11 +1,11 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
-import { Employee } from '../types';
-import { getShortName, formatDateString, triggerHaptic } from '../utils/helpers';
-import { updateProfileAvatar, changePassword } from '../services/api';
-import Avatar from './Avatar';
-import ImageCropper from './ImageCropper';
-import ConfirmDialog from './ConfirmDialog';
-import ModalHeader from './ModalHeader';
+import { Employee } from '../../types';
+import { getShortName, formatDateString, triggerHaptic } from '../../utils/helpers';
+import { updateProfileAvatar, changePassword } from '../../services/api';
+import Avatar from '../common/Avatar';
+import ImageCropper from '../common/ImageCropper';
+import ConfirmDialog from '../modals/ConfirmDialog';
+import ModalHeader from '../modals/ModalHeader';
 
 interface Props {
   user: Employee;

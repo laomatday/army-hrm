@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { doLogin } from '../services/api';
-import { getDeviceId, triggerHaptic } from '../utils/helpers';
-import { Employee } from '../types';
+import { doLogin } from '../../services/api';
+import { getDeviceId, triggerHaptic } from '../../utils/helpers';
+import { Employee } from '../../types';
 
 interface Props {
   onLoginSuccess: (user: Employee) => void;

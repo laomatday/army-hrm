@@ -1,27 +1,27 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Employee } from '../types';
-import { doCheckIn, doCheckOut } from '../services/api';
-import { getDeviceId, triggerHaptic, calculateDistance } from '../utils/helpers';
-import { useDashboardData } from '../hooks/useDashboardData';
-import { useScrollControl } from '../hooks/useScrollControl';
+import { Employee } from '../../types';
+import { doCheckIn, doCheckOut } from '../../services/api';
+import { getDeviceId, triggerHaptic, calculateDistance } from '../../utils/helpers';
+import { useDashboardData } from '../../hooks/useDashboardData';
+import { useScrollControl } from '../../hooks/useScrollControl';
 
-import { db } from '../services/firebase';
-import TabHome from './TabHome';
-import TabHistory from './TabHistory';
-import TabRequests from './TabRequests';
-import TabContacts from './TabContacts';
-import TabProfile from './TabProfile';
-import TabManager from './TabManager'; 
-import ModalCamera from './ModalCamera';
-import ModalQRScanner from './ModalQRScanner';
-import NotificationsModal from './NotificationsModal';
-import ModalCreateRequest from './ModalCreateRequest';
-import ModalExplainWork from './ModalExplainWork';
+import { db } from '../../services/firebase';
+import TabHome from '../tabs/TabHome';
+import TabHistory from '../tabs/TabHistory';
+import TabRequests from '../tabs/TabRequests';
+import TabContacts from '../tabs/TabContacts';
+import TabProfile from '../tabs/TabProfile';
+import TabManager from '../tabs/TabManager'; 
+import ModalCamera from '../modals/ModalCamera';
+import ModalQRScanner from '../modals/ModalQRScanner';
+import NotificationsModal from '../modals/NotificationsModal';
+import ModalCreateRequest from '../modals/ModalCreateRequest';
+import ModalExplainWork from '../modals/ModalExplainWork';
 import BottomNav, { TabType } from './BottomNav';
 import Header from './Header';
-import Spinner from './Spinner';
-import ConfirmDialog from './ConfirmDialog';
-import { DashboardSkeleton } from './Skeleton';
+import Spinner from '../common/Spinner';
+import ConfirmDialog from '../modals/ConfirmDialog';
+import { DashboardSkeleton } from '../common/Skeleton';
 
 interface Props {
   user: Employee;

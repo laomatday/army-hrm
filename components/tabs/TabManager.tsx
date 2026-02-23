@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { DashboardData, Employee, LeaveRequest, Explanation } from '../types';
-import { processRequest, processExplanation } from '../services/api';
-import { formatDateString, triggerHaptic } from '../utils/helpers';
-import Avatar from './Avatar';
-import PullToRefresh from './PullToRefresh';
+import { DashboardData, Employee, LeaveRequest, Explanation } from '../../types';
+import { processRequest, processExplanation } from '../../services/api';
+import { formatDateString, triggerHaptic } from '../../utils/helpers';
+import Avatar from '../common/Avatar';
+import PullToRefresh from '../layout/PullToRefresh';
 
 interface Props {
   data: DashboardData | null;
@@ -45,6 +45,16 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
       for (let i = 1; i <= daysInMonth; i++) days.push(new Date(year, month, i));
       
       return days;
+  };
+
+  const getTypeConfig = (type: string) => {
+      if (!type) return { icon: 'fa-file-signature', bg: 'bg-secondary-yellow', text: 'text-secondary-yellow dark:text-secondary-yellow', bgLight: 'bg-secondary-yellow/10 dark:bg-secondary-yellow/20', border: 'border-secondary-yellow/20 dark:border-secondary-yellow/30' };
+      if (type.includes('Nghỉ phép')) return { icon: 'fa-umbrella-beach', bg: 'bg-primary', text: 'text-primary dark:text-primary', bgLight: 'bg-primary/10 dark:bg-primary/20', border: 'border-primary/20 dark:border-primary/30' };
+      if (type.includes('Nghỉ ốm')) return { icon: 'fa-user-nurse', bg: 'bg-secondary-red', text: 'text-secondary-red dark:text-secondary-red', bgLight: 'bg-secondary-red/10 dark:bg-secondary-red/20', border: 'border-secondary-red/20 dark:border-secondary-red/30' };
+      if (type.includes('Công tác')) return { icon: 'fa-plane-departure', bg: 'bg-secondary-purple', text: 'text-secondary-purple dark:text-secondary-purple', bgLight: 'bg-secondary-purple/10 dark:bg-secondary-purple/20', border: 'border-secondary-purple/20 dark:border-secondary-purple/30' };
+      if (type.includes('Làm việc tại nhà')) return { icon: 'fa-house-laptop', bg: 'bg-primary', text: 'text-primary dark:text-primary', bgLight: 'bg-primary/10 dark:bg-primary/20', border: 'border-primary/20 dark:border-primary/30' };
+      if (type.includes('Giải trình')) return { icon: 'fa-file-signature', bg: 'bg-secondary-yellow', text: 'text-secondary-yellow dark:text-secondary-yellow', bgLight: 'bg-secondary-yellow/10 dark:bg-secondary-yellow/20', border: 'border-secondary-yellow/20 dark:border-secondary-yellow/30' };
+      return { icon: 'fa-file-lines', bg: 'bg-slate-500', text: 'text-slate-500 dark:text-dark-text-secondary', bgLight: 'bg-slate-50 dark:bg-dark-border/50', border: 'border-slate-200 dark:border-dark-border' };
   };
 
   const getLeavesForDate = (date: Date) => {
@@ -215,9 +225,7 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
                                                 {groupedApprovals[centerName][teamName].map((item: any) => {
                                                     const isLeave = item.itemType === 'leave';
                                                     const typeLabel = isLeave ? item.type : 'Giải trình công';
-                                                    const typeColor = isLeave 
-                                                        ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary border border-primary/20 dark:border-primary/30' 
-                                                        : 'bg-secondary-yellow/10 dark:bg-secondary-yellow/20 text-secondary-yellow dark:text-secondary-yellow border border-secondary-yellow/20 dark:border-secondary-yellow/30';
+                                                    const typeConfig = getTypeConfig(typeLabel);
                                                     const dateInfo = isLeave 
                                                         ? renderDateRange(item.from_date, item.to_date)
                                                         : formatDateString(item.date?.split('T')[0]);
@@ -233,8 +241,8 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
                                                                             className="w-12 h-12 rounded-2xl"
                                                                             textSize="text-sm"
                                                                         />
-                                                                        <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-neutral-white dark:border-dark-surface flex items-center justify-center ${isLeave ? 'bg-primary' : 'bg-secondary-yellow'}`}>
-                                                                            <i className={`fa-solid ${isLeave ? 'fa-umbrella-beach' : 'fa-file-signature'} text-[8px] text-white`}></i>
+                                                                        <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-neutral-white dark:border-dark-surface flex items-center justify-center ${typeConfig.bg}`}>
+                                                                            <i className={`fa-solid ${typeConfig.icon} text-[8px] text-white`}></i>
                                                                         </div>
                                                                     </div>
                                                                     <div>
@@ -247,7 +255,7 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
 
                                                             <div className="bg-slate-50 dark:bg-dark-bg/50 p-4 rounded-2xl border border-slate-100 dark:border-dark-border mb-4">
                                                                 <div className="flex items-center justify-between mb-2">
-                                                                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border uppercase tracking-widest ${typeColor}`}>
+                                                                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border uppercase tracking-widest ${typeConfig.bgLight} ${typeConfig.text} ${typeConfig.border}`}>
                                                                         {typeLabel}
                                                                     </span>
                                                                     <div className="flex items-center gap-2">

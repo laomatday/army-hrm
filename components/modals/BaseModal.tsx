@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { useScrollControl } from '../../../hooks/useScrollControl';
+import { useScrollControl } from '../../hooks/useScrollControl';
 
 interface Props {
   isOpen: boolean;

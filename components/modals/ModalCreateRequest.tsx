@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Employee } from '../../../types';
-import { submitRequest } from '../../../services/api';
-import { formatDateString, triggerHaptic } from '../../../utils/helpers';
+import { Employee } from '../../types';
+import { submitRequest } from '../../services/api';
+import { formatDateString, triggerHaptic } from '../../utils/helpers';
 import ModalHeader from './ModalHeader';
-import { useScrollControl } from '../../../hooks/useScrollControl';
+import { useScrollControl } from '../../hooks/useScrollControl';
 
 interface Props {
   user: Employee;

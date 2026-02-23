@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { Employee } from '../../types';
-import Avatar from '../ui/Avatar';
+import Avatar from '../common/Avatar';
 import ModalHeader from './ModalHeader';
 import { formatDateString, triggerHaptic } from '../../utils/helpers';
 
