@@ -13,7 +13,7 @@
   --secondary-orange: 255, 149, 0;   /* Apple Orange (#ff9500) */
   
   /* Màu trung tính */
-  --neutral-black: 30, 41, 59;       /* Apple Dark Mode Bg (#1c1c1e) */
+  --neutral-black: 28, 28, 30;       /* Apple Dark Mode Bg (#1c1c1e) */
   --neutral-white: 255, 255, 255;
 
   /* Structural Variables */
@@ -197,30 +197,3 @@ input[type="date"] {
 
 .pb-safe { padding-bottom: env(safe-area-inset-bottom, 34px); }
 .pt-safe { padding-top: env(safe-area-inset-top, 44px); }
-
-/* 1. Ép màu nền Body ở chế độ Dark Mode thành màu sâu nhất (OLED Black style) */
-.dark body {
-  background-color: rgb(var(--dark-bg-body)) !important;
-}
-
-/* 2. Xử lý triệt để các thẻ đang bị trùng màu nền */
-/* Nó sẽ tìm tất cả các thẻ mà bạn đang dùng dark:bg-neutral-black/50 hoặc bg-white */
-.dark .bg-neutral-white, 
-.dark .bg-white,
-.dark [class*="bg-neutral-black/50"] {
-  background-color: rgb(var(--neutral-black)) !important; /* Ép về màu Slate 800 */
-  border: 1px solid rgba(255, 255, 255, 0.05) !important; /* Tự động thêm viền mờ */
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important; /* Đổ bóng sâu */
-}
-
-/* 3. Làm cho các đường kẻ chia tách (divide) trong danh sách rõ ràng hơn */
-.dark .divide-slate-50 > * + *,
-.dark .border-slate-100,
-.dark .border-slate-200 {
-  border-color: rgba(255, 255, 255, 0.05) !important;
-}
-
-/* 4. Làm cho các ô Input lồng bên trong thẻ Card sáng hơn nữa để tạo chiều sâu */
-.dark .bg-slate-50 {
-  background-color: rgba(255, 255, 255, 0.03) !important;
-}
