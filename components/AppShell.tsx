@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Employee } from '../types';
 import { doCheckIn, doCheckOut } from '../services/api';
@@ -364,21 +363,21 @@ const AppShell: React.FC<Props> = ({ user, onLogout }) => {
   if (loading) return <DashboardSkeleton />;
 
   return (
-    <div className="h-full w-full bg-slate-50 dark:bg-slate-900 relative flex flex-col font-sans transition-colors duration-300">
+    <div className="h-full w-full bg-slate-50 dark:bg-neutral-black relative flex flex-col font-sans transition-colors duration-300">
        {checkingIn && (
-         <div className="fixed inset-0 z-[5000] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-6 text-center animate-fade-in">
-           <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 max-w-sm w-full shadow-2xl animate-scale-in">
+         <div className="fixed inset-0 z-[5000] bg-neutral-black/80 backdrop-blur-sm flex items-center justify-center p-6 text-center animate-fade-in">
+           <div className="bg-neutral-white dark:bg-neutral-black/90 rounded-[32px] p-8 max-w-sm w-full shadow-2xl border border-slate-100 dark:border-slate-800 animate-scale-in">
              <div className="relative w-20 h-20 mx-auto mb-6">
-               <div className="absolute inset-0 border-4 border-slate-100 dark:border-slate-700 rounded-full"></div>
-               <div className="absolute inset-0 border-4 border-emerald-500 rounded-full border-t-transparent animate-spin"></div>
+               <div className="absolute inset-0 border-4 border-slate-100 dark:border-slate-800 rounded-full"></div>
+               <div className="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin"></div>
              </div>
-             <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">Đang xử lý...</h3>
-             <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+             <h3 className="text-xl font-black text-neutral-black dark:text-neutral-white mb-2 tracking-tight">Đang xử lý...</h3>
+             <p className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-relaxed">
                {checkInStatus || "Vui lòng đợi trong giây lát"}
              </p>
              <button 
                onClick={() => setCheckingIn(false)}
-               className="mt-8 text-slate-400 text-xs font-bold uppercase tracking-widest hover:text-slate-600 transition-colors"
+               className="mt-8 text-slate-400 dark:text-slate-500 text-xs font-extrabold uppercase tracking-widest hover:text-neutral-black dark:hover:text-neutral-white transition-colors"
              >
                Ẩn đi (Vẫn chạy nền)
              </button>
@@ -398,7 +397,7 @@ const AppShell: React.FC<Props> = ({ user, onLogout }) => {
        )}
 
        <div 
-         className="flex-1 relative overflow-hidden bg-slate-50 dark:bg-slate-900"
+         className="flex-1 relative overflow-hidden bg-slate-50 dark:bg-neutral-black"
          onTouchStart={onTouchStart}
          onTouchMove={(e) => { touchEnd.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY }; }}
          onTouchEnd={onTouchEnd}

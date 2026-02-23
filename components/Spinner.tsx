@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface Props {
@@ -7,7 +6,7 @@ interface Props {
   className?: string;
 }
 
-const Spinner: React.FC<Props> = ({ size = 'md', color = 'border-t-emerald-600', className = '' }) => {
+const Spinner: React.FC<Props> = ({ size = 'md', color = 'border-t-primary', className = '' }) => {
   const sizeClasses = {
     sm: 'h-5 w-5 border-2',
     md: 'h-8 w-8 border-[3px]',
@@ -16,7 +15,7 @@ const Spinner: React.FC<Props> = ({ size = 'md', color = 'border-t-emerald-600',
   };
 
   return (
-    <div className={`animate-spin rounded-full border-slate-200 ${sizeClasses[size]} ${color} ${className}`}></div>
+    <div className={`animate-spin rounded-full border-slate-200 dark:border-slate-700 ${sizeClasses[size]} ${color} ${className}`}></div>
   );
 };
 

@@ -53,7 +53,8 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
       "Nghỉ ốm",
       "Nghỉ không lương",
       "Công tác",
-      "Làm việc tại nhà"
+      "Làm việc tại nhà",
+      "Giải trình công"
   ];
 
   const handleSubmit = async () => {
@@ -129,11 +130,11 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
 
   if (!isOpen) return null;
 
-  const gradientClass = 'from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20';
+  const gradientClass = 'from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10';
 
   return (
     <div 
-        className="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-900 flex flex-col animate-slide-up transition-colors duration-300"
+        className="fixed inset-0 z-[100] bg-slate-50 dark:bg-neutral-black flex flex-col animate-slide-up transition-colors duration-300"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -148,39 +149,39 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
         <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-14" onScroll={handleScroll}>
             <div className="animate-fade-in mt-4">
                 
-                <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors">
+                <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[32px] p-8 border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors">
                     <div className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-br ${gradientClass} rounded-t-[32px] transition-colors duration-500`}></div>
                     
                     <div className="relative z-10 flex flex-col items-center">
-                        <div className="w-28 h-28 rounded-full p-1.5 bg-white dark:bg-slate-800 mb-4 mt-2 relative transition-colors">
-                            <div className="w-full h-full rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center border border-emerald-100 dark:border-emerald-800/50 text-emerald-500 dark:text-emerald-400">
+                        <div className="w-28 h-28 rounded-full p-1.5 bg-neutral-white dark:bg-neutral-black/80 mb-4 mt-2 relative transition-colors">
+                            <div className="w-full h-full rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center border border-primary/20 dark:border-primary/30 text-primary dark:text-primary">
                                 <i className="fa-solid fa-paper-plane text-4xl ml-[-4px]"></i>
                             </div>
                         </div>
-                        <h2 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight leading-tight">Tạo Đề Xuất</h2>
+                        <h2 className="text-2xl font-black text-neutral-black dark:text-neutral-white tracking-tight leading-tight">Tạo Đề Xuất</h2>
                         <p className="text-xs text-slate-500 dark:text-slate-400 font-bold mt-2 uppercase tracking-wide">Điền thông tin chi tiết bên dưới</p>
                     </div>
                 </div>
 
-                <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
+                <h3 className="text-xs font-black text-primary dark:text-primary uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
                     <i className="fa-solid fa-pen-to-square text-[10px]"></i>
                     Thông tin đề xuất
                 </h3>
                 
-                <div className="bg-white dark:bg-slate-800 rounded-[32px] p-6 border border-slate-100 dark:border-slate-700 space-y-5 transition-colors mb-8">
+                <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[32px] p-6 border border-slate-100 dark:border-slate-700 space-y-5 transition-colors mb-8">
                      
                      <div className="relative">
                          <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1 block mb-1.5">Loại đề xuất</label>
                          <button 
                             onClick={() => { triggerHaptic('light'); setIsTypeOpen(!isTypeOpen); }}
-                            className={`w-full h-14 px-4 flex justify-between items-center bg-slate-50 dark:bg-slate-900 border rounded-2xl text-sm font-bold outline-none transition-all ${isTypeOpen ? 'border-emerald-500 dark:border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200 dark:border-slate-700'}`}
+                            className={`w-full h-14 px-4 flex justify-between items-center bg-slate-50 dark:bg-neutral-black/80 border rounded-2xl text-sm font-bold outline-none transition-all ${isTypeOpen ? 'border-primary dark:border-primary ring-2 ring-primary/20' : 'border-slate-200 dark:border-slate-700'}`}
                          >
-                             <span className="text-slate-800 dark:text-white">{formData.type}</span>
+                             <span className="text-neutral-black dark:text-neutral-white">{formData.type}</span>
                              <i className={`fa-solid fa-chevron-down text-slate-400 dark:text-slate-500 text-xs transition-transform ${isTypeOpen ? 'rotate-180' : ''}`}></i>
                          </button>
                          
                          {isTypeOpen && (
-                            <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl z-50 overflow-hidden animate-fade-in p-2 space-y-1">
+                            <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-neutral-white dark:bg-neutral-black border border-slate-100 dark:border-slate-700 rounded-2xl z-50 overflow-hidden animate-fade-in p-2 space-y-1 shadow-xl">
                                 {requestTypes.map((type) => (
                                     <div 
                                         key={type}
@@ -191,13 +192,13 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
                                         }}
                                         className={`flex items-center justify-between p-3.5 rounded-xl cursor-pointer transition-all ${
                                             formData.type === type 
-                                            ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' 
+                                            ? 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary' 
                                             : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                                         }`}
                                     >
                                         <span className="font-bold text-sm">{type}</span>
                                         {formData.type === type && (
-                                            <i className="fa-solid fa-check text-emerald-600 dark:text-emerald-400"></i>
+                                            <i className="fa-solid fa-check text-primary dark:text-primary"></i>
                                         )}
                                     </div>
                                 ))}
@@ -216,7 +217,7 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
                                      onChange={e => setFormData({...formData, fromDate: e.target.value})}
                                      onClick={(e) => { try { e.currentTarget.showPicker() } catch(err) {} }}
                                  />
-                                 <div className={`absolute inset-0 w-full h-full px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold flex items-center justify-between pointer-events-none z-10 transition-colors ${formData.fromDate ? 'text-slate-800 dark:text-white' : 'text-slate-400 dark:text-slate-500'}`}>
+                                 <div className={`absolute inset-0 w-full h-full px-4 bg-slate-50 dark:bg-neutral-black/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold flex items-center justify-between pointer-events-none z-10 transition-colors ${formData.fromDate ? 'text-neutral-black dark:text-neutral-white' : 'text-slate-400 dark:text-slate-500'}`}>
                                      <span>{formData.fromDate ? formatDateDisplay(formData.fromDate) : 'dd/mm/yyyy'}</span>
                                      <i className="fa-regular fa-calendar text-slate-400 dark:text-slate-500"></i>
                                  </div>
@@ -232,7 +233,7 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
                                      onChange={e => setFormData({...formData, toDate: e.target.value})}
                                      onClick={(e) => { try { e.currentTarget.showPicker() } catch(err) {} }}
                                  />
-                                 <div className={`absolute inset-0 w-full h-full px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold flex items-center justify-between pointer-events-none z-10 transition-colors ${formData.toDate ? 'text-slate-800 dark:text-white' : 'text-slate-400 dark:text-slate-500'}`}>
+                                 <div className={`absolute inset-0 w-full h-full px-4 bg-slate-50 dark:bg-neutral-black/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold flex items-center justify-between pointer-events-none z-10 transition-colors ${formData.toDate ? 'text-neutral-black dark:text-neutral-white' : 'text-slate-400 dark:text-slate-500'}`}>
                                      <span>{formData.toDate ? formatDateDisplay(formData.toDate) : 'dd/mm/yyyy'}</span>
                                      <i className="fa-regular fa-calendar text-slate-400 dark:text-slate-500"></i>
                                  </div>
@@ -250,7 +251,7 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
                                  onChange={e => setFormData({...formData, expirationDate: e.target.value})}
                                  onClick={(e) => { try { e.currentTarget.showPicker() } catch(err) {} }}
                              />
-                             <div className={`absolute inset-0 w-full h-full px-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold flex items-center justify-between pointer-events-none z-10 transition-colors ${formData.expirationDate ? 'text-slate-800 dark:text-white' : 'text-slate-400 dark:text-slate-500'}`}>
+                             <div className={`absolute inset-0 w-full h-full px-4 bg-slate-50 dark:bg-neutral-black/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold flex items-center justify-between pointer-events-none z-10 transition-colors ${formData.expirationDate ? 'text-neutral-black dark:text-neutral-white' : 'text-slate-400 dark:text-slate-500'}`}>
                                  <span>{formData.expirationDate ? formatDateDisplay(formData.expirationDate) : 'dd/mm/yyyy'}</span>
                                  <i className="fa-regular fa-clock text-slate-400 dark:text-slate-500"></i>
                              </div>
@@ -260,8 +261,8 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
                      <div>
                          <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1 block mb-1.5">Lý do chi tiết</label>
                          <textarea 
-                            className="w-full p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-800 dark:text-white outline-none h-32 resize-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:focus:border-emerald-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" 
-                            placeholder="Nhập lý do nghỉ..."
+                            className="w-full p-4 bg-slate-50 dark:bg-neutral-black/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-neutral-black dark:text-neutral-white outline-none h-32 resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary dark:focus:border-primary transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" 
+                            placeholder="Nhập lý do nghỉ hoặc giải trình..."
                             value={formData.reason} 
                             onChange={e => setFormData({...formData, reason: e.target.value})}
                          ></textarea>
@@ -270,7 +271,7 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
                      <button 
                         onClick={handleSubmit} 
                         disabled={loading} 
-                        className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-400 text-white font-extrabold py-4 rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-widest mt-2"
+                        className="w-full bg-primary hover:bg-primary/90 disabled:opacity-70 text-neutral-white font-extrabold py-4 rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-widest mt-2 shadow-sm"
                      >
                             {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : <>Gửi đề xuất <i className="fa-solid fa-paper-plane"></i></>}
                      </button>

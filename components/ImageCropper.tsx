@@ -4,9 +4,9 @@ import Spinner from './Spinner';
 
 interface Props {
   imageSrc: string;
-  userId: string; // Add userId to create unique filenames
+  userId: string;
   onCancel: () => void;
-  onCropComplete: (url: string) => Promise<void>; // Changed from fileId to url
+  onCropComplete: (url: string) => Promise<void>; 
 }
 
 const ImageCropper: React.FC<Props> = ({ imageSrc, userId, onCancel, onCropComplete }) => {
@@ -92,7 +92,7 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, userId, onCancel, onCropCompl
         displaySize.height
       );
 
-      return canvas.toDataURL('image/jpeg', 0.9); // Use jpeg for better compatibility
+      return canvas.toDataURL('image/jpeg', 0.9);
     }
     return null;
   };
@@ -114,11 +114,11 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, userId, onCancel, onCropCompl
   };
 
   return (
-    <div className="fixed inset-0 z-[5000] bg-black/80 backdrop-blur-sm flex flex-col animate-fade-in touch-none">
+    <div className="fixed inset-0 z-[6000] bg-neutral-black/95 backdrop-blur-md flex flex-col animate-fade-in touch-none">
       
       <div className="flex-1 flex flex-col items-center justify-center relative w-full">
           
-          <h2 className="text-white font-bold text-lg absolute top-[15vh] pointer-events-none">Chỉnh sửa ảnh đại diện</h2>
+          <h2 className="text-neutral-white font-black text-xl absolute top-[15vh] pointer-events-none tracking-tight">Cắt Ảnh Đại Diện</h2>
 
           <div
             className="relative z-20"
@@ -141,7 +141,7 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, userId, onCancel, onCropCompl
                 onTouchEnd={handlePointerUp}
              ></div>
 
-             <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center">
+             <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-slate-900">
                 <img 
                     ref={imgRef}
                     src={imageSrc}
@@ -161,17 +161,17 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, userId, onCancel, onCropCompl
           </div>
 
           {isUploading && (
-            <div className="absolute inset-0 z-40 bg-black/50 flex flex-col items-center justify-center">
-                <Spinner />
-                <p className="text-white/80 mt-4">Đang tải ảnh lên...</p>
+            <div className="absolute inset-0 z-40 bg-neutral-black/70 flex flex-col items-center justify-center backdrop-blur-sm">
+                <i className="fa-solid fa-circle-notch fa-spin text-primary text-4xl"></i>
+                <p className="text-neutral-white font-bold tracking-widest uppercase mt-4">Đang tải ảnh lên...</p>
             </div>
           )}
       </div>
 
-      <div className="bg-slate-900 border-t border-slate-800 pb-safe pt-6 px-6 z-40 w-full rounded-t-3xl">
+      <div className="bg-neutral-white dark:bg-neutral-black border-t border-slate-200 dark:border-slate-800 pb-safe pt-6 px-6 z-40 w-full rounded-t-[32px]">
           
-          <div className="flex items-center gap-4 justify-center mb-6">
-              <i className="fa-solid fa-magnifying-glass-minus text-slate-500"></i>
+          <div className="flex items-center gap-4 justify-center mb-6 px-2">
+              <i className="fa-solid fa-image text-slate-400 dark:text-slate-500 text-sm"></i>
               <input 
                 type="range" 
                 min="1" 
@@ -180,25 +180,25 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, userId, onCancel, onCropCompl
                 value={zoom}
                 onChange={(e) => setZoom(parseFloat(e.target.value))}
                 disabled={isUploading}
-                className="w-full max-w-[240px] h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 disabled:opacity-50"
+                className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary disabled:opacity-50"
               />
-              <i className="fa-solid fa-magnifying-glass-plus text-white"></i>
+              <i className="fa-solid fa-image text-neutral-black dark:text-neutral-white text-lg"></i>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 mb-4">
                <button 
                   onClick={onCancel} 
                   disabled={isUploading}
-                  className="flex-1 py-4 bg-slate-800 text-slate-300 rounded-2xl font-bold text-base border border-slate-700 active:scale-95 transition-all disabled:opacity-50"
+                  className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl font-extrabold text-base active:scale-95 transition-all disabled:opacity-50 uppercase tracking-widest"
                >
                    Hủy
                </button>
                <button 
                   onClick={handleConfirmCrop}
                   disabled={!imageLoaded || isUploading}
-                  className="flex-1 py-4 bg-emerald-500 text-white rounded-2xl font-bold text-base active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                  className="flex-1 py-4 bg-primary text-neutral-white rounded-2xl font-extrabold text-base active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-3 uppercase tracking-widest shadow-lg shadow-primary/30"
                >
-                  {isUploading ? <Spinner size='sm' /> : 'Lưu'}
+                  {isUploading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : 'Lưu Ảnh'}
                </button>
           </div>
       </div>

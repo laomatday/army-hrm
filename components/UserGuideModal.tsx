@@ -233,7 +233,7 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
   const currentSection = sections[activeTab];
 
   return (
-    <div className="fixed inset-0 z-[100] bg-white dark:bg-slate-950 flex flex-col font-sans animate-slide-up overflow-hidden">
+    <div className="fixed inset-0 z-[100] bg-neutral-white dark:bg-neutral-black flex flex-col font-sans animate-slide-up overflow-hidden">
       <div 
         className="h-full flex flex-col pb-safe overflow-hidden" 
         onScroll={handleScroll}
@@ -243,7 +243,7 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
       >
         <button 
             onClick={handleCloseAndSave}
-            className="absolute top-safe mt-4 right-4 z-50 px-3 py-1.5 rounded-full bg-black/5 dark:bg-white/5 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest hover:bg-black/10 transition-colors"
+            className="absolute top-safe mt-4 right-4 z-50 px-3 py-1.5 rounded-full bg-black/5 dark:bg-neutral-white/5 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest hover:bg-black/10 transition-colors"
         >
             Đóng
         </button>
@@ -288,7 +288,7 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
             </div>
         </div>
 
-        <div className="px-8 py-8 flex flex-col items-center gap-6 bg-white/80 dark:bg-slate-950/80 border-t border-slate-100 dark:border-slate-800/50">
+        <div className="px-8 py-8 flex flex-col items-center gap-6 bg-neutral-white/80 dark:bg-neutral-black/80 border-t border-slate-100 dark:border-slate-800/50">
             <div className="flex gap-2.5">
                 {sections.map((_, idx) => (
                     <button 

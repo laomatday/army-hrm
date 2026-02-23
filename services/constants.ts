@@ -14,3 +14,6 @@ export const COLLECTIONS = {
 export const GLOBAL_ADMINS = ["Admin", "HR", "Board", "Accountant"];
 export const MANAGERS = ["Manager"];
 export const PRIVILEGED_ROLES = [...GLOBAL_ADMINS, ...MANAGERS];
+
+// ADDED: The missing LOGO_URL constant
+export const LOGO_URL = "https://firebasestorage.googleapis.com/v0/b/army-hrm-70615.firebasestorage.app/o/logo%2Flogo.png?alt=media";

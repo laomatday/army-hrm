@@ -41,7 +41,7 @@ const Header: React.FC<Props> = ({ user, activeTab, onOpenProfile, onOpenNoti, c
 
   return (
     <>
-        <div className="fixed top-0 left-0 w-full z-40 bg-slate-50 dark:bg-slate-900 pt-safe transition-all">
+        <div className="fixed top-0 left-0 w-full z-40 bg-slate-50 dark:bg-neutral-black pt-safe transition-all border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center justify-between h-14 px-3 relative">
                 
                 <div className="flex items-center z-20 gap-1">
@@ -59,7 +59,7 @@ const Header: React.FC<Props> = ({ user, activeTab, onOpenProfile, onOpenNoti, c
                             </span>
                         )}
                         {customIcon && (
-                            <i className={`${customIcon} text-emerald-500 text-sm mb-0.5`}></i>
+                            <i className={`${customIcon} text-primary text-sm mb-0.5`}></i>
                         )}
                     </div>
                 </div>
@@ -78,7 +78,7 @@ const Header: React.FC<Props> = ({ user, activeTab, onOpenProfile, onOpenNoti, c
                     {activeTab === 'requests' && onCreateRequest && (
                         <button 
                             onClick={onCreateRequest}
-                            className="w-10 h-10 rounded-full flex items-center justify-center text-emerald-500 transition-all active:scale-90"
+                            className="w-10 h-10 rounded-full flex items-center justify-center text-primary transition-all active:scale-90"
                         >
                             <i className="fa-solid fa-plus text-xl"></i>
                         </button>
@@ -96,7 +96,7 @@ const Header: React.FC<Props> = ({ user, activeTab, onOpenProfile, onOpenNoti, c
                                 className="w-9 h-9" 
                                 textSize="text-xs"
                             />
-                            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 ring-2 ring-white dark:ring-slate-900 rounded-full"></div>
+                            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-primary ring-2 ring-white dark:ring-slate-900 rounded-full"></div>
                         </div>
                     )}
                 </div>

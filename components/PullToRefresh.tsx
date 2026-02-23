@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { triggerHaptic } from '../utils/helpers';
 import Spinner from './Spinner';
@@ -26,7 +25,6 @@ const PullToRefresh: React.FC<Props> = ({ onRefresh, children, className = "", s
       const touchY = e.touches[0].clientY;
       const deltaY = touchY - touchStartY.current;
       if (contentRef.current?.scrollTop === 0 && deltaY > 10) {
-          // Add resistance
           setPullY(Math.min((deltaY - 10) * 0.4, 120)); 
       }
   };
@@ -54,19 +52,17 @@ const PullToRefresh: React.FC<Props> = ({ onRefresh, children, className = "", s
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
     >
-        {/* Pull Indicator */}
         <div 
             className="w-full flex items-center justify-center overflow-hidden transition-all duration-200 absolute top-0 left-0 z-0 pointer-events-none"
             style={{ height: `${pullY}px`, opacity: Math.min(pullY / 40, 1) }}
         >
             {isRefreshing ? (
-                 <Spinner size="md" color="border-t-emerald-600" />
+                 <Spinner size="md" color="border-t-primary" />
             ) : (
-                 <i className="fa-solid fa-arrow-down text-emerald-500 text-xl animate-bounce"></i>
+                 <i className="fa-solid fa-arrow-down text-primary text-xl animate-bounce"></i>
             )}
         </div>
 
-        {/* Content Wrapper */}
         <div style={{ transform: `translateY(${pullY}px)`, transition: isRefreshing ? 'transform 0.2s' : 'transform 0s' }} className="relative z-10 min-h-full">
             {children}
         </div>

@@ -77,12 +77,34 @@ const ModalCamera: React.FC<Props> = ({ onClose, onCapture, onError }) => {
   };
 
   return (
-    <div className="modal-camera">
-      <video ref={videoRef} autoPlay playsInline muted />
-      <div className="controls">
-        <button onClick={onClose} className="btn-close">Hủy</button>
-        <button onClick={handleCapture} className="btn-capture" disabled={!location}>
-          {location ? 'Chụp ảnh' : 'Đang lấy GPS...'}
+    <div className="fixed inset-0 z-[6000] bg-neutral-black flex flex-col animate-fade-in touch-none">
+      {/* Video chiếm trọn màn hình */}
+      <video 
+        ref={videoRef} 
+        autoPlay 
+        playsInline 
+        muted 
+        className="flex-1 w-full h-full object-cover transform scale-x-[-1]" 
+      />
+      
+      {/* Overlay controls */}
+      <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-neutral-black/90 to-transparent pt-20 pb-safe px-6 pb-8 flex gap-4">
+        <button 
+            onClick={onClose} 
+            className="w-16 h-16 rounded-2xl bg-neutral-white/20 backdrop-blur-md text-neutral-white font-extrabold flex items-center justify-center active:scale-95 transition-all border border-neutral-white/30"
+        >
+            <i className="fa-solid fa-xmark text-2xl"></i>
+        </button>
+        <button 
+            onClick={handleCapture} 
+            disabled={!location}
+            className="flex-1 h-16 bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-neutral-white rounded-2xl font-extrabold text-lg flex items-center justify-center gap-2 active:scale-95 transition-all uppercase tracking-widest shadow-lg shadow-primary/30"
+        >
+          {!location ? (
+              <><i className="fa-solid fa-location-crosshairs fa-fade"></i> Đang lấy GPS...</>
+          ) : (
+              <><i className="fa-solid fa-camera"></i> Chụp ảnh</>
+          )}
         </button>
       </div>
     </div>

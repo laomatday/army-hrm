@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { doLogin } from '../services/api';
 import { getDeviceId, triggerHaptic } from '../utils/helpers';
@@ -38,19 +37,19 @@ const LoginView: React.FC<Props> = ({ onLoginSuccess }) => {
   const LOGO_URL = "https://lh3.googleusercontent.com/d/1r_FuqN4QJbch0FYXAwX8efW9s0ucreiO";
 
   return (
-    <div className="w-full h-full bg-slate-50 dark:bg-slate-900 flex flex-col justify-between p-8 relative overflow-hidden font-sans transition-colors duration-300">
+    <div className="w-full h-full bg-slate-50 dark:bg-neutral-black flex flex-col justify-between p-8 relative overflow-hidden font-sans transition-colors duration-300">
 
       <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full z-10 animate-slide-up">
         {/* Brand */}
         <div className="mb-12 flex flex-col items-center">
-           <div className="w-40 h-40 mb-8 relative rounded-[2.5rem] bg-white dark:bg-slate-800 p-2 flex items-center justify-center border border-slate-100 dark:border-slate-700 transform hover:scale-105 transition-transform duration-500">
+           <div className="w-40 h-40 mb-8 relative rounded-[2.5rem] bg-neutral-white dark:bg-neutral-black/80 p-2 flex items-center justify-center border border-slate-200 dark:border-slate-700 transform hover:scale-105 transition-transform duration-500 shadow-sm">
               <img 
                 src={LOGO_URL} 
                 className="w-full h-full object-contain" 
                 alt="Army HRM Logo" 
               />
            </div>
-           <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Xin chào,</h1>
+           <h1 className="text-4xl font-black text-neutral-black dark:text-neutral-white tracking-tight">Xin chào,</h1>
            <p className="text-slate-500 dark:text-slate-400 mt-2 font-medium text-base tracking-wide">Đăng nhập để bắt đầu làm việc</p>
         </div>
 
@@ -63,16 +62,16 @@ const LoginView: React.FC<Props> = ({ onLoginSuccess }) => {
             }}
         >
           {error && (
-            <div className="flex items-center gap-3 bg-red-50 dark:bg-red-900/20 p-4 rounded-2xl border border-red-100 dark:border-red-900/30 animate-scale-in">
-                <i className="fa-solid fa-circle-exclamation text-red-500 dark:text-red-400 text-lg"></i>
-                <span className="text-red-600 dark:text-red-400 text-sm font-bold">{error}</span>
+            <div className="flex items-center gap-3 bg-secondary-red/10 dark:bg-secondary-red/20 p-4 rounded-2xl border border-secondary-red/20 dark:border-secondary-red/30 animate-scale-in">
+                <i className="fa-solid fa-circle-exclamation text-secondary-red dark:text-secondary-red text-lg"></i>
+                <span className="text-secondary-red dark:text-secondary-red text-sm font-bold">{error}</span>
             </div>
           )}
           
           <div className="space-y-2">
-            <label className="text-xs font-extrabold text-slate-400 uppercase ml-1 tracking-wider">Tài khoản</label>
+            <label className="text-xs font-extrabold text-slate-400 dark:text-slate-500 uppercase ml-1 tracking-wider">Tài khoản</label>
             <div className="relative group">
-                <i className="fa-solid fa-user absolute left-4 top-4 text-slate-400 group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-500 transition-colors text-base"></i>
+                <i className="fa-solid fa-user absolute left-4 top-4 text-slate-400 group-focus-within:text-primary transition-colors text-base"></i>
                 <input 
                   type="text" 
                   value={email}
@@ -80,23 +79,23 @@ const LoginView: React.FC<Props> = ({ onLoginSuccess }) => {
                   enterKeyHint="next"
                   autoComplete="username"
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-11 pr-4 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white font-bold text-base outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 placeholder:font-semibold tracking-tight" 
+                  className="w-full pl-11 pr-4 py-4 bg-neutral-white dark:bg-neutral-black/50 border border-slate-200 dark:border-slate-700 rounded-2xl text-neutral-black dark:text-neutral-white font-bold text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 placeholder:font-semibold tracking-tight" 
                   placeholder="Mã nhân viên / Email" 
                 />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-extrabold text-slate-400 uppercase ml-1 tracking-wider">Mật khẩu</label>
+            <label className="text-xs font-extrabold text-slate-400 dark:text-slate-500 uppercase ml-1 tracking-wider">Mật khẩu</label>
             <div className="relative group">
-                <i className="fa-solid fa-lock absolute left-4 top-4 text-slate-400 group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-500 transition-colors text-base"></i>
+                <i className="fa-solid fa-lock absolute left-4 top-4 text-slate-400 group-focus-within:text-primary transition-colors text-base"></i>
                 <input 
                   type="password" 
                   value={password}
                   enterKeyHint="go"
                   autoComplete="current-password"
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-900 dark:text-white font-bold text-base outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 placeholder:font-semibold tracking-widest" 
+                  className="w-full pl-11 pr-4 py-4 bg-neutral-white dark:bg-neutral-black/50 border border-slate-200 dark:border-slate-700 rounded-2xl text-neutral-black dark:text-neutral-white font-bold text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 placeholder:font-semibold tracking-widest" 
                   placeholder="••••••••" 
                 />
             </div>
@@ -105,7 +104,7 @@ const LoginView: React.FC<Props> = ({ onLoginSuccess }) => {
           <button 
             type="submit"
             disabled={loading}
-            className="w-full mt-4 bg-emerald-600 text-white py-4 rounded-2xl font-extrabold text-base hover:bg-emerald-700 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 uppercase tracking-widest"
+            className="w-full mt-4 bg-primary text-neutral-white py-4 rounded-2xl font-extrabold text-base hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 uppercase tracking-widest shadow-lg shadow-primary/20"
           >
             {loading ? <i className="fa-solid fa-circle-notch fa-spin"></i> : <span>Đăng Nhập</span>}
             {!loading && <i className="fa-solid fa-arrow-right text-base"></i>}
@@ -114,7 +113,7 @@ const LoginView: React.FC<Props> = ({ onLoginSuccess }) => {
       </div>
 
       <div className="text-center pb-safe z-10">
-        <p className="text-[10px] text-slate-300 dark:text-slate-600 font-extrabold uppercase tracking-widest">Army HRM © 2026 Enterprise</p>
+        <p className="text-[10px] text-slate-400 dark:text-slate-600 font-extrabold uppercase tracking-widest">Army HRM © 2026 Enterprise</p>
       </div>
     </div>
   );

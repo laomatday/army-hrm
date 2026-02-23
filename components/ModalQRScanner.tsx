@@ -65,7 +65,7 @@ const ModalQRScanner: React.FC<Props> = ({ onClose, onScan, onError }) => {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[5000] bg-[#05070a] flex flex-col overflow-hidden font-sans">
+    <div className="fixed inset-0 z-[5000] bg-neutral-black flex flex-col overflow-hidden font-sans">
       <style>{`
         #qr-reader video {
             width: 100% !important;
@@ -77,11 +77,6 @@ const ModalQRScanner: React.FC<Props> = ({ onClose, onScan, onError }) => {
             overflow: hidden;
             background: #000;
         }
-        @keyframes scan-horizontal {
-            0% { left: 5%; }
-            50% { left: 95%; }
-            100% { left: 5%; }
-        }
         @keyframes scan-vertical {
             0% { top: 0%; }
             100% { top: 100%; }
@@ -89,7 +84,7 @@ const ModalQRScanner: React.FC<Props> = ({ onClose, onScan, onError }) => {
         .scanner-corner {
             width: 40px;
             height: 40px;
-            border-color: #10b981;
+            border-color: rgb(var(--primary-color));
             position: absolute;
             z-index: 20;
         }
@@ -97,14 +92,14 @@ const ModalQRScanner: React.FC<Props> = ({ onClose, onScan, onError }) => {
       
       <div className="safe-top bg-black/40 border-b border-white/5 px-6 py-4 flex items-center justify-between z-50">
           <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20">
-                  <i className="fa-solid fa-qrcode text-emerald-500 text-sm"></i>
+              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
+                  <i className="fa-solid fa-qrcode text-primary text-sm"></i>
               </div>
-              <span className="text-white font-bold tracking-tight">Quét mã Kiosk</span>
+              <span className="text-neutral-white font-bold tracking-tight">Quét mã Kiosk</span>
           </div>
           <button 
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-neutral-white transition-colors"
           >
             <i className="fa-solid fa-xmark text-lg"></i>
           </button>
@@ -116,32 +111,32 @@ const ModalQRScanner: React.FC<Props> = ({ onClose, onScan, onError }) => {
         <div className="absolute inset-0 z-10 pointer-events-none">
             <div className="absolute inset-0 bg-black/60"></div>
             
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70vw] h-[70vw] max-w-[300px] max-h-[300px] bg-transparent shadow-[0_0_0_9999px_rgba(5,7,10,0.7)] rounded-3xl">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70vw] h-[70vw] max-w-[300px] max-h-[300px] bg-transparent shadow-[0_0_0_9999px_rgba(0,0,0,0.7)] rounded-3xl">
                 
                 <div className="scanner-corner -top-2 -left-2 border-t-4 border-l-4 rounded-tl-2xl"></div>
                 <div className="scanner-corner -top-2 -right-2 border-t-4 border-r-4 rounded-tr-2xl"></div>
                 <div className="scanner-corner -bottom-2 -left-2 border-b-4 border-l-4 rounded-bl-2xl"></div>
                 <div className="scanner-corner -bottom-2 -right-2 border-b-4 border-r-4 rounded-br-2xl"></div>
 
-                <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500 animate-[scan-vertical_2.5s_ease-in-out_infinite] opacity-60"></div>
+                <div className="absolute top-0 left-0 w-full h-1 bg-primary animate-[scan-vertical_2.5s_ease-in-out_infinite] opacity-60"></div>
                 
                 <div className="absolute -bottom-10 left-0 w-full text-center">
-                    <span className="text-[10px] text-emerald-500/60 font-black tracking-[0.2em] uppercase animate-pulse">Scanning Biometric ID...</span>
+                    <span className="text-[10px] text-primary/80 font-black tracking-[0.2em] uppercase animate-pulse">Scanning Kiosk ID...</span>
                 </div>
             </div>
         </div>
 
         {!hasCamera && (
-            <div className="absolute inset-0 z-[60] bg-[#05070a] flex flex-col items-center justify-center">
-                <div className="w-12 h-12 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mb-4"></div>
-                <p className="text-emerald-500/60 text-sm font-bold uppercase tracking-widest">Khởi tạo camera...</p>
+            <div className="absolute inset-0 z-[60] bg-neutral-black flex flex-col items-center justify-center">
+                <div className="w-12 h-12 border-2 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+                <p className="text-primary/80 text-sm font-bold uppercase tracking-widest">Khởi tạo camera...</p>
             </div>
         )}
       </div>
       
-      <div className="safe-bottom bg-black/80 border-t border-white/5 p-8 z-50">
+      <div className="safe-bottom bg-neutral-black/90 backdrop-blur-md border-t border-white/5 p-8 z-50">
           <div className="max-w-xs mx-auto text-center">
-              <h3 className="text-white font-bold mb-2">Hướng dẫn</h3>
+              <h3 className="text-neutral-white font-bold mb-2">Hướng dẫn</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
                   Di chuyển camera để mã QR trên màn hình Kiosk nằm gọn trong khung hình vuông.
               </p>

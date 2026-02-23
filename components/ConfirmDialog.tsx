@@ -20,38 +20,33 @@ const ConfirmDialog: React.FC<Props> = ({
   
   const colors = {
       danger: { 
-          bg: 'bg-red-50', 
-          iconColor: 'text-red-500', 
-          btn: 'bg-red-500 hover:bg-red-600',
-          cancelBtn: 'text-red-500 bg-red-50 hover:bg-red-100',
+          bg: 'bg-secondary-red/10 dark:bg-secondary-red/20', 
+          iconColor: 'text-secondary-red', 
+          btn: 'bg-secondary-red hover:bg-secondary-red/90 text-neutral-white',
           icon: 'fa-triangle-exclamation'
       },
       error: { 
-          bg: 'bg-red-50', 
-          iconColor: 'text-red-500', 
-          btn: 'bg-red-500 hover:bg-red-600',
-          cancelBtn: 'text-red-500 bg-red-50 hover:bg-red-100',
+          bg: 'bg-secondary-red/10 dark:bg-secondary-red/20', 
+          iconColor: 'text-secondary-red', 
+          btn: 'bg-secondary-red hover:bg-secondary-red/90 text-neutral-white',
           icon: 'fa-xmark'
       },
       success: { 
-          bg: 'bg-emerald-50', 
-          iconColor: 'text-emerald-500', 
-          btn: 'bg-emerald-600 hover:bg-emerald-700', 
-          cancelBtn: 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100',
+          bg: 'bg-secondary-green/10 dark:bg-secondary-green/20', 
+          iconColor: 'text-secondary-green', 
+          btn: 'bg-secondary-green hover:bg-secondary-green/90 text-neutral-white', 
           icon: 'fa-check'
       },
       info: { 
-          bg: 'bg-blue-50', 
-          iconColor: 'text-blue-500', 
-          btn: 'bg-blue-600 hover:bg-blue-700', 
-          cancelBtn: 'text-blue-600 bg-blue-50 hover:bg-blue-100',
+          bg: 'bg-primary/10 dark:bg-primary/20', 
+          iconColor: 'text-primary', 
+          btn: 'bg-primary hover:bg-primary/90 text-neutral-white', 
           icon: 'fa-info'
       },
       warning: { 
-          bg: 'bg-orange-50', 
-          iconColor: 'text-orange-500', 
-          btn: 'bg-orange-500 hover:bg-orange-600', 
-          cancelBtn: 'text-orange-600 bg-orange-50 hover:bg-orange-100',
+          bg: 'bg-secondary-yellow/10 dark:bg-secondary-yellow/20', 
+          iconColor: 'text-secondary-yellow', 
+          btn: 'bg-secondary-yellow hover:bg-secondary-yellow/90 text-neutral-white', 
           icon: 'fa-exclamation'
       }
   };
@@ -60,15 +55,15 @@ const ConfirmDialog: React.FC<Props> = ({
   const isSingleButton = !cancelLabel;
 
   return (
-    <div className="fixed inset-0 z-[3000] bg-slate-900/60 flex items-center justify-center p-6 animate-fade-in">
-        <div className="bg-white rounded-[24px] w-full max-w-[320px] flex flex-col animate-scale-in overflow-hidden transform transition-all">
+    <div className="fixed inset-0 z-[6000] bg-neutral-black/60 backdrop-blur-sm flex items-center justify-center p-6 animate-fade-in">
+        <div className="bg-neutral-white dark:bg-neutral-black rounded-[24px] w-full max-w-[320px] flex flex-col animate-scale-in overflow-hidden transform transition-all border border-slate-100 dark:border-slate-800 shadow-2xl">
             <div className="p-6 flex flex-col items-center text-center">
                 <div className={`w-16 h-16 ${theme.bg} rounded-full flex items-center justify-center mb-5`}>
                     <i className={`fa-solid ${theme.icon} text-2xl ${theme.iconColor}`}></i>
                 </div>
 
-                <h3 className="text-lg font-extrabold text-slate-800 mb-2 leading-tight px-2">{title}</h3>
-                <div className="text-sm text-slate-500 font-medium leading-relaxed px-1">
+                <h3 className="text-lg font-black text-neutral-black dark:text-neutral-white mb-2 leading-tight px-2 tracking-tight">{title}</h3>
+                <div className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed px-1">
                     {message}
                 </div>
             </div>
@@ -78,7 +73,7 @@ const ConfirmDialog: React.FC<Props> = ({
                     <button 
                         onClick={onCancel} 
                         disabled={isLoading} 
-                        className="py-3.5 px-4 rounded-xl text-base font-bold text-slate-500 bg-slate-50 hover:bg-slate-100 transition-colors disabled:opacity-50 active:scale-[0.98]"
+                        className="py-3.5 px-4 rounded-xl text-sm font-extrabold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 active:scale-[0.98] uppercase tracking-wide"
                     >
                         {cancelLabel}
                     </button>
@@ -87,7 +82,7 @@ const ConfirmDialog: React.FC<Props> = ({
                 <button 
                     onClick={onConfirm} 
                     disabled={isLoading} 
-                    className={`py-3.5 px-4 rounded-xl text-base font-bold text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.98] ${theme.btn} ${isSingleButton ? 'w-full' : ''}`}
+                    className={`py-3.5 px-4 rounded-xl text-sm font-extrabold transition-all disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.98] uppercase tracking-wide ${theme.btn} ${isSingleButton ? 'w-full' : ''}`}
                 >
                     {isLoading && <i className="fa-solid fa-circle-notch fa-spin"></i>}
                     {confirmLabel}

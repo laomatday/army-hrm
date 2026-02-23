@@ -256,7 +256,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
             </div>
             <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide">{label}</p>
-                <p className="text-base font-semibold text-slate-800 dark:text-white truncate">{value}</p>
+                <p className="text-base font-semibold text-neutral-black dark:text-neutral-white truncate">{value}</p>
             </div>
             {isLink && (
                 <div className="text-slate-300 dark:text-slate-600">
@@ -274,7 +274,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
   };
 
   return (
-    <div className="absolute inset-0 flex flex-col bg-slate-50 dark:bg-slate-900 font-sans transition-colors duration-300">
+    <div className="absolute inset-0 flex flex-col bg-slate-50 dark:bg-neutral-black font-sans transition-colors duration-300">
         
         <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-28">
             
@@ -289,7 +289,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                                 type="text"
                                 inputMode="search"
                                 enterKeyHint="search"
-                                className="w-full h-12 bg-white dark:bg-slate-800 rounded-2xl pl-12 pr-10 text-base font-bold text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/20 border border-slate-200 dark:border-slate-700 transition-all"
+                                className="w-full h-12 bg-neutral-white dark:bg-neutral-black/50 rounded-2xl pl-12 pr-10 text-base font-bold text-neutral-black dark:text-neutral-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20 border border-slate-200 dark:border-slate-700 transition-all"
                                 placeholder="Tìm kiếm..."
                                 value={term}
                                 onChange={e => setTerm(e.target.value)}
@@ -302,7 +302,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                         </div>
                         <button 
                             onClick={handleCancelSearch}
-                            className="text-sm font-bold text-slate-500 dark:text-slate-400 active:text-slate-800 dark:active:text-white px-2 py-2"
+                            className="text-sm font-bold text-slate-500 dark:text-slate-400 active:text-neutral-black dark:active:text-neutral-white px-2 py-2"
                         >
                             Hủy
                         </button>
@@ -312,7 +312,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
             
             {isSearching && term ? (
                 <div className="mt-2 animate-fade-in">
-                    <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700">
+                    <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700">
                         {term !== debouncedTerm ? (
                             <div className="flex flex-col items-center justify-center py-10 text-slate-400 dark:text-slate-600 opacity-60">
                                 <i className="fa-solid fa-circle-notch fa-spin text-2xl mb-3"></i>
@@ -336,21 +336,21 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                                         textSize="text-xs"
                                     />
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="text-sm font-bold text-slate-800 dark:text-white truncate">{c.name}</h4>
+                                        <h4 className="text-sm font-bold text-neutral-black dark:text-neutral-white truncate">{c.name}</h4>
                                         <div className="flex flex-wrap gap-1 mt-1">
                                             {c.department && (
-                                                <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[10px] font-extrabold border border-blue-100 dark:border-blue-900/30 uppercase tracking-wide truncate max-w-[100px]">
+                                                <span className="px-2 py-0.5 rounded-md bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary text-[10px] font-extrabold border border-primary/20 dark:border-primary/30 uppercase tracking-wide truncate max-w-[100px]">
                                                     {c.department}
                                                 </span>
                                             )}
                                             {c.position && (
-                                                <span className="px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 text-[10px] font-extrabold border border-purple-100 dark:border-purple-900/30 uppercase tracking-wide truncate max-w-[100px]">
+                                                <span className="px-2 py-0.5 rounded-md bg-secondary-purple/10 dark:bg-secondary-purple/20 text-secondary-purple dark:text-secondary-purple text-[10px] font-extrabold border border-secondary-purple/20 dark:border-secondary-purple/30 uppercase tracking-wide truncate max-w-[100px]">
                                                     {c.position}
                                                 </span>
                                             )}
                                         </div>
                                     </div>
-                                    <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600 flex items-center justify-center group-hover:bg-emerald-50 dark:group-hover:bg-emerald-900/30 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors">
+                                    <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600 flex items-center justify-center group-hover:bg-primary/10 dark:group-hover:bg-primary/20 group-hover:text-primary dark:group-hover:text-primary transition-colors">
                                         <i className="fa-solid fa-chevron-right text-xs"></i>
                                     </div>
                                 </div>
@@ -362,7 +362,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                 <div className="pb-4">
                     {sortedGroups.map((groupKey, index) => (
                         <div key={groupKey} className="space-y-3 animate-slide-up mb-6">
-                            <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase ml-2 tracking-widest flex items-center justify-between gap-2">
+                            <h3 className="text-xs font-black text-primary dark:text-primary uppercase ml-2 tracking-widest flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-2">
                                     <i className="fa-solid fa-user-group text-[10px]"></i>
                                     <span>{groupKey}</span>
@@ -370,7 +370,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                                 <span className="bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded text-[10px] tabular-nums">{groupedContacts[groupKey].length}</span>
                             </h3>
                             
-                            <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700">
+                            <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700">
                                 {groupedContacts[groupKey].map(c => (
                                     <div key={c.employee_id} 
                                         onClick={() => handleOpenContact(c)}
@@ -383,21 +383,21 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                                             textSize="text-xs"
                                         />
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="text-base font-bold text-slate-800 dark:text-white truncate leading-tight group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">{c.name}</h4>
+                                            <h4 className="text-base font-bold text-neutral-black dark:text-neutral-white truncate leading-tight group-hover:text-primary dark:group-hover:text-primary transition-colors">{c.name}</h4>
                                             <div className="flex flex-wrap gap-1 mt-1">
                                                 {c.department && (
-                                                    <span className="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[10px] font-extrabold border border-blue-100 dark:border-blue-900/30 uppercase tracking-wide truncate max-w-[120px]">
+                                                    <span className="px-2 py-0.5 rounded-md bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary text-[10px] font-extrabold border border-primary/20 dark:border-primary/30 uppercase tracking-wide truncate max-w-[120px]">
                                                         {c.department}
                                                     </span>
                                                 )}
                                                 {c.position && (
-                                                    <span className="px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 text-[10px] font-extrabold border border-purple-100 dark:border-purple-900/30 uppercase tracking-wide truncate max-w-[120px]">
+                                                    <span className="px-2 py-0.5 rounded-md bg-secondary-purple/10 dark:bg-secondary-purple/20 text-secondary-purple dark:text-secondary-purple text-[10px] font-extrabold border border-secondary-purple/20 dark:border-secondary-purple/30 uppercase tracking-wide truncate max-w-[120px]">
                                                         {c.position}
                                                     </span>
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600 flex items-center justify-center group-hover:bg-emerald-50 dark:group-hover:bg-emerald-900/30 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors">
+                                        <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600 flex items-center justify-center group-hover:bg-primary/10 dark:group-hover:bg-primary/20 group-hover:text-primary dark:group-hover:text-primary transition-colors">
                                             <i className="fa-solid fa-chevron-right text-xs"></i>
                                         </div>
                                     </div>
@@ -411,7 +411,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
 
         {selectedContact && (
             <div 
-                className="fixed inset-0 z-[90] bg-slate-50 dark:bg-slate-900 flex flex-col animate-slide-up transition-colors duration-300"
+                className="fixed inset-0 z-[90] bg-slate-50 dark:bg-neutral-black flex flex-col animate-slide-up transition-colors duration-300"
                 onTouchStart={onTouchStart}
                 onTouchMove={onTouchMove}
                 onTouchEnd={onTouchEnd}
@@ -428,11 +428,11 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                     onScroll={handleScroll}
                  >
                       <div className="animate-fade-in mt-4">
-                          <div className="bg-white dark:bg-slate-800 rounded-[32px] p-8 border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors">
-                               <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 dark:from-emerald-500/20 dark:to-teal-500/20 rounded-t-[32px] transition-colors duration-500"></div>
+                          <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[32px] p-8 border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors">
+                               <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-t-[32px] transition-colors duration-500"></div>
                                
                                <div className="relative z-10 flex flex-col items-center">
-                                   <div className="w-28 h-28 rounded-full p-1.5 bg-white dark:bg-slate-800 mb-4 mt-2 relative group transition-colors">
+                                   <div className="w-28 h-28 rounded-full p-1.5 bg-neutral-white dark:bg-neutral-black mb-4 mt-2 relative group transition-colors">
                                        <Avatar 
                                           src={selectedContact.face_ref_url} 
                                           name={selectedContact.name} 
@@ -440,48 +440,48 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                                           textSize="text-3xl"
                                        />
                                    </div>
-                                   <h2 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight leading-tight">{selectedContact.name}</h2>
+                                   <h2 className="text-2xl font-black text-neutral-black dark:text-neutral-white tracking-tight leading-tight">{selectedContact.name}</h2>
                                    
                                    <div className="mt-3 flex gap-2 flex-wrap justify-center">
-                                       <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 rounded-lg text-[10px] font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-wide">{selectedContact.department}</span>
-                                       <span className="px-3 py-1 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-900/30 rounded-lg text-[10px] font-extrabold text-purple-600 dark:text-purple-400 uppercase tracking-wide">{selectedContact.position}</span>
+                                       <span className="px-3 py-1 bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/30 rounded-lg text-[10px] font-extrabold text-primary dark:text-primary uppercase tracking-wide">{selectedContact.department}</span>
+                                       <span className="px-3 py-1 bg-secondary-purple/10 dark:bg-secondary-purple/20 border border-secondary-purple/20 dark:border-secondary-purple/30 rounded-lg text-[10px] font-extrabold text-secondary-purple dark:text-secondary-purple uppercase tracking-wide">{selectedContact.position}</span>
                                    </div>
                                </div>
                           </div>
 
-                          <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-2 ml-2 tracking-widest flex items-center gap-2">
+                          <h3 className="text-xs font-black text-primary dark:text-primary uppercase mb-2 ml-2 tracking-widest flex items-center gap-2">
                               <i className="fa-solid fa-briefcase text-[10px]"></i> Công việc
                           </h3>
-                          <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-6">
+                          <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-6">
                               <ContactDetailRow 
                                   icon="fa-location-dot" 
-                                  colorClass="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
+                                  colorClass="bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary"
                                   label="Văn phòng"
                                   value={locationsMap[selectedContact.center_id] || selectedContact.center_id}
                               />
                               <ContactDetailRow 
                                   icon="fa-building-user" 
-                                  colorClass="bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
+                                  colorClass="bg-secondary-purple/10 dark:bg-secondary-purple/20 text-secondary-purple dark:text-secondary-purple"
                                   label="Phòng ban"
-                                  value={selectedContact.department}
+                                  value={selectedContact.department || "--"}
                               />
                               {selectedContact.direct_manager_id && empNameMap[selectedContact.direct_manager_id] && (
                                   <ContactDetailRow 
                                       icon="fa-user-tie" 
-                                      colorClass="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"
+                                      colorClass="bg-secondary-green/10 dark:bg-secondary-green/20 text-secondary-green dark:text-secondary-green"
                                       label="Quản lý trực tiếp"
                                       value={empNameMap[selectedContact.direct_manager_id]}
                                   />
                               )}
                           </div>
 
-                          <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-2 ml-2 tracking-widest flex items-center gap-2">
+                          <h3 className="text-xs font-black text-primary dark:text-primary uppercase mb-2 ml-2 tracking-widest flex items-center gap-2">
                               <i className="fa-solid fa-address-book text-[10px]"></i> Liên hệ
                           </h3>
-                          <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
+                          <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
                               <ContactDetailRow 
                                   icon="fa-envelope" 
-                                  colorClass="bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
+                                  colorClass="bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary"
                                   label="Email"
                                   value={selectedContact.email}
                                   isLink
@@ -489,7 +489,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                               />
                               <ContactDetailRow 
                                   icon="fa-phone" 
-                                  colorClass="bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400"
+                                  colorClass="bg-secondary-green/10 dark:bg-secondary-green/20 text-secondary-green dark:text-secondary-green"
                                   label="Số điện thoại"
                                   value={String(selectedContact.phone)}
                                   isLink

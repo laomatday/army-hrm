@@ -26,17 +26,17 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
 
   const getStatusConfig = (status: string) => {
       switch (status) {
-          case 'Approved': return { label: 'ĐÃ DUYỆT', text: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30', icon: 'fa-circle-check' };
-          case 'Rejected': return { label: 'TỪ CHỐI', text: 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30', icon: 'fa-circle-xmark' };
-          default: return { label: 'CHỜ DUYỆT', text: 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/30', icon: 'fa-circle-pause' };
+          case 'Approved': return { label: 'ĐÃ DUYỆT', text: 'bg-primary/10 text-primary border border-primary/20', icon: 'fa-circle-check' };
+          case 'Rejected': return { label: 'TỪ CHỐI', text: 'bg-secondary-red/10 text-secondary-red border border-secondary-red/20', icon: 'fa-circle-xmark' };
+          default: return { label: 'CHỜ DUYỆT', text: 'bg-secondary-yellow/10 text-secondary-yellow border border-secondary-yellow/20', icon: 'fa-circle-pause' };
       }
   };
 
   const getTypeConfig = (type: string) => {
-      if (type.includes('Nghỉ phép')) return { icon: 'fa-umbrella-beach', bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-500 dark:text-blue-400' };
-      if (type.includes('Nghỉ ốm')) return { icon: 'fa-user-nurse', bg: 'bg-rose-50 dark:bg-rose-900/20', text: 'text-rose-500 dark:text-rose-400' };
+      if (type.includes('Nghỉ phép')) return { icon: 'fa-umbrella-beach', bg: 'bg-primary/10', text: 'text-primary' };
+      if (type.includes('Nghỉ ốm')) return { icon: 'fa-user-nurse', bg: 'bg-secondary-red/10', text: 'text-secondary-red' };
       if (type.includes('Công tác')) return { icon: 'fa-plane-departure', bg: 'bg-purple-50 dark:bg-purple-900/20', text: 'text-purple-500 dark:text-purple-400' };
-      if (type.includes('Giải trình')) return { icon: 'fa-file-signature', bg: 'bg-amber-50 dark:bg-amber-900/20', text: 'text-amber-500 dark:text-amber-400' };
+      if (type.includes('Giải trình')) return { icon: 'fa-file-signature', bg: 'bg-secondary-yellow/10', text: 'text-secondary-yellow' };
       return { icon: 'fa-file-lines', bg: 'bg-slate-50 dark:bg-slate-700/50', text: 'text-slate-500 dark:text-slate-400' };
   };
 
@@ -46,18 +46,18 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
           const approved = requests.filter(r => r.status === 'Approved').length;
           const balance = user.annual_leave_balance || 0;
           return {
-              col1: { label: 'Chờ duyệt', value: pending, color: 'text-orange-500 dark:text-orange-400' },
-              col2: { label: 'Đã duyệt', value: approved, color: 'text-emerald-600 dark:text-emerald-400' },
-              col3: { label: 'Quỹ phép', value: balance, color: 'text-blue-600 dark:text-blue-400' }
+              col1: { label: 'Chờ duyệt', value: pending, color: 'text-secondary-yellow' },
+              col2: { label: 'Đã duyệt', value: approved, color: 'text-primary' },
+              col3: { label: 'Quỹ phép', value: balance, color: 'text-secondary-blue' }
           };
       } else {
           const pending = explanations.filter(e => e.status === 'Pending').length;
           const approved = explanations.filter(e => e.status === 'Approved').length;
           const rejected = explanations.filter(e => e.status === 'Rejected').length;
           return {
-              col1: { label: 'Chờ duyệt', value: pending, color: 'text-orange-500 dark:text-orange-400' },
-              col2: { label: 'Đã duyệt', value: approved, color: 'text-emerald-600 dark:text-emerald-400' },
-              col3: { label: 'Từ chối', value: rejected, color: 'text-red-500 dark:text-red-400' }
+              col1: { label: 'Chờ duyệt', value: pending, color: 'text-secondary-yellow' },
+              col2: { label: 'Đã duyệt', value: approved, color: 'text-primary' },
+              col3: { label: 'Từ chối', value: rejected, color: 'text-secondary-red' }
           };
       }
   }, [viewMode, requests, explanations, user]);
@@ -69,20 +69,20 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
 
   return (
     <>
-        <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-slate-900 font-sans">
+        <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-neutral-black font-sans">
             <div className="pt-28 space-y-4 animate-fade-in pb-28 px-4">
                 
                 <div className="flex justify-center mb-6">
                      <div className="bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-full flex relative">
                          <button 
                             onClick={() => switchViewMode('leaves')}
-                            className={`px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'leaves' ? 'text-emerald-600 dark:text-emerald-400 bg-white dark:bg-slate-700' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                            className={`px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'leaves' ? 'text-primary bg-neutral-white dark:bg-slate-700' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                          >
                              Nghỉ phép
                          </button>
                          <button 
                             onClick={() => switchViewMode('explanations')}
-                            className={`px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'explanations' ? 'text-emerald-600 dark:text-emerald-400 bg-white dark:bg-slate-700' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                            className={`px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'explanations' ? 'text-primary bg-neutral-white dark:bg-slate-700' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                          >
                              Giải trình
                          </button>
@@ -90,15 +90,15 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
                 </div>
 
                 <div className="grid grid-cols-3 gap-3 mb-8">
-                    <div className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28">
+                    <div className="bg-neutral-white dark:bg-neutral-black rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28">
                         <span className={`text-3xl font-black mb-1 tabular-nums tracking-tighter ${stats.col1.color}`}>{stats.col1.value}</span>
                         <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{stats.col1.label}</span>
                     </div>
-                    <div className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28">
+                    <div className="bg-neutral-white dark:bg-neutral-black rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28">
                         <span className={`text-3xl font-black mb-1 tabular-nums tracking-tighter ${stats.col2.color}`}>{stats.col2.value}</span>
                         <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{stats.col2.label}</span>
                     </div>
-                    <div className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28">
+                    <div className="bg-neutral-white dark:bg-neutral-black rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28">
                         <span className={`text-3xl font-black mb-1 tabular-nums tracking-tighter ${stats.col3.color}`}>{stats.col3.value}</span>
                         <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{stats.col3.label}</span>
                     </div>
@@ -106,12 +106,12 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
 
                 {viewMode === 'leaves' && (
                     <div className="animate-slide-up">
-                        <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase ml-2 mb-3 tracking-widest flex items-center gap-2">
+                        <h3 className="text-xs font-black text-primary uppercase ml-2 mb-3 tracking-widest flex items-center gap-2">
                             <i className="fa-solid fa-umbrella-beach text-[10px]"></i>
                             Danh sách đơn nghỉ phép
                         </h3>
                         {requests.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-600 opacity-60 bg-white dark:bg-slate-800 rounded-[24px] border border-dashed border-slate-200 dark:border-slate-700">
+                            <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-600 opacity-60 bg-neutral-white dark:bg-neutral-black rounded-[24px] border border-dashed border-slate-200 dark:border-slate-700">
                                 <div className="w-16 h-16 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center mb-3">
                                     <i className="fa-regular fa-folder-open text-2xl text-slate-300 dark:text-slate-500"></i>
                                 </div>
@@ -124,7 +124,7 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
                                     const typeInfo = getTypeConfig(req.type);
 
                                     return (
-                                        <div key={req.id} className="bg-white dark:bg-slate-800 p-5 rounded-[28px] border border-slate-100 dark:border-slate-700 relative overflow-hidden active:scale-[0.99] transition-all group">
+                                        <div key={req.id} className="bg-neutral-white dark:bg-neutral-black p-5 rounded-[28px] border border-slate-100 dark:border-slate-700 relative overflow-hidden active:scale-[0.99] transition-all group">
                                             <div className="flex gap-4">
                                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${typeInfo.bg} ${typeInfo.text}`}>
                                                     <i className={`fa-solid ${typeInfo.icon} text-xl`}></i>
@@ -150,12 +150,12 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
                                                 </div>
                                             </div>
 
-                                            <div className="mt-4 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50">
+                                            <div className="mt-4 bg-slate-50 dark:bg-neutral-black/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50">
                                                 <p className="text-sm text-slate-600 dark:text-slate-300 font-medium italic leading-relaxed">"{req.reason}"</p>
                                             </div>
                                             
                                             {req.manager_note && (
-                                                <div className={`mt-3 px-4 py-3 rounded-2xl border text-xs font-medium flex items-start gap-2 ${req.status === 'Approved' ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-300' : 'bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-900/30 text-red-800 dark:text-red-300'}`}>
+                                                <div className={`mt-3 px-4 py-3 rounded-2xl border text-xs font-medium flex items-start gap-2 ${req.status === 'Approved' ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-secondary-red/10 border-secondary-red/20 text-secondary-red'}`}>
                                                     <i className="fa-solid fa-comment-dots mt-0.5"></i>
                                                     <div>
                                                         <span className="font-extrabold opacity-80 uppercase block mb-0.5 text-[10px] tracking-wide">Phản hồi quản lý:</span>
@@ -173,12 +173,12 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
 
                 {viewMode === 'explanations' && (
                     <div className="animate-slide-up">
-                        <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase ml-2 mb-3 tracking-widest flex items-center gap-2">
+                        <h3 className="text-xs font-black text-primary uppercase ml-2 mb-3 tracking-widest flex items-center gap-2">
                             <i className="fa-solid fa-file-signature text-[10px]"></i>
                             Danh sách giải trình
                         </h3>
                         {explanations.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-600 opacity-60 bg-white dark:bg-slate-800 rounded-[24px] border border-dashed border-slate-200 dark:border-slate-700">
+                            <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-600 opacity-60 bg-neutral-white dark:bg-neutral-black rounded-[24px] border border-dashed border-slate-200 dark:border-slate-700">
                                 <div className="w-16 h-16 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center mb-3">
                                     <i className="fa-solid fa-file-signature text-2xl text-slate-300 dark:text-slate-500"></i>
                                 </div>
@@ -190,9 +190,9 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
                                     const statusInfo = getStatusConfig(exp.status);
                                     
                                     return (
-                                        <div key={exp.id} className="bg-white dark:bg-slate-800 p-5 rounded-[28px] border border-slate-100 dark:border-slate-700 relative overflow-hidden active:scale-[0.99] transition-all group">
+                                        <div key={exp.id} className="bg-neutral-white dark:bg-neutral-black p-5 rounded-[28px] border border-slate-100 dark:border-slate-700 relative overflow-hidden active:scale-[0.99] transition-all group">
                                             <div className="flex gap-4">
-                                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-amber-50 dark:bg-amber-900/20 text-amber-500 dark:text-amber-400 border border-amber-100/50 dark:border-amber-800/50">
+                                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-secondary-yellow/10 text-secondary-yellow border border-secondary-yellow/20">
                                                     <i className="fa-solid fa-file-signature text-xl"></i>
                                                 </div>
                                                 
@@ -213,12 +213,12 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
                                                 </div>
                                             </div>
 
-                                            <div className="mt-4 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50">
+                                            <div className="mt-4 bg-slate-50 dark:bg-neutral-black/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50">
                                                 <p className="text-sm text-slate-600 dark:text-slate-300 font-medium italic leading-relaxed">"{exp.reason}"</p>
                                             </div>
 
                                             {exp.manager_note && (
-                                                <div className={`mt-3 px-4 py-3 rounded-2xl border text-xs font-medium flex items-start gap-2 ${exp.status === 'Approved' ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-300' : 'bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-900/30 text-red-800 dark:text-red-300'}`}>
+                                                <div className={`mt-3 px-4 py-3 rounded-2xl border text-xs font-medium flex items-start gap-2 ${exp.status === 'Approved' ? 'bg-primary/10 border-primary/20 text-primary' : 'bg-secondary-red/10 border-secondary-red/20 text-secondary-red'}`}>
                                                     <i className="fa-solid fa-comment-dots mt-0.5"></i>
                                                     <div>
                                                         <span className="font-extrabold opacity-80 uppercase block mb-0.5 text-[10px] tracking-wide">Phản hồi quản lý:</span>

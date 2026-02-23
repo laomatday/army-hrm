@@ -4,11 +4,13 @@
 
 :root {
   /* User Defined Colors (RGB triplets for Tailwind opacity support) */
-  --primary-color: 66, 133, 244;      /* Google Blue */
-  --secondary-green: 52, 168, 83;     /* Google Green */
-  --secondary-red: 234, 67, 53;       /* Google Red */
-  --secondary-yellow: 251, 188, 5;    /* Google Yellow */
-  --neutral-black: 32, 33, 36;        /* Google Dark Gray */
+  --primary-color: 5, 150, 105;      /* Main Emerald */
+  --secondary-blue: 37, 99, 235;     /* Blue */
+  --secondary-red: 220, 38, 38;       /* Red */
+  --secondary-yellow: 245, 158, 11;    /* Amber */
+  --secondary-purple: 147, 51, 234;  /* Purple */
+  --secondary-orange: 234, 88, 12;   /* Orange */
+  --neutral-black: 17, 24, 39;        /* Gray 900 */
   --neutral-white: 255, 255, 255;     /* White */
 
   /* Structural Variables */
@@ -36,13 +38,13 @@
 }
 
 .dark {
-  --c-surface: #1e293b; /* Slate 800 */
-  --c-bg: #0f172a; /* Slate 900 */
+  --c-surface: #111827; /* Gray 900 */
+  --c-bg: #030712; /* Gray 950 */
 }
 
 /* Custom Utility Classes */
 .bg-gradient {
-    background-image: linear-gradient(to right, rgb(var(--primary-color)), rgb(var(--secondary-green)));
+    background-image: linear-gradient(to right, rgb(var(--primary-color)), rgb(var(--secondary-blue)));
 }
 
 .button-primary {
@@ -50,8 +52,8 @@
     color: rgb(var(--neutral-white));
 }
 
-.button-secondary-green {
-    background-color: rgb(var(--secondary-green));
+.button-secondary-blue {
+    background-color: rgb(var(--secondary-blue));
     color: rgb(var(--neutral-white));
 }
 
@@ -77,9 +79,6 @@ html {
   -webkit-font-smoothing: antialiased; 
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-
-  /* Prevent pull-to-refresh and overscroll navigation */
-  overscroll-behavior-x: none;
 }
 
 body {
@@ -95,7 +94,6 @@ body {
   
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
-  overscroll-behavior-x: none;
   touch-action: manipulation;
 }
 

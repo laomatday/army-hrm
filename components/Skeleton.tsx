@@ -1,9 +1,8 @@
-
 import React from 'react';
 
 export const DashboardSkeleton = () => {
   return (
-    <div className="h-full w-full bg-slate-50 dark:bg-slate-900 flex flex-col relative overflow-hidden">
+    <div className="h-full w-full bg-slate-50 dark:bg-neutral-black flex flex-col relative overflow-hidden transition-colors">
         {/* HEADER SKELETON */}
         <div className="h-16 px-4 flex items-center justify-between mt-2 pt-safe">
             <div className="flex items-center gap-3">
@@ -18,17 +17,14 @@ export const DashboardSkeleton = () => {
             
             {/* CLOCK AREA */}
             <div className="flex flex-col items-center mb-8 w-full">
-                {/* Time */}
                 <div className="h-20 w-48 bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse mb-3"></div>
-                {/* Date */}
                 <div className="h-4 w-32 bg-slate-200 dark:bg-slate-800 rounded-full animate-pulse mb-6"></div>
-                {/* Status Pill */}
                 <div className="h-10 w-40 bg-slate-200 dark:bg-slate-800 rounded-full animate-pulse"></div>
             </div>
 
             {/* ACTION BUTTON */}
             <div className="mb-10">
-                <div className="w-44 h-44 rounded-full bg-slate-200 dark:bg-slate-800 animate-pulse ring-4 ring-white dark:ring-slate-900"></div>
+                <div className="w-44 h-44 rounded-full bg-slate-200 dark:bg-slate-800 animate-pulse ring-4 ring-white dark:ring-neutral-black"></div>
             </div>
 
             {/* STATS HEADER */}
@@ -46,7 +42,7 @@ export const DashboardSkeleton = () => {
         </div>
 
         {/* BOTTOM NAV SKELETON */}
-        <div className="fixed bottom-6 left-4 right-4 h-[72px] bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl rounded-[24px] flex justify-around items-center px-2">
+        <div className="fixed bottom-6 left-4 right-4 h-[72px] bg-white/50 dark:bg-neutral-black/50 backdrop-blur-xl rounded-[24px] flex justify-around items-center px-2">
              {[1, 2, 3, 4, 5].map((i) => (
                  <div key={i} className="w-10 h-10 rounded-full bg-slate-200/50 dark:bg-slate-700/50 animate-pulse"></div>
              ))}

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { getAvatarHtml } from '../utils/helpers';
 
@@ -20,7 +19,7 @@ const Avatar: React.FC<Props> = ({ src, name, className = "w-10 h-10", textSize 
       <img 
         src={avatarData.src} 
         alt={name} 
-        className={`${commonClasses} object-cover bg-slate-100`} 
+        className={`${commonClasses} object-cover bg-slate-100 dark:bg-slate-800 transition-colors`} 
         loading="lazy"
         onClick={onClick}
       />
@@ -29,7 +28,7 @@ const Avatar: React.FC<Props> = ({ src, name, className = "w-10 h-10", textSize 
 
   return (
     <div 
-        className={`${commonClasses} bg-slate-800 text-white flex items-center justify-center font-bold ${textSize}`}
+        className={`${commonClasses} bg-primary text-neutral-white flex items-center justify-center font-bold ${textSize} transition-colors uppercase`}
         onClick={onClick}
     >
       {avatarData.text}

@@ -138,16 +138,16 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
   const totalPending = approvals.length + explanationApprovals.length;
 
   return (
-    <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-slate-900 font-sans">
+    <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-neutral-black font-sans">
         <div className="pt-28 pb-32 px-4 animate-fade-in space-y-8">
             
             <div>
-                 <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
+                 <h3 className="text-xs font-black text-primary uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
                      <i className="fa-solid fa-calendar-days text-[10px]"></i>
                      Lịch nghỉ nhân viên
                  </h3>
 
-                 <div className="bg-white dark:bg-slate-800 p-4 rounded-[24px] border border-slate-100 dark:border-slate-700">
+                 <div className="bg-neutral-white dark:bg-neutral-black p-4 rounded-[24px] border border-slate-100 dark:border-slate-700">
                      <div className="grid grid-cols-7 mb-3">
                         {["CN", "T2", "T3", "T4", "T5", "T6", "T7"].map((d, i) => (
                             <div key={i} className="text-center text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide">{d}</div>
@@ -162,8 +162,8 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
                              const isToday = date.toDateString() === new Date().toDateString();
 
                              return (
-                                 <div key={idx} className={`h-16 p-1 border rounded-xl flex flex-col items-center justify-start overflow-hidden ${isToday ? 'border-emerald-200 bg-emerald-50/30 dark:bg-emerald-900/20 dark:border-emerald-900/50' : 'border-slate-50 dark:border-slate-700 bg-white dark:bg-slate-800'}`}>
-                                     <span className={`text-[10px] font-extrabold mb-1 tracking-tight ${date.getDay() === 0 ? 'text-red-500 dark:text-red-400' : 'text-slate-600 dark:text-slate-300'}`}>{date.getDate()}</span>
+                                 <div key={idx} className={`h-16 p-1 border rounded-xl flex flex-col items-center justify-start overflow-hidden ${isToday ? 'border-primary/20 bg-primary/10 dark:border-primary/30' : 'border-slate-50 dark:border-slate-700 bg-neutral-white dark:bg-neutral-black'}`}>
+                                     <span className={`text-[10px] font-extrabold mb-1 tracking-tight ${date.getDay() === 0 ? 'text-secondary-red' : 'text-slate-600 dark:text-slate-300'}`}>{date.getDate()}</span>
                                      <div className="w-full flex flex-col gap-0.5">
                                          {leaves.map((l, i) => (
                                              <div key={i} className="w-full h-1.5 rounded-full bg-purple-500 dark:bg-purple-400 opacity-80" title={l.name}></div>
@@ -181,18 +181,18 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
             </div>
 
             <div>
-                <h3 className="text-xs font-black text-emerald-700 dark:text-emerald-400 uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
+                <h3 className="text-xs font-black text-primary uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
                     <i className="fa-solid fa-clipboard-check text-[10px]"></i>
                     Cần duyệt 
                     {totalPending > 0 && (
-                        <span className={`bg-red-500 text-white text-[10px] font-bold h-5 flex items-center justify-center rounded-full ${totalPending < 10 ? 'w-5' : 'px-1.5 min-w-[20px]'}`}>
+                        <span className={`bg-secondary-red text-neutral-white text-[10px] font-bold h-5 flex items-center justify-center rounded-full ${totalPending < 10 ? 'w-5' : 'px-1.5 min-w-[20px]'}`}>
                             {totalPending}
                         </span>
                     )}
                 </h3>
 
                 {totalPending === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-600 opacity-60 bg-white dark:bg-slate-800 rounded-[24px] border border-dashed border-slate-200 dark:border-slate-700">
+                    <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-600 opacity-60 bg-neutral-white dark:bg-neutral-black rounded-[24px] border border-dashed border-slate-200 dark:border-slate-700">
                         <div className="w-16 h-16 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center mb-3">
                             <i className="fa-solid fa-clipboard-check text-2xl text-slate-300 dark:text-slate-500"></i>
                         </div>
@@ -203,7 +203,7 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
                         {Object.keys(groupedApprovals).map(centerName => (
                             <div key={centerName} className="animate-slide-up">
                                 <div className="flex items-center gap-2 mb-3 px-1">
-                                    <i className="fa-solid fa-location-dot text-emerald-500 text-xs"></i>
+                                    <i className="fa-solid fa-location-dot text-primary text-xs"></i>
                                     <h4 className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{centerName}</h4>
                                 </div>
                                 
@@ -216,14 +216,14 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
                                                     const isLeave = item.itemType === 'leave';
                                                     const typeLabel = isLeave ? item.type : 'Giải trình công';
                                                     const typeColor = isLeave 
-                                                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30' 
-                                                        : 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/30';
+                                                        ? 'bg-primary/10 text-primary border border-primary/20' 
+                                                        : 'bg-secondary-yellow/10 text-secondary-yellow border border-secondary-yellow/20';
                                                     const dateInfo = isLeave 
                                                         ? renderDateRange(item.from_date, item.to_date)
                                                         : formatDateString(item.date?.split('T')[0]);
 
                                                     return (
-                                                        <div key={item.id} className="bg-white dark:bg-slate-800 p-4 rounded-[20px] border border-slate-100 dark:border-slate-700 relative group active:scale-[0.99] transition-all">
+                                                        <div key={item.id} className="bg-neutral-white dark:bg-neutral-black p-4 rounded-[20px] border border-slate-100 dark:border-slate-700 relative group active:scale-[0.99] transition-all">
                                                             <div className="flex justify-between items-start mb-3">
                                                                 <div className="flex items-center gap-3">
                                                                     <Avatar 
@@ -242,7 +242,7 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
                                                                 <span className="text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500">{formatDateString(item.created_at?.split('T')[0])}</span>
                                                             </div>
 
-                                                            <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700 mb-3">
+                                                            <div className="bg-slate-50 dark:bg-neutral-black/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700 mb-3">
                                                                 <div className="flex items-center gap-2 mb-1">
                                                                     <i className="fa-regular fa-clock text-slate-400 dark:text-slate-500 text-xs"></i>
                                                                     <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{dateInfo}</span>
@@ -254,14 +254,14 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
                                                                 <button 
                                                                     disabled={!!processing}
                                                                     onClick={() => handleAction(item.id, 'Rejected', item.itemType)}
-                                                                    className="py-3 bg-white dark:bg-slate-800 border border-red-100 dark:border-red-900/30 text-red-500 dark:text-red-400 rounded-xl text-sm font-extrabold hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors uppercase tracking-widest"
+                                                                    className="py-3 bg-neutral-white dark:bg-neutral-black border border-secondary-red/20 text-secondary-red rounded-xl text-sm font-extrabold hover:bg-secondary-red/10 transition-colors uppercase tracking-widest"
                                                                 >
                                                                     Từ chối
                                                                 </button>
                                                                 <button 
                                                                     disabled={!!processing}
                                                                     onClick={() => handleAction(item.id, 'Approved', item.itemType)}
-                                                                    className="py-3 bg-emerald-600 text-white rounded-xl text-sm font-extrabold hover:bg-emerald-700 flex items-center justify-center gap-2 uppercase tracking-widest"
+                                                                    className="py-3 bg-primary text-neutral-white rounded-xl text-sm font-extrabold hover:bg-primary/90 flex items-center justify-center gap-2 uppercase tracking-widest"
                                                                 >
                                                                     {processing === item.id ? <i className="fa-solid fa-circle-notch fa-spin"></i> : <span>Duyệt ngay</span>}
                                                                 </button>
@@ -282,17 +282,17 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
 
         {rejectModal.isOpen && (
              <div className="fixed inset-0 z-[2100] bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 animate-fade-in">
-                 <div className="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-sm p-6 animate-scale-in">
+                 <div className="bg-neutral-white dark:bg-neutral-black rounded-3xl w-full max-w-sm p-6 animate-scale-in">
                      <div className="text-center mb-6">
-                         <div className="w-14 h-14 bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100 dark:border-red-900/30">
+                         <div className="w-14 h-14 bg-secondary-red/10 text-secondary-red rounded-full flex items-center justify-center mx-auto mb-4 border border-secondary-red/20">
                              <i className="fa-solid fa-triangle-exclamation text-xl"></i>
                          </div>
-                         <h3 className="text-lg font-extrabold text-slate-800 dark:text-white tracking-tight">Từ chối yêu cầu?</h3>
+                         <h3 className="text-lg font-extrabold text-slate-800 dark:text-neutral-white tracking-tight">Từ chối yêu cầu?</h3>
                          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Nhập lý do để nhân viên biết nguyên nhân.</p>
                      </div>
 
                      <textarea 
-                        className="w-full h-24 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none resize-none mb-4 placeholder:text-slate-400 text-slate-800 dark:text-white"
+                        className="w-full h-24 p-4 bg-slate-50 dark:bg-neutral-black border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-secondary-red/20 focus:border-secondary-red outline-none resize-none mb-4 placeholder:text-slate-400 text-slate-800 dark:text-neutral-white"
                         placeholder="Lý do từ chối..."
                         value={rejectModal.reason}
                         onChange={(e) => setRejectModal({...rejectModal, reason: e.target.value})}
@@ -308,7 +308,7 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
                          <button 
                             onClick={submitRejection}
                             disabled={!rejectModal.reason.trim()}
-                            className="flex-1 py-4 rounded-xl bg-red-500 text-white text-base font-extrabold hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest"
+                            className="flex-1 py-4 rounded-xl bg-secondary-red text-neutral-white text-base font-extrabold hover:bg-secondary-red/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest"
                          >
                              Xác nhận
                          </button>

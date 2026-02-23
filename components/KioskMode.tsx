@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import QRCode from 'react-qr-code';
 import { db } from '../services/firebase';
 import { doCheckIn } from '../services/api';
-import { uploadToGoogleDrive } from '../services/googleDrive'; // Import the new upload function
+import { uploadToGoogleDrive } from '../services/googleDrive';
 import { Employee, Kiosk } from '../types';
 import { getKioskById } from '../services/kiosk';
 
@@ -142,14 +142,11 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
         ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-        const base64 = canvas.toDataURL('image/jpeg', 0.8); // Use jpeg for broader compatibility
+        const base64 = canvas.toDataURL('image/jpeg', 0.8);
         
         stopCamera();
-
-        // Announce upload start
         setSession((prev: any) => ({ ...prev, status: 'uploading' }));
 
-        // 1. Upload to Google Drive
         const filename = `checkin_${session.employee_id}_${Date.now()}.jpg`;
         const imageUrl = await uploadToGoogleDrive(filename, base64);
 
@@ -160,7 +157,6 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
             return;
         }
         
-        // 2. Proceed with check-in
         const mockEmployee = { employee_id: session.employee_id, name: session.employee_name, center_id: kioskInfo.center_id } as Employee;
         
         if (navigator.geolocation) {
@@ -172,7 +168,7 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
                             lat: position.coords.latitude,
                             lng: position.coords.longitude,
                             deviceId: kioskInfo.kiosk_id, 
-                            imageUrl: imageUrl // Pass the new URL
+                            imageUrl: imageUrl
                         }, mockEmployee);
                         
                         if (res.success) {
@@ -219,35 +215,35 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
 
   if (isConfiguring) {
     return (
-        <div className="fixed inset-0 bg-slate-900 text-white flex items-center justify-center p-6 z-[6000]">
-            <div className="w-full max-w-sm bg-slate-800 p-8 rounded-2xl border border-slate-700">
+        <div className="fixed inset-0 bg-slate-50 dark:bg-neutral-black text-neutral-black dark:text-neutral-white flex items-center justify-center p-6 z-[6000] font-sans transition-colors duration-300">
+            <div className="w-full max-w-sm bg-neutral-white dark:bg-neutral-black/80 p-8 rounded-[32px] border border-slate-200 dark:border-slate-700 shadow-xl animate-scale-in">
                 <div className="text-center mb-8">
-                    <i className="fa-solid fa-gear text-emerald-500 text-4xl mb-3"></i>
-                    <h2 className="text-2xl font-bold">Cài đặt Kiosk</h2>
+                    <i className="fa-solid fa-gear text-primary text-4xl mb-3"></i>
+                    <h2 className="text-2xl font-black tracking-tight">Cài đặt Kiosk</h2>
                 </div>
                 
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-2">Mã thiết bị</label>
+                        <label className="block text-xs font-extrabold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Mã thiết bị</label>
                         <input 
                           type="text" 
                           value={tempKioskId}
                           onChange={(e) => setTempKioskId(e.target.value)}
-                          className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 text-white focus:border-emerald-500 outline-none"
+                          className="w-full bg-slate-50 dark:bg-neutral-black/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-4 font-bold text-neutral-black dark:text-neutral-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                           placeholder="e.g., kioks_01"
                         />
                     </div>
                     
-                    <div className="pt-4 flex gap-4">
+                    <div className="pt-4 flex gap-3">
                         <button 
                           onClick={saveConfig}
-                          className="flex-1 bg-emerald-600 hover:bg-emerald-700 font-bold py-3 rounded-lg"
+                          className="flex-1 bg-primary hover:bg-primary/90 text-neutral-white font-extrabold py-4 rounded-2xl transition-all uppercase tracking-widest"
                         >
                           Khởi tạo
                         </button>
                         <button 
                           onClick={onExit}
-                          className="px-6 bg-slate-700 hover:bg-slate-600 rounded-lg"
+                          className="px-6 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-extrabold rounded-2xl transition-all uppercase tracking-widest"
                         >
                           Thoát
                         </button>
@@ -258,63 +254,65 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
     );
 }
 
-
   return (
-    <div className="fixed inset-0 bg-slate-900 text-white font-sans flex flex-col z-[5000]">
-      <header className="h-20 flex items-center justify-between px-8 border-b border-slate-800">
+    <div className="fixed inset-0 bg-slate-50 dark:bg-neutral-black text-neutral-black dark:text-neutral-white font-sans flex flex-col z-[5000] transition-colors duration-300">
+      <header className="h-24 flex items-center justify-between px-8 border-b border-slate-200 dark:border-slate-800 bg-neutral-white/50 dark:bg-neutral-black/50 backdrop-blur-md">
         <div>
-          <h1 className="text-lg font-bold tracking-wider text-emerald-500">AITENDANCE KIOSK</h1>
-          <p className="text-xs text-slate-500">{kioskInfo?.name}</p>
+          <h1 className="text-xl font-black tracking-widest text-primary flex items-center gap-3">
+              <i className="fa-solid fa-tablet-screen-button"></i> AITENDANCE KIOSK
+          </h1>
+          <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wide">{kioskInfo?.name}</p>
         </div>
-        <div className="text-right">
-          <div className="text-2xl font-semibold">{currentTime.toLocaleTimeString('vi-VN', { hour12: false })}</div>
-          <button onClick={onExit} className="text-xs text-red-500 hover:underline">Tắt Kiosk</button>
+        <div className="text-right flex flex-col items-end">
+          <div className="text-3xl font-black tabular-nums tracking-tighter">{currentTime.toLocaleTimeString('vi-VN', { hour12: false })}</div>
+          <button onClick={onExit} className="text-xs font-bold text-secondary-red hover:text-secondary-red/80 transition-colors uppercase tracking-widest mt-1"><i className="fa-solid fa-power-off"></i> Thoát Kiosk</button>
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center p-8">
+      <main className="flex-1 flex flex-col items-center justify-center p-8 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] dark:bg-none">
           
         {!session && (
-          <div className="text-center">
-            <h2 className="text-3xl font-bold mb-4">Quét QR để Chấm công</h2>
-            <p className="text-slate-400 mb-8">
-              Dùng ứng dụng di động Army HRM để quét mã.
+          <div className="text-center animate-fade-in">
+            <h2 className="text-4xl font-black mb-4 tracking-tight">Quét QR để Chấm công</h2>
+            <p className="text-slate-500 dark:text-slate-400 mb-10 font-medium text-lg">
+              Mở ứng dụng di động Army HRM và chọn Quét Kiosk.
             </p>
 
-            <div className="p-6 bg-white rounded-xl">
-                <QRCode value={qrData} size={256} />
+            <div className="p-8 bg-neutral-white rounded-[32px] border border-slate-200 dark:border-slate-700 inline-block shadow-2xl">
+                <QRCode value={qrData} size={300} />
             </div>
             
-            <div className="mt-8">
-                <div className="text-lg font-mono tracking-widest text-emerald-400">{token}</div>
-                <div className="text-xs text-slate-500">MÃ PHIÊN</div>
+            <div className="mt-10 bg-primary/10 dark:bg-primary/20 inline-block px-8 py-4 rounded-3xl border border-primary/20">
+                <div className="text-3xl font-black font-mono tracking-[0.3em] text-primary">{token}</div>
+                <div className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase mt-1 tracking-widest">Mã phiên hiện tại</div>
             </div>
           </div>
         )}
 
         {session && (
-          <div className="w-full h-full flex flex-col items-center justify-center text-center">
-            <div className="relative w-full max-w-2xl aspect-video bg-black rounded-lg overflow-hidden border border-slate-700">
-              <video ref={videoRef} className={`w-full h-full object-cover transform scale-x-[-1] ${isCameraActive ? 'opacity-100' : 'opacity-0'}`} autoPlay playsInline muted></video>
+          <div className="w-full h-full flex flex-col items-center justify-center text-center animate-scale-in">
+            <div className="relative w-full max-w-2xl aspect-video bg-neutral-black rounded-[32px] overflow-hidden border-4 border-slate-200 dark:border-slate-800 shadow-2xl">
+              <video ref={videoRef} className={`w-full h-full object-cover transform scale-x-[-1] ${isCameraActive ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`} autoPlay playsInline muted></video>
               
               {session.status !== 'camera_ready' && (
-                 <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-12 h-12 border-4 border-slate-700 border-t-emerald-500 rounded-full animate-spin"></div>
+                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-neutral-black/80 backdrop-blur-sm">
+                    <i className="fa-solid fa-circle-notch fa-spin text-primary text-5xl mb-4"></i>
+                    <p className="text-neutral-white font-bold tracking-widest uppercase">Đang chuẩn bị Camera...</p>
                  </div>
               )}
 
               {session.status === 'camera_ready' && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                    <div className="text-8xl font-bold text-white" style={{textShadow: '0 0 20px black'}}>{countdown}</div>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                    <div className="text-[10rem] font-black text-neutral-white tabular-nums drop-shadow-2xl animate-ping" style={{textShadow: '0 10px 30px rgba(0,0,0,0.8)'}}>{countdown}</div>
                 </div>
               )}
             </div>
             
-            <div className="mt-6 h-12 flex flex-col justify-center items-center">
-                <h2 className="text-2xl font-bold">{session.employee_name}</h2>
-                {session.status === 'uploading' && <p className="text-amber-500">Đang tải ảnh lên...</p>}
-                {session.status === 'completed' && <p className="text-emerald-500">Chấm công thành công!</p>}
-                {session.status === 'failed' && <p className="text-red-500">Chấm công thất bại: {session.error}</p>}
+            <div className="mt-8 flex flex-col justify-center items-center h-20">
+                <h2 className="text-3xl font-black tracking-tight">{session.employee_name}</h2>
+                {session.status === 'uploading' && <p className="text-secondary-orange font-bold mt-2 text-lg uppercase tracking-wide animate-pulse">Đang tải ảnh lên...</p>}
+                {session.status === 'completed' && <p className="text-secondary-green font-bold mt-2 text-lg uppercase tracking-wide"><i className="fa-solid fa-check-circle mr-1"></i> Chấm công thành công!</p>}
+                {session.status === 'failed' && <p className="text-secondary-red font-bold mt-2 text-lg uppercase tracking-wide"><i className="fa-solid fa-triangle-exclamation mr-1"></i> Thất bại: {session.error}</p>}
             </div>
           </div>
         )}
