@@ -459,12 +459,6 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                                   label="Văn phòng"
                                   value={locationsMap[selectedContact.center_id] || selectedContact.center_id}
                               />
-                              <ContactDetailRow 
-                                  icon="fa-building-user" 
-                                  colorClass="bg-secondary-purple/10 dark:bg-secondary-purple/20 text-secondary-purple dark:text-secondary-purple"
-                                  label="Phòng ban"
-                                  value={selectedContact.department || "--"}
-                              />
                               {selectedContact.direct_manager_id && empNameMap[selectedContact.direct_manager_id] && (
                                   <ContactDetailRow 
                                       icon="fa-user-tie" 
