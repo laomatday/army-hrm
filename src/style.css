@@ -4,14 +4,19 @@
 
 :root {
   /* User Defined Colors (RGB triplets for Tailwind opacity support) */
-  --primary-color: 5, 150, 105;      /* Main Emerald */
-  --secondary-blue: 37, 99, 235;     /* Blue */
-  --secondary-red: 220, 38, 38;       /* Red */
-  --secondary-yellow: 245, 158, 11;    /* Amber */
-  --secondary-purple: 147, 51, 234;  /* Purple */
-  --secondary-orange: 234, 88, 12;   /* Orange */
-  --neutral-black: 17, 24, 39;        /* Gray 900 */
-  --neutral-white: 255, 255, 255;     /* White */
+          /* Màu chủ đạo: Google Blue (Hex: #1a73e8) - Đậm vừa đủ để nút bấm nổi bật */
+        --primary-color: 26, 115, 232;     
+        
+        /* Các màu phụ trợ được lấy chuẩn theo hệ sinh thái Google */
+        --secondary-green: 52, 168, 83;    /* Google Green (#34a853) - Đổi từ Blue cũ sang Green để đa dạng */
+        --secondary-red: 234, 67, 53;      /* Google Red (#ea4335) */
+        --secondary-yellow: 251, 188, 4;   /* Google Yellow (#fbbc04) */
+        --secondary-purple: 161, 66, 244;  /* Google Purple (#a142f4) */
+        --secondary-orange: 250, 123, 23;  /* Google Orange (#fa7b17) */
+        
+        /* Màu trung tính (Text/Nền) */
+        --neutral-black: 32, 33, 36;       /* Google Dark Gray (#202124) - Sang trọng, dễ đọc hơn xám cũ */
+        --neutral-white: 255, 255, 255;
 
   /* Structural Variables */
   --radius-card: 28px;
