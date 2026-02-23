@@ -36,19 +36,23 @@
     
     <style>
       :root {
-        /* Màu chủ đạo: Google Blue (Hex: #1a73e8) - Đậm vừa đủ để nút bấm nổi bật */
-        --primary-color: 26, 115, 232;     
-        
-        /* Các màu phụ trợ được lấy chuẩn theo hệ sinh thái Google */
-        --secondary-green: 52, 168, 83;    /* Google Green (#34a853) - Đổi từ Blue cũ sang Green để đa dạng */
-        --secondary-red: 234, 67, 53;      /* Google Red (#ea4335) */
-        --secondary-yellow: 251, 188, 4;   /* Google Yellow (#fbbc04) */
-        --secondary-purple: 161, 66, 244;  /* Google Purple (#a142f4) */
-        --secondary-orange: 250, 123, 23;  /* Google Orange (#fa7b17) */
+        --primary-color: 26, 115, 232; 
+        --secondary-green: 52, 168, 83;
+        --secondary-red: 234, 67, 53;
+        --secondary-yellow: 251, 188, 4;
+        --secondary-purple: 161, 66, 244;
+        --secondary-orange: 250, 123, 23;
         
         /* Màu trung tính (Text/Nền) */
-        --neutral-black: 30, 41, 59;       /* Google Dark Gray (#202124) - Sang trọng, dễ đọc hơn xám cũ */
+        --neutral-black: 30, 41, 59;       
         --neutral-white: 255, 255, 255;
+
+        /* Dark Mode Specific Overrides */
+        --dark-bg: 3, 7, 18;
+        --dark-surface: 17, 24, 39;
+        --dark-border: 31, 41, 55;
+        --dark-text-primary: 248, 250, 252;
+        --dark-text-secondary: 148, 163, 184;
       }
     </style>
 
@@ -67,6 +71,8 @@
               'card': 'var(--shadow-card)',
               'modal': 'var(--shadow-modal)',
               'nav': 'var(--shadow-nav)',
+              'premium': '0 10px 30px -5px rgba(0, 0, 0, 0.3), 0 5px 15px -5px rgba(0, 0, 0, 0.1)',
+              'premium-dark': '0 20px 40px -10px rgba(0, 0, 0, 0.6), 0 10px 20px -10px rgba(0, 0, 0, 0.4)',
             },
             spacing: {
               'header': 'var(--header-height)',
@@ -81,6 +87,15 @@
               'secondary-orange': 'rgba(var(--secondary-orange), <alpha-value>)',
               'neutral-black': 'rgba(var(--neutral-black), <alpha-value>)',
               'neutral-white': 'rgba(var(--neutral-white), <alpha-value>)',
+              
+              // Crafted Dark Mode Palette
+              dark: {
+                bg: 'rgb(var(--dark-bg))',
+                surface: 'rgb(var(--dark-surface))',
+                border: 'rgb(var(--dark-border))',
+                'text-primary': 'rgb(var(--dark-text-primary))',
+                'text-secondary': 'rgb(var(--dark-text-secondary))',
+              }
             },
             fontFamily: {
               // Force Plus Jakarta Sans as the primary and fallback
@@ -152,7 +167,7 @@
     </script>
 
 </head>
-  <body class="bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 select-none h-screen w-screen overflow-hidden font-sans antialiased transition-colors duration-300">
+  <body class="bg-slate-50 dark:bg-dark-bg text-slate-600 dark:text-dark-text-secondary select-none h-screen w-screen overflow-hidden font-sans antialiased transition-colors duration-300">
     <div id="root" class="h-full w-full"></div>
     <script type="module" src="./index.tsx"></script>
     <script>
