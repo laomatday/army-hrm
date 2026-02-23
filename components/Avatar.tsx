@@ -19,7 +19,7 @@ const Avatar: React.FC<Props> = ({ src, name, className = "w-10 h-10", textSize 
       <img 
         src={avatarData.src} 
         alt={name} 
-        className={`${commonClasses} object-cover bg-slate-100 dark:bg-slate-800 transition-colors`} 
+        className={`${commonClasses} object-cover bg-slate-100 dark:bg-dark-surface transition-colors`} 
         loading="lazy"
         onClick={onClick}
       />

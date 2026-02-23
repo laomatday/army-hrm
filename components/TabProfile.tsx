@@ -173,7 +173,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
           onClick={() => { if(onClick) { triggerHaptic('light'); onClick(); } }}
           className={`flex items-center gap-4 p-4 active:bg-slate-50 dark:active:bg-dark-border/50 transition-colors group ${onClick ? 'cursor-pointer' : ''}`}
       >
-          <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-base flex-shrink-0 border border-white/50 dark:border-dark-border/50 shadow-sm ${colorClass}`}>
+          <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-base flex-shrink-0 ${colorClass}`}>
               <i className={`fa-solid ${icon}`}></i>
           </div>
           
@@ -254,7 +254,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
 
                 <h3 className="text-xs font-black text-primary dark:text-primary uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
                     <i className="fa-solid fa-briefcase text-[10px]"></i>
-                    Thông-tin công-việc
+                    Thông tin công việc
                 </h3>
                 <div className="bg-neutral-white dark:bg-dark-surface rounded-[24px] overflow-hidden border border-slate-100 dark:border-dark-border divide-y divide-slate-50 dark:divide-dark-border mb-8">
                     <ProfileRow 

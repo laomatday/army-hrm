@@ -49,24 +49,24 @@ const BaseModal: React.FC<Props> = ({
 
   return (
     <div 
-        className={`fixed inset-0 z-[60] bg-slate-50 dark:bg-slate-900 flex flex-col font-sans animate-slide-up transition-colors duration-300 ${className}`}
+        className={`fixed inset-0 z-[60] bg-slate-50 dark:bg-dark-bg flex flex-col font-sans animate-slide-up transition-colors duration-300 ${className}`}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
     >
         {showCloseButton && (
             <div className="fixed top-0 right-0 pt-safe p-4 z-[70]">
-                <button onClick={onClose} className="w-10 h-10 bg-neutral-white/60 dark:bg-neutral-black/60 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-neutral-white dark:hover:bg-neutral-black/80 transition-colors border border-white/20 dark:border-slate-700/50 active:scale-95 shadow-sm">
+                <button onClick={onClose} className="w-10 h-10 bg-neutral-white/60 dark:bg-dark-surface/60 rounded-full flex items-center justify-center text-slate-600 dark:text-dark-text-secondary hover:bg-neutral-white dark:hover:bg-dark-surface/80 transition-colors border border-white/20 dark:border-dark-border active:scale-95 shadow-sm">
                     <i className="fa-solid fa-xmark"></i>
                 </button>
             </div>
         )}
 
         {title && (
-             <div className="px-5 pt-safe pt-4 pb-2 flex items-center justify-between shrink-0 z-10 bg-slate-50/90 dark:bg-neutral-black/90 sticky top-0 backdrop-blur-md transition-colors">
+             <div className="px-5 pt-safe pt-4 pb-2 flex items-center justify-between shrink-0 z-10 bg-slate-50/90 dark:bg-dark-bg/90 sticky top-0 backdrop-blur-md transition-colors">
                 <div>
-                    <h1 className="text-2xl font-black text-neutral-black dark:text-neutral-white tracking-tight">{title}</h1>
-                    {subtitle && <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{subtitle}</p>}
+                    <h1 className="text-2xl font-black text-neutral-black dark:text-dark-text-primary tracking-tight">{title}</h1>
+                    {subtitle && <p className="text-xs font-bold text-slate-400 dark:text-dark-text-secondary uppercase tracking-widest">{subtitle}</p>}
                 </div>
                 <div className="w-10"></div>
             </div>

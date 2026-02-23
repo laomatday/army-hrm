@@ -60,7 +60,7 @@ const ModalContactDetail: React.FC<Props> = ({ contact, isOpen, onClose, locatio
   }) => {
       const Content = (
           <>
-            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-base flex-shrink-0 border border-white/50 dark:border-dark-border/50 shadow-sm ${colorClass}`}>
+            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-base flex-shrink-0 ${colorClass}`}>
                 <i className={`fa-solid ${icon}`}></i>
             </div>
             <div className="flex-1 min-w-0">

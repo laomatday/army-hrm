@@ -42,7 +42,7 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
             <div className="absolute inset-0 bg-primary/20 dark:bg-primary/10 rounded-full blur-xl animate-pulse"></div>
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border border-primary/20 rounded-full animate-spin-slow"></div>
             
-            <div className="relative z-10 w-24 h-38 bg-neutral-black rounded-[1.8rem] border-[3px] border-slate-800 dark:border-slate-700 flex flex-col items-center p-2 overflow-hidden shadow-xl">
+            <div className="relative z-10 w-24 h-38 bg-neutral-black rounded-[1.8rem] border-[3px] border-slate-800 dark:border-dark-border flex flex-col items-center p-2 overflow-hidden shadow-xl">
                 <div className="w-8 h-1 bg-slate-700 rounded-full mb-3 mt-0.5"></div>
                 <div className="w-full h-full border border-dashed border-primary/40 rounded-xl flex items-center justify-center relative overflow-hidden bg-primary/5">
                     <div className="flex flex-col items-center gap-1.5">
@@ -53,10 +53,10 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
                 </div>
             </div>
 
-            <div className="absolute top-1 -right-1 w-10 h-10 bg-neutral-white dark:bg-neutral-black rounded-lg flex items-center justify-center border border-primary/20 dark:border-primary/30 rotate-12 animate-bounce-slow shadow-sm">
+            <div className="absolute top-1 -right-1 w-10 h-10 bg-neutral-white dark:bg-dark-surface rounded-lg flex items-center justify-center border border-primary/20 dark:border-primary/30 rotate-12 animate-bounce-slow shadow-sm">
                 <i className="fa-solid fa-location-dot text-base text-secondary-red"></i>
             </div>
-            <div className="absolute bottom-4 -left-3 w-9 h-9 bg-neutral-white dark:bg-neutral-black rounded-lg flex items-center justify-center border border-primary/20 dark:border-primary/30 -rotate-12 animate-float shadow-sm">
+            <div className="absolute bottom-4 -left-3 w-9 h-9 bg-neutral-white dark:bg-dark-surface rounded-lg flex items-center justify-center border border-primary/20 dark:border-primary/30 -rotate-12 animate-float shadow-sm">
                 <i className="fa-solid fa-wifi text-sm text-primary"></i>
             </div>
         </div>
@@ -78,8 +78,8 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
         <div className="relative w-full aspect-square max-w-[140px] mx-auto flex items-center justify-center">
             <div className="absolute inset-0 bg-secondary-purple/20 dark:bg-secondary-purple/10 rounded-full blur-xl animate-pulse"></div>
             
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-20 bg-neutral-white/40 dark:bg-neutral-black/40 rounded-lg border border-slate-200 dark:border-slate-700/50 -rotate-6 translate-x-2 -translate-y-2"></div>
-            <div className="relative z-10 w-32 h-24 bg-neutral-white dark:bg-neutral-black rounded-lg p-4 flex flex-col gap-2 border border-slate-100 dark:border-slate-700 shadow-xl">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-20 bg-neutral-white/40 dark:bg-dark-surface/40 rounded-lg border border-slate-200 dark:border-dark-border/50 -rotate-6 translate-x-2 -translate-y-2"></div>
+            <div className="relative z-10 w-32 h-24 bg-neutral-white dark:bg-dark-surface rounded-lg p-4 flex flex-col gap-2 border border-slate-100 dark:border-dark-border shadow-xl">
                 <div className="flex justify-between items-center mb-1">
                     <div className="flex gap-1">
                         <div className="w-1.5 h-1.5 rounded-full bg-secondary-red"></div>
@@ -89,8 +89,8 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
                     <div className="px-2 py-0.5 rounded-full bg-secondary-green/10 text-secondary-green text-[6px] font-black tracking-widest uppercase border border-secondary-green/20">Approved</div>
                 </div>
                 <div className="space-y-1.5">
-                    <div className="w-full h-2 bg-slate-100 dark:bg-slate-700/50 rounded-full"></div>
-                    <div className="w-3/4 h-2 bg-slate-100 dark:bg-slate-700/50 rounded-full"></div>
+                    <div className="w-full h-2 bg-slate-100 dark:bg-dark-border/50 rounded-full"></div>
+                    <div className="w-3/4 h-2 bg-slate-100 dark:bg-dark-border/50 rounded-full"></div>
                 </div>
                 <div className="mt-auto flex justify-end">
                     <div className="w-8 h-8 bg-secondary-purple rounded-lg flex items-center justify-center text-neutral-white animate-pulse shadow-md">
@@ -121,11 +121,11 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
         <div className="relative w-full aspect-square max-w-[140px] mx-auto flex items-center justify-center">
             <div className="absolute inset-0 bg-secondary-green/20 dark:bg-secondary-green/10 rounded-full blur-xl animate-pulse"></div>
             
-            <div className="relative z-10 w-32 h-32 bg-neutral-white dark:bg-neutral-black rounded-2xl p-4 flex flex-col border border-slate-100 dark:border-slate-700 overflow-hidden shadow-xl">
+            <div className="relative z-10 w-32 h-32 bg-neutral-white dark:bg-dark-surface rounded-2xl p-4 flex flex-col border border-slate-100 dark:border-dark-border overflow-hidden shadow-xl">
                 <div className="flex justify-between items-start mb-3">
                     <div>
-                        <p className="text-[7px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">Tháng này</p>
-                        <h4 className="text-base font-black text-neutral-black dark:text-neutral-white">22.5</h4>
+                        <p className="text-[7px] font-bold text-slate-400 dark:text-dark-text-secondary uppercase tracking-tighter">Tháng này</p>
+                        <h4 className="text-base font-black text-neutral-black dark:text-dark-text-primary">22.5</h4>
                     </div>
                     <div className="w-7 h-7 rounded-full bg-secondary-green/10 border border-secondary-green/20 flex items-center justify-center">
                         <i className="fa-solid fa-chart-line text-secondary-green text-sm"></i>
@@ -143,7 +143,7 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
                 </div>
             </div>
 
-            <div className="absolute -bottom-1 -left-1 w-16 h-16 bg-neutral-white dark:bg-neutral-black rounded-full p-1.5 border-2 border-secondary-green/20 dark:border-secondary-green/30 flex flex-col items-center justify-center rotate-[-10deg] shadow-lg">
+            <div className="absolute -bottom-1 -left-1 w-16 h-16 bg-neutral-white dark:bg-dark-surface rounded-full p-1.5 border-2 border-secondary-green/20 dark:border-secondary-green/30 flex flex-col items-center justify-center rotate-[-10deg] shadow-lg">
                 <div className="relative w-full h-full flex items-center justify-center">
                     <svg className="w-full h-full -rotate-90">
                         <circle cx="50%" cy="50%" r="40%" className="fill-none stroke-secondary-green/20 dark:stroke-secondary-green/30 stroke-[3]" />
@@ -173,13 +173,13 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
         <div className="relative w-full aspect-square max-w-[140px] mx-auto flex items-center justify-center">
             <div className="absolute inset-0 bg-secondary-red/20 dark:bg-secondary-red/10 rounded-full blur-xl animate-pulse"></div>
             
-            <div className="relative z-10 w-24 h-24 bg-neutral-black rounded-[1.8rem] flex items-center justify-center border-[3px] border-slate-800 dark:border-slate-700 shadow-xl">
+            <div className="relative z-10 w-24 h-24 bg-neutral-black rounded-[1.8rem] flex items-center justify-center border-[3px] border-slate-800 dark:border-dark-border shadow-xl">
                 <div className="w-14 h-14 bg-secondary-red rounded-full flex items-center justify-center text-neutral-white animate-pulse">
                     <i className="fa-solid fa-shield-halved text-3xl"></i>
                 </div>
                 
                 <div className="absolute inset-0 animate-spin-slow">
-                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-6 h-6 bg-neutral-white dark:bg-neutral-black rounded-md flex items-center justify-center border border-secondary-red/20 dark:border-secondary-red/30">
+                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-6 h-6 bg-neutral-white dark:bg-dark-surface rounded-md flex items-center justify-center border border-secondary-red/20 dark:border-secondary-red/30">
                         <i className="fa-solid fa-lock text-secondary-red text-[10px]"></i>
                     </div>
                 </div>
@@ -233,7 +233,7 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
   const currentSection = sections[activeTab];
 
   return (
-    <div className="fixed inset-0 z-[100] bg-neutral-white dark:bg-neutral-black flex flex-col font-sans animate-slide-up overflow-hidden">
+    <div className="fixed inset-0 z-[100] bg-neutral-white dark:bg-dark-bg flex flex-col font-sans animate-slide-up overflow-hidden">
       <div 
         className="h-full flex flex-col pb-safe overflow-hidden" 
         onScroll={handleScroll}
@@ -243,7 +243,7 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
       >
         <button 
             onClick={handleCloseAndSave}
-            className="absolute top-safe mt-4 right-4 z-50 px-3 py-1.5 rounded-full bg-black/5 dark:bg-neutral-white/5 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest hover:bg-black/10 transition-colors"
+            className="absolute top-safe mt-4 right-4 z-50 px-3 py-1.5 rounded-full bg-black/5 dark:bg-neutral-white/5 text-slate-500 dark:text-dark-text-secondary text-[10px] font-black uppercase tracking-widest hover:bg-black/10 transition-colors"
         >
             Đóng
         </button>
@@ -256,11 +256,11 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
             </div>
             
             <div key={`title-${activeTab}`} className="mt-6 text-center animate-slide-up relative z-10">
-                <h2 className="text-2xl font-black text-neutral-black dark:text-neutral-white leading-tight mb-2 px-4">
+                <h2 className="text-2xl font-black text-neutral-black dark:text-dark-text-primary leading-tight mb-2 px-4">
                     {currentSection.title}
                 </h2>
                 <div className={`mx-auto w-10 h-1.5 rounded-full bg-gradient-to-r ${currentSection.color} mb-3`}></div>
-                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
+                <p className="text-[10px] font-black text-slate-400 dark:text-dark-text-secondary uppercase tracking-[0.2em]">
                     {currentSection.subtitle}
                 </p>
             </div>
@@ -278,8 +278,8 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
                             <i className={`fa-solid ${step.icon}`}></i>
                         </div>
                         <div className="flex-1">
-                            <h4 className="text-base font-black text-neutral-black dark:text-neutral-white mb-0.5">{step.title}</h4>
-                            <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+                            <h4 className="text-base font-black text-neutral-black dark:text-dark-text-primary mb-0.5">{step.title}</h4>
+                            <p className="text-[13px] font-medium text-slate-500 dark:text-dark-text-secondary leading-relaxed">
                                 {step.text}
                             </p>
                         </div>
@@ -288,13 +288,13 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
             </div>
         </div>
 
-        <div className="px-8 py-8 flex flex-col items-center gap-6 bg-neutral-white/80 dark:bg-neutral-black/80 border-t border-slate-100 dark:border-slate-800/50">
+        <div className="px-8 py-8 flex flex-col items-center gap-6 bg-neutral-white/80 dark:bg-dark-surface/80 border-t border-slate-100 dark:border-dark-border/50">
             <div className="flex gap-2.5">
                 {sections.map((_, idx) => (
                     <button 
                         key={idx}
                         onClick={() => handleChangeTab(idx)}
-                        className={`h-1.5 rounded-full transition-all duration-500 ease-out ${activeTab === idx ? `w-8 bg-gradient-to-r ${currentSection.color}` : 'w-1.5 bg-slate-200 dark:bg-slate-700'}`}
+                        className={`h-1.5 rounded-full transition-all duration-500 ease-out ${activeTab === idx ? `w-8 bg-gradient-to-r ${currentSection.color}` : 'w-1.5 bg-slate-200 dark:bg-dark-border'}`}
                     />
                 ))}
             </div>
@@ -303,7 +303,7 @@ const UserGuideModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =
                 {activeTab > 0 && (
                     <button 
                         onClick={() => handleChangeTab(activeTab - 1)}
-                        className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-300 flex items-center justify-center transition-all active:scale-90 hover:bg-slate-200 dark:hover:bg-slate-700"
+                        className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-dark-border/50 text-slate-500 dark:text-dark-text-secondary flex items-center justify-center transition-all active:scale-90 hover:bg-slate-200 dark:hover:bg-dark-border"
                     >
                         <i className="fa-solid fa-arrow-left text-lg"></i>
                     </button>

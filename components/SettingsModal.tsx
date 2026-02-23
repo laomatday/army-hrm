@@ -74,54 +74,54 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
   }) => (
     <div 
         onClick={type === 'toggle' ? undefined : onClick}
-        className="flex items-center gap-4 p-4 active:bg-slate-50 dark:active:bg-slate-700/50 transition-colors cursor-pointer group"
+        className="flex items-center gap-4 p-4 active:bg-slate-50 dark:active:bg-dark-border/50 transition-colors cursor-pointer group"
     >
-        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl flex-shrink-0 border border-slate-100 dark:border-slate-700/50 ${colorClass}`}>
+        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl flex-shrink-0 ${colorClass}`}>
             <i className={`fa-solid ${icon}`}></i>
         </div>
 
         <div className="flex-1 min-w-0">
-            <h4 className="text-base font-bold text-slate-800 dark:text-neutral-white leading-tight group-hover:text-primary transition-colors">{title}</h4>
-            {subtitle && <p className="text-xs text-slate-400 dark:text-slate-500 font-bold mt-0.5 truncate">{subtitle}</p>}
+            <h4 className="text-base font-bold text-slate-800 dark:text-dark-text-primary leading-tight group-hover:text-primary transition-colors">{title}</h4>
+            {subtitle && <p className="text-xs text-slate-400 dark:text-dark-text-secondary font-bold mt-0.5 truncate">{subtitle}</p>}
         </div>
 
         <div className="pl-2">
             {type === 'link' && (
-                <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-900 text-slate-300 dark:text-slate-600 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-dark-bg text-slate-300 dark:text-dark-text-secondary flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                     <i className="fa-solid fa-chevron-right text-xs"></i>
                 </div>
             )}
             {type === 'toggle' && (
                 <div 
                     onClick={onClick}
-                    className={`w-12 h-7 rounded-full relative transition-colors duration-300 ${value ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'}`}
+                    className={`w-12 h-7 rounded-full relative transition-colors duration-300 ${value ? 'bg-primary' : 'bg-slate-200 dark:bg-dark-border'}`}
                 >
                     <div className={`w-5 h-5 bg-neutral-white rounded-full absolute top-1 transition-transform duration-300 ${value ? 'translate-x-[22px]' : 'translate-x-1'}`}></div>
                 </div>
             )}
-            {type === 'info' && <i className="fa-solid fa-circle-info text-slate-300 dark:text-slate-600 text-lg"></i>}
+            {type === 'info' && <i className="fa-solid fa-circle-info text-slate-300 dark:text-dark-text-secondary text-lg"></i>}
         </div>
     </div>
   );
 
   return (
     <>
-      <div className="fixed inset-0 z-[60] bg-neutral-white dark:bg-neutral-black flex flex-col font-sans animate-slide-up">
+      <div className="fixed inset-0 z-[60] bg-neutral-white dark:bg-dark-bg flex flex-col font-sans animate-slide-up">
 
           <ModalHeader 
               title="Cài đặt" 
               onClose={onClose} 
-              bgClass="bg-neutral-white dark:bg-neutral-black border-b border-slate-100 dark:border-slate-800"
+              bgClass="bg-neutral-white dark:bg-dark-bg border-b border-slate-100 dark:border-dark-border"
           />
 
           <div className="flex-1 overflow-y-auto px-4 pb-32 space-y-6 pt-4 relative z-0" onScroll={handleScroll}>
               
               <div className="relative group mb-2">
-                  <i className="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400 group-focus-within:text-primary transition-colors"></i>
+                  <i className="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400 dark:text-dark-text-secondary group-focus-within:text-primary transition-colors"></i>
                   <input 
                       type="text" 
                       placeholder="Tìm kiếm cài đặt..."
-                      className="w-full h-11 bg-slate-50 dark:bg-slate-900 rounded-2xl pl-11 pr-4 text-base font-bold text-slate-800 dark:text-neutral-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/20 border border-transparent transition-all focus:bg-neutral-white"
+                      className="w-full h-11 bg-slate-50 dark:bg-dark-surface rounded-2xl pl-11 pr-4 text-base font-bold text-slate-800 dark:text-dark-text-primary placeholder:text-slate-400 dark:placeholder:text-dark-text-secondary outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/20 border border-transparent transition-all focus:bg-neutral-white dark:focus:bg-dark-surface"
                   />
               </div>
 
@@ -129,7 +129,7 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
                   <h3 className="text-xs font-black text-primary dark:text-primary uppercase ml-2 tracking-widest flex items-center gap-2">
                       <i className="fa-solid fa-sliders text-[10px]"></i> Tùy chọn chung
                   </h3>
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
+                  <div className="bg-slate-50 dark:bg-dark-surface rounded-[24px] overflow-hidden border border-slate-100 dark:border-dark-border divide-y divide-slate-100 dark:divide-dark-border">
                       <SettingItem 
                           icon="fa-moon" 
                           colorClass="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"
@@ -161,10 +161,10 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
                   <h3 className="text-xs font-black text-primary dark:text-primary uppercase ml-2 tracking-widest flex items-center gap-2">
                       <i className="fa-solid fa-headset text-[10px]"></i> Trợ giúp & Hỗ trợ
                   </h3>
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
+                  <div className="bg-slate-50 dark:bg-dark-surface rounded-[24px] overflow-hidden border border-slate-100 dark:border-dark-border divide-y divide-slate-100 dark:divide-dark-border">
                       <SettingItem 
                           icon="fa-phone-volume" 
-                          colorClass="bg-primary/10 text-primary"
+                          colorClass="bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary"
                           title="Tổng đài hỗ trợ"
                           subtitle="1900 1234 (Nhánh 1)"
                           onClick={() => setShowSupportModal(true)}
@@ -172,14 +172,14 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
                       <a href="mailto:support@armyhrm.com" className="no-underline block">
                           <SettingItem 
                               icon="fa-paper-plane" 
-                              colorClass="bg-secondary-red/10 text-secondary-red"
+                              colorClass="bg-secondary-red/10 dark:bg-secondary-red/20 text-secondary-red dark:text-secondary-red"
                               title="Gửi phản hồi"
                               subtitle="Báo lỗi hoặc góp ý tính năng"
                           />
                       </a>
                        <SettingItem 
                           icon="fa-book-open" 
-                          colorClass="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                          colorClass="bg-slate-100 dark:bg-dark-border/50 text-slate-600 dark:text-dark-text-secondary"
                           title="Hướng dẫn sử dụng"
                           subtitle="Câu hỏi thường gặp (FAQ)"
                           onClick={() => setIsGuideOpen(true)}
@@ -191,14 +191,14 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
                   <h3 className="text-xs font-black text-primary dark:text-primary uppercase ml-2 tracking-widest flex items-center gap-2">
                       <i className="fa-solid fa-circle-info text-[10px]"></i> Thông tin ứng dụng
                   </h3>
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
-                      <div className="p-6 flex flex-col items-center justify-center text-center gap-3 bg-gradient-to-b from-neutral-white/50 dark:from-slate-700/50 to-slate-50 dark:to-slate-800">
-                          <div className="w-20 h-20 bg-neutral-white dark:bg-slate-700 rounded-[20px] border border-slate-100 dark:border-slate-600 p-3 mb-1 animate-scale-in">
+                  <div className="bg-slate-50 dark:bg-dark-surface rounded-[24px] overflow-hidden border border-slate-100 dark:border-dark-border divide-y divide-slate-100 dark:divide-dark-border">
+                      <div className="p-6 flex flex-col items-center justify-center text-center gap-3 bg-gradient-to-b from-neutral-white/50 dark:from-dark-bg/50 to-slate-50 dark:to-dark-surface">
+                          <div className="w-20 h-20 bg-neutral-white dark:bg-dark-bg rounded-[20px] border border-slate-100 dark:border-dark-border/50 p-3 mb-1 animate-scale-in">
                                <img src={"https://lh3.googleusercontent.com/d/1r_FuqN4QJbch0FYXAwX8efW9s0ucreiO"} className="w-full h-full object-contain" alt="Logo" />
                           </div>
                           <div>
-                              <h4 className="text-xl font-black text-slate-800 dark:text-neutral-white tracking-tight">Army HRM</h4>
-                              <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider bg-neutral-white dark:bg-slate-700 px-2 py-1 rounded-md inline-block mt-1">v2026.2.0 (Build 890)</p>
+                              <h4 className="text-xl font-black text-slate-800 dark:text-dark-text-primary tracking-tight">Army HRM</h4>
+                              <p className="text-xs text-slate-400 dark:text-dark-text-secondary font-bold uppercase tracking-wider bg-neutral-white dark:bg-dark-bg px-2 py-1 rounded-md inline-block mt-1">v2026.2.0 (Build 890)</p>
                           </div>
                       </div>
                       

@@ -18,7 +18,7 @@ interface Props {
 }
 
 const ReasonBadge = ({ reason }: { reason: string }) => {
-    let badgeClass = 'bg-slate-100 dark:bg-neutral-black/50 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400';
+    let badgeClass = 'bg-slate-100 dark:bg-dark-surface border-slate-200 dark:border-dark-border text-slate-500 dark:text-dark-text-secondary';
 
     if (reason.includes('Vắng') || reason.includes('Quên')) {
         badgeClass = 'bg-secondary-red/10 dark:bg-secondary-red/20 border-secondary-red/20 dark:border-secondary-red/30 text-secondary-red dark:text-secondary-red';
@@ -146,7 +146,7 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
   return (
     <>
         <div 
-          className="fixed inset-0 z-[80] bg-slate-50 dark:bg-slate-900 flex flex-col animate-slide-up transition-colors duration-300"
+          className="fixed inset-0 z-[80] bg-slate-50 dark:bg-dark-bg flex flex-col animate-slide-up transition-colors duration-300"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
@@ -160,17 +160,17 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
 
             <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-14" onScroll={handleScroll}>
                 <div className="animate-fade-in mt-4">
-                    <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[32px] p-8 border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors">
+                    <div className="bg-neutral-white dark:bg-dark-surface rounded-[32px] p-8 border border-slate-100 dark:border-dark-border text-center relative overflow-hidden mb-6 transition-colors shadow-sm">
                         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-secondary-orange/10 to-secondary-yellow/10 dark:from-secondary-orange/20 dark:to-secondary-yellow/20 rounded-t-[32px] transition-colors duration-500"></div>
                         
                         <div className="relative z-10 flex flex-col items-center">
-                            <div className="w-28 h-28 rounded-full p-1.5 bg-neutral-white dark:bg-neutral-black/80 mb-4 mt-2 relative transition-colors">
+                            <div className="w-28 h-28 rounded-full p-1.5 bg-neutral-white dark:bg-dark-surface mb-4 mt-2 relative transition-colors">
                                 <div className="w-full h-full rounded-full bg-secondary-orange/10 dark:bg-secondary-orange/20 flex items-center justify-center border border-secondary-orange/20 dark:border-secondary-orange/30 text-secondary-orange dark:text-secondary-orange">
                                     <i className="fa-solid fa-file-pen text-4xl ml-1"></i>
                                 </div>
                             </div>
-                            <h2 className="text-2xl font-black text-neutral-black dark:text-neutral-white tracking-tight leading-tight">Giải Trình Công</h2>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 font-bold mt-2 uppercase tracking-wide">Bổ sung thông tin chấm công</p>
+                            <h2 className="text-2xl font-black text-neutral-black dark:text-dark-text-primary tracking-tight leading-tight">Giải Trình Công</h2>
+                            <p className="text-xs text-slate-500 dark:text-dark-text-secondary font-bold mt-2 uppercase tracking-wide">Bổ sung thông tin chấm công</p>
                         </div>
                     </div>
 
@@ -179,33 +179,33 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
                         Thông tin chi tiết
                     </h3>
 
-                    <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[32px] p-6 border border-slate-100 dark:border-slate-700 space-y-5 transition-colors mb-8">
+                    <div className="bg-neutral-white dark:bg-dark-surface rounded-[32px] p-6 border border-slate-100 dark:border-dark-border space-y-5 transition-colors mb-8 shadow-sm">
                         
                         <div className="relative">
-                            <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1 block mb-1.5">Chọn ngày cần giải trình</label>
+                            <label className="text-[10px] font-extrabold text-slate-400 dark:text-dark-text-secondary uppercase tracking-wide ml-1 block mb-1.5">Chọn ngày cần giải trình</label>
                             <button 
                                 onClick={() => { triggerHaptic('light'); setIsDropdownOpen(!isDropdownOpen); }}
-                                className={`w-full min-h-[56px] px-4 py-3 flex justify-between items-center bg-slate-50 dark:bg-neutral-black/80 border rounded-2xl text-sm font-bold outline-none transition-all ${isDropdownOpen ? 'border-secondary-orange dark:border-secondary-orange ring-2 ring-secondary-orange/20' : 'border-slate-200 dark:border-slate-700'}`}
+                                className={`w-full min-h-[56px] px-4 py-3 flex justify-between items-center bg-slate-50 dark:bg-dark-bg/50 border rounded-2xl text-sm font-bold outline-none transition-all ${isDropdownOpen ? 'border-secondary-orange dark:border-secondary-orange ring-2 ring-secondary-orange/20' : 'border-slate-200 dark:border-dark-border'}`}
                             >
                                 <div className="text-left flex-1 flex items-center gap-3">
                                     {selectedItem ? (
                                         <>
                                             <ReasonDisplay reasons={selectedItem.explainReason} />
-                                            <span className="block text-neutral-black dark:text-neutral-white font-bold ml-auto">
+                                            <span className="block text-neutral-black dark:text-dark-text-primary font-bold ml-auto">
                                                 {formatDateString(selectedDate)}
                                             </span>
                                         </>
                                     ) : (
-                                        <span className="text-slate-400 dark:text-slate-500">Chọn ngày...</span>
+                                        <span className="text-slate-400 dark:text-dark-text-secondary">Chọn ngày...</span>
                                     )}
                                 </div>
-                                <i className={`fa-solid fa-chevron-down text-slate-400 dark:text-slate-500 text-xs transition-transform ml-3 ${isDropdownOpen ? 'rotate-180' : ''}`}></i>
+                                <i className={`fa-solid fa-chevron-down text-slate-400 dark:text-dark-text-secondary text-xs transition-transform ml-3 ${isDropdownOpen ? 'rotate-180' : ''}`}></i>
                             </button>
                             
                             {isDropdownOpen && (
-                                <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-neutral-white dark:bg-neutral-black border border-slate-100 dark:border-slate-700 rounded-2xl z-50 overflow-hidden animate-fade-in p-2 space-y-1 shadow-xl max-h-60 overflow-y-auto custom-scrollbar">
+                                <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-neutral-white dark:bg-dark-surface border border-slate-100 dark:border-dark-border rounded-2xl z-50 overflow-hidden animate-fade-in p-2 space-y-1 shadow-xl max-h-60 overflow-y-auto custom-scrollbar">
                                     {explainableItems.length === 0 ? (
-                                        <div className="p-4 text-center text-xs text-slate-400 font-bold uppercase tracking-widest">Không có ngày nào cần giải trình</div>
+                                        <div className="p-4 text-center text-xs text-slate-400 dark:text-dark-text-secondary font-bold uppercase tracking-widest">Không có ngày nào cần giải trình</div>
                                     ) : (
                                         explainableItems.map((item) => (
                                             <div 
@@ -219,12 +219,12 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
                                                 className={`flex items-center justify-between p-3.5 rounded-xl cursor-pointer transition-all ${
                                                     selectedDate === item.date 
                                                     ? 'bg-secondary-orange/10 dark:bg-secondary-orange/20' 
-                                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                                                    : 'text-slate-600 dark:text-dark-text-secondary hover:bg-slate-50 dark:hover:bg-dark-border/50'
                                                 }`}
                                             >
                                                 <div className="flex-1 flex items-center gap-3">
                                                     <ReasonDisplay reasons={item.explainReason} />
-                                                     <span className={`font-bold text-sm ml-auto ${selectedDate === item.date ? 'text-secondary-orange dark:text-secondary-orange' : ''}`}>
+                                                     <span className={`font-bold text-sm ml-auto ${selectedDate === item.date ? 'text-secondary-orange dark:text-secondary-orange' : 'dark:text-dark-text-primary'}`}>
                                                         {formatDateString(item.date)}
                                                     </span>
                                                 </div>
@@ -239,10 +239,10 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
                         </div>
 
                         <div>
-                            <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1 block mb-1.5">Lý do giải trình</label>
+                            <label className="text-[10px] font-extrabold text-slate-400 dark:text-dark-text-secondary uppercase tracking-wide ml-1 block mb-1.5">Lý do giải trình</label>
                             <textarea 
                                 id="explain-reason-textarea"
-                                className="w-full p-4 bg-slate-50 dark:bg-neutral-black/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-neutral-black dark:text-neutral-white outline-none h-32 resize-none focus:ring-2 focus:ring-secondary-orange/20 focus:border-secondary-orange dark:focus:border-secondary-orange transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" 
+                                className="w-full p-4 bg-slate-50 dark:bg-dark-bg/50 border border-slate-200 dark:border-dark-border rounded-2xl text-sm font-bold text-neutral-black dark:text-dark-text-primary outline-none h-32 resize-none focus:ring-2 focus:ring-secondary-orange/20 focus:border-secondary-orange dark:focus:border-secondary-orange transition-all placeholder:text-slate-400 dark:placeholder:text-dark-text-secondary/50" 
                                 placeholder="Nhập lý do chi tiết..."
                                 value={reason} 
                                 onChange={e => setReason(e.target.value)}
@@ -268,7 +268,7 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
             message={confirmDialog.isPastMonth ? 
                 <span className="text-secondary-red font-bold"><i className="fa-solid fa-triangle-exclamation mr-1"></i> Bạn đang giải trình cho tháng trước. Đơn này có thể bị tính là trễ hạn.</span> 
                 : 
-                <span>Hệ thống sẽ ghi nhận giải trình của bạn cho ngày <span className="text-neutral-black dark:text-neutral-white font-bold"> {formatDateString(selectedDate)}</span>.</span>
+                <span>Hệ thống sẽ ghi nhận giải trình của bạn cho ngày <span className="text-neutral-black dark:text-dark-text-primary font-bold"> {formatDateString(selectedDate)}</span>.</span>
             }
             confirmLabel="Xác nhận gửi"
             onConfirm={handleSubmitExplanation}
