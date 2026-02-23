@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Employee } from '../types';
-import { submitExplanation } from '../services/api';
-import { formatDateString, triggerHaptic } from '../utils/helpers';
+import { Employee } from '../../../types';
+import { submitExplanation } from '../../../services/api';
+import { formatDateString, triggerHaptic } from '../../../utils/helpers';
 import ModalHeader from './ModalHeader';
 import ConfirmDialog from './ConfirmDialog';
-import { useScrollControl } from '../hooks/useScrollControl';
+import { useScrollControl } from '../../../hooks/useScrollControl';
 
 interface Props {
   isOpen: boolean;

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { DashboardData } from '../types';
-import { triggerHaptic, timeToMinutes, getCurrentTimeStr } from '../utils/helpers';
-import { togglePause, determineShift } from '../services/api';
-import PullToRefresh from './PullToRefresh';
-import Spinner from './Spinner';
+import { DashboardData } from '../../types';
+import { triggerHaptic, timeToMinutes, getCurrentTimeStr } from '../../utils/helpers';
+import { togglePause, determineShift } from '../../services/api';
+import PullToRefresh from '../ui/PullToRefresh';
+import Spinner from '../ui/Spinner';
 
 interface Props {
   data: DashboardData | null;

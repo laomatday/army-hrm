@@ -1,8 +1,8 @@
 import React, { useRef } from 'react';
-import { Employee } from '../types';
-import Avatar from './Avatar';
+import { Employee } from '../../types';
+import Avatar from '../ui/Avatar';
 import ModalHeader from './ModalHeader';
-import { formatDateString, triggerHaptic } from '../utils/helpers';
+import { formatDateString, triggerHaptic } from '../../utils/helpers';
 
 interface Props {
   contact: Employee | null;

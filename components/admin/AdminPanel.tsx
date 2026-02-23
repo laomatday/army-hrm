@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Employee } from '../types';
-import { adminGetCollection, adminDeleteDoc, adminUpdateDoc, adminCreateDoc } from '../services/api';
+import { Employee } from '../../types';
+import { adminGetCollection, adminDeleteDoc, adminUpdateDoc, adminCreateDoc } from '../../services/api';
 import * as XLSX from 'xlsx';
-import { hashPassword, formatDateString } from '../utils/helpers';
-import ConfirmDialog from './ConfirmDialog';
-import { useToast } from '../contexts/ToastContext';
+import { hashPassword, formatDateString } from '../../utils/helpers';
+import ConfirmDialog from '../modals/ConfirmDialog';
+import { useToast } from '../../contexts/ToastContext';
 
 interface Props {
   user: Employee;
@@ -175,10 +175,10 @@ const MultiSelectTags = ({
         <div ref={containerRef} className="relative">
             <div 
                 onClick={() => setIsOpen(!isOpen)}
-                className="min-h-[46px] p-2 bg-neutral-white dark:bg-neutral-black/50 border border-slate-200 dark:border-slate-700 rounded-2xl flex flex-wrap gap-2 cursor-pointer focus-within:ring-2 focus-within:ring-primary transition-all"
+                className="min-h-[46px] p-2 bg-neutral-white dark:bg-dark-bg/50 border border-slate-200 dark:border-dark-border rounded-2xl flex flex-wrap gap-2 cursor-pointer focus-within:ring-2 focus-within:ring-primary transition-all"
             >
                 {selected.length === 0 && !isOpen && (
-                    <span className="text-slate-400 dark:text-slate-500 text-sm mt-1 ml-2">Chọn các chi nhánh...</span>
+                    <span className="text-slate-400 dark:text-dark-text-secondary text-sm mt-1 ml-2">Chọn các chi nhánh...</span>
                 )}
                 {selected.map(val => {
                     const opt = options.find(o => o[valueField] === val);
@@ -202,21 +202,21 @@ const MultiSelectTags = ({
             </div>
 
             {isOpen && (
-                <div className="absolute z-[100] top-full left-0 right-0 mt-2 bg-neutral-white dark:bg-neutral-black border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden animate-scale-in">
-                    <div className="p-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/30">
+                <div className="absolute z-[100] top-full left-0 right-0 mt-2 bg-neutral-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-2xl overflow-hidden animate-scale-in">
+                    <div className="p-3 border-b border-slate-100 dark:border-dark-border bg-slate-50/50 dark:bg-dark-bg/80">
                         <div className="relative">
                             <i className="fa-solid fa-search absolute left-3 top-2.5 text-slate-400 text-xs"></i>
                             <input 
                                 autoFocus
                                 type="text" 
-                                className="w-full pl-9 pr-4 py-2 bg-neutral-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary text-neutral-black dark:text-neutral-white"
+                                className="w-full pl-9 pr-4 py-2 bg-neutral-white dark:bg-dark-bg border border-slate-200 dark:border-dark-border rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary text-neutral-black dark:text-dark-text-primary"
                                 placeholder="Tìm chi nhánh..."
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                             />
                         </div>
                     </div>
-                    <div className="max-h-60 overflow-y-auto custom-scrollbar bg-neutral-white dark:bg-neutral-black">
+                    <div className="max-h-60 overflow-y-auto custom-scrollbar bg-neutral-white dark:bg-dark-surface">
                         <div 
                             onClick={() => { onAdd("ALL"); setIsOpen(false); }}
                             className="px-4 py-3 hover:bg-secondary-red/10 dark:hover:bg-secondary-red/20 text-xs font-black text-secondary-red dark:text-secondary-red cursor-pointer transition-colors flex items-center gap-2"
@@ -227,7 +227,7 @@ const MultiSelectTags = ({
                             <div 
                                 key={opt[valueField]} 
                                 onClick={() => onAdd(opt[valueField])}
-                                className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 text-sm text-neutral-black dark:text-neutral-white cursor-pointer transition-colors border-t border-slate-50 dark:border-slate-800 font-medium"
+                                className="px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-dark-border/50 text-sm text-neutral-black dark:text-dark-text-primary cursor-pointer transition-colors border-t border-slate-50 dark:border-dark-border/50 font-medium"
                             >
                                 {opt[labelField]} ({opt[valueField]})
                             </div>
@@ -568,7 +568,7 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                   const colSpanClass = fieldConfig.colSpan === 2 ? 'md:col-span-2' : 'md:col-span-1';
 
                   let inputEl;
-                  const commonClasses = "block w-full rounded-2xl border-0 px-4 py-3 text-neutral-black dark:text-neutral-white ring-1 ring-inset ring-slate-200 dark:ring-slate-700 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-primary transition-all bg-neutral-white dark:bg-neutral-black/50 font-medium";
+                  const commonClasses = "block w-full rounded-2xl border-0 px-4 py-3 text-neutral-black dark:text-dark-text-primary ring-1 ring-inset ring-slate-200 dark:ring-dark-border placeholder:text-slate-400 dark:placeholder:text-dark-text-secondary/50 focus:ring-2 focus:ring-inset focus:ring-primary transition-all bg-neutral-white dark:bg-dark-bg/50 font-medium";
 
                   if (fieldConfig.type === 'select') {
                       inputEl = (
@@ -645,7 +645,7 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
 
                   return (
                       <div key={key} className={colSpanClass}>
-                          <label className="block text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase mb-1.5 tracking-wide">
+                          <label className="block text-xs font-extrabold text-slate-500 dark:text-dark-text-secondary uppercase mb-1.5 tracking-wide">
                               {fieldConfig.label || key} {fieldConfig.required && <span className="text-secondary-red">*</span>}
                           </label>
                           {inputEl}
@@ -672,11 +672,11 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                  return <span className="inline-flex items-center rounded-md bg-secondary-yellow/10 px-2 py-0.5 text-[10px] font-extrabold text-secondary-yellow ring-1 ring-inset ring-secondary-yellow/20 uppercase tracking-wide">{displayVal}</span>
             }
        }
-       return <span className="text-sm font-medium text-neutral-black dark:text-neutral-white">{displayVal}</span>;
+       return <span className="text-sm font-medium text-neutral-black dark:text-dark-text-primary">{displayVal}</span>;
   }
 
   return (
-    <div className="flex h-screen w-screen bg-slate-50 dark:bg-slate-900 overflow-hidden font-sans transition-colors duration-300">
+    <div className="flex h-screen w-screen bg-slate-50 dark:bg-dark-bg overflow-hidden font-sans transition-colors duration-300">
         <div className="w-72 bg-neutral-black text-slate-300 flex flex-col flex-shrink-0 border-r border-slate-800 z-20 hidden md:flex">
             <div className="p-6 flex items-center gap-3 mb-2">
                 <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-neutral-white font-black">A</div>
@@ -716,13 +716,13 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
             </div>
         </div>
 
-        <div className="flex-1 flex flex-col min-w-0 relative bg-slate-50/50 dark:bg-neutral-black/50">
-            <header className="h-20 bg-neutral-white/80 dark:bg-neutral-black/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 z-10 sticky top-0 backdrop-blur-md">
+        <div className="flex-1 flex flex-col min-w-0 relative bg-slate-50/50 dark:bg-dark-bg/50">
+            <header className="h-20 bg-neutral-white/80 dark:bg-dark-bg/80 border-b border-slate-200 dark:border-dark-border flex items-center justify-between px-8 z-10 sticky top-0 backdrop-blur-md">
                 <div className="flex items-center gap-4">
                      <div className="md:hidden w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-neutral-white font-black">A</div>
-                    <h2 className="text-2xl font-black text-neutral-black dark:text-neutral-white flex items-center gap-3 tracking-tight">
+                    <h2 className="text-2xl font-black text-neutral-black dark:text-dark-text-primary flex items-center gap-3 tracking-tight">
                         {COLLECTIONS.find(c => c.id === selectedCollection)?.name}
-                        <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2.5 py-0.5 rounded-lg text-xs font-extrabold border border-slate-200 dark:border-slate-700 uppercase tracking-wide">{processedData.length} records</span>
+                        <span className="bg-slate-100 dark:bg-dark-border/50 text-slate-500 dark:text-dark-text-secondary px-2.5 py-0.5 rounded-lg text-xs font-extrabold border border-slate-200 dark:border-dark-border uppercase tracking-wide">{processedData.length} records</span>
                     </h2>
                 </div>
                 
@@ -734,19 +734,19 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                     )}
                     
                     <div className="relative group hidden md:block">
-                        <i className="fa-solid fa-search absolute left-4 top-3 text-slate-400 dark:text-slate-500 text-sm group-focus-within:text-primary transition-colors"></i>
+                        <i className="fa-solid fa-search absolute left-4 top-3 text-slate-400 dark:text-dark-text-secondary text-sm group-focus-within:text-primary transition-colors"></i>
                         <input type="text" placeholder="Tìm kiếm..." 
-                            className="pl-10 pr-4 py-2.5 bg-neutral-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-medium w-64 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-neutral-black dark:text-neutral-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            className="pl-10 pr-4 py-2.5 bg-neutral-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-2xl text-sm font-medium w-64 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-neutral-black dark:text-dark-text-primary placeholder:text-slate-400 dark:placeholder:text-dark-text-secondary/50"
                             value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
                         />
                     </div>
                     
-                    <div className="flex items-center bg-neutral-white dark:bg-slate-800 rounded-2xl p-1 border border-slate-200 dark:border-slate-700 hidden md:flex">
-                        <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl flex items-center gap-1 transition-colors uppercase tracking-wide">
+                    <div className="flex items-center bg-neutral-white dark:bg-dark-surface rounded-2xl p-1 border border-slate-200 dark:border-dark-border hidden md:flex">
+                        <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 text-sm font-bold text-slate-600 dark:text-dark-text-secondary hover:bg-slate-50 dark:hover:bg-dark-border/50 rounded-xl flex items-center gap-1 transition-colors uppercase tracking-wide">
                             <i className="fa-solid fa-file-import text-primary"></i> Import
                         </button>
-                        <div className="w-[1px] h-4 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-                        <button onClick={handleExport} className="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-xl flex items-center gap-1 transition-colors uppercase tracking-wide">
+                        <div className="w-[1px] h-4 bg-slate-200 dark:bg-dark-border mx-1"></div>
+                        <button onClick={handleExport} className="px-4 py-2 text-sm font-bold text-slate-600 dark:text-dark-text-secondary hover:bg-slate-50 dark:hover:bg-dark-border/50 rounded-xl flex items-center gap-1 transition-colors uppercase tracking-wide">
                             <i className="fa-solid fa-file-excel text-secondary-green"></i> Export
                         </button>
                         <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx, .xls" onChange={handleFileChange} />
@@ -759,33 +759,33 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
             </header>
 
             <div className="flex-1 overflow-hidden p-6 flex flex-col">
-                <div key={selectedCollection} className="bg-neutral-white dark:bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 flex-1 flex flex-col overflow-hidden relative transition-all duration-300 animate-slide-up">
+                <div key={selectedCollection} className="bg-neutral-white dark:bg-dark-surface rounded-[24px] border border-slate-200 dark:border-dark-border flex-1 flex flex-col overflow-hidden relative transition-all duration-300 animate-slide-up">
                     <div className="overflow-auto flex-1 custom-scrollbar">
                         {loading && (
-                             <div className="absolute inset-0 flex items-center justify-center bg-neutral-white/60 dark:bg-neutral-black/60 z-30 backdrop-blur-sm">
-                                <div className="animate-spin rounded-full h-10 w-10 border-[3px] border-slate-200 dark:border-slate-700 border-t-primary"></div>
+                             <div className="absolute inset-0 flex items-center justify-center bg-neutral-white/60 dark:bg-dark-bg/80 z-30 backdrop-blur-sm">
+                                <div className="animate-spin rounded-full h-10 w-10 border-[3px] border-slate-200 dark:border-dark-border border-t-primary"></div>
                              </div>
                         )}
                         
                         <table className="w-full text-left border-collapse table-auto md:w-full">
-                            <thead className="bg-slate-50 dark:bg-slate-800/80 sticky top-0 z-20">
+                            <thead className="bg-slate-50 dark:bg-dark-surface/80 sticky top-0 z-20">
                                 <tr>
-                                    <th className="px-6 py-4 w-14 border-b border-slate-200 dark:border-slate-700">
-                                        <input type="checkbox" className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary cursor-pointer accent-primary bg-neutral-white dark:bg-slate-700"
+                                    <th className="px-6 py-4 w-14 border-b border-slate-200 dark:border-dark-border">
+                                        <input type="checkbox" className="w-4 h-4 rounded border-slate-300 dark:border-dark-border text-primary focus:ring-primary cursor-pointer accent-primary bg-neutral-white dark:bg-dark-surface"
                                             checked={paginatedData.length > 0 && paginatedData.every(item => selectedIds.has(String(item.id)))} onChange={toggleSelectAll} />
                                     </th>
-                                    <th className="px-4 py-4 text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase w-28 border-b border-slate-200 dark:border-slate-700 tracking-wide">Thao tác</th>
+                                    <th className="px-4 py-4 text-xs font-extrabold text-slate-500 dark:text-dark-text-secondary uppercase w-28 border-b border-slate-200 dark:border-dark-border tracking-wide">Thao tác</th>
                                     {headers.map(h => {
                                         const schema = SCHEMAS[selectedCollection];
                                         const label = schema?.fields?.[h]?.label || h.replace(/_/g, ' ');
                                         return (
-                                            <th key={h} onClick={() => handleSort(h)} className="px-6 py-4 text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase whitespace-nowrap cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors border-b border-slate-200 dark:border-slate-700 group select-none tracking-wide">
+                                            <th key={h} onClick={() => handleSort(h)} className="px-6 py-4 text-xs font-extrabold text-slate-500 dark:text-dark-text-secondary uppercase whitespace-nowrap cursor-pointer hover:bg-slate-100 dark:hover:bg-dark-border/50 transition-colors border-b border-slate-200 dark:border-dark-border group select-none tracking-wide">
                                                 <div className="flex items-center gap-2">
                                                     {label}
                                                     {sortConfig?.key === h ? (
                                                         <i className={`fa-solid fa-arrow-${sortConfig.direction === 'asc' ? 'up' : 'down'} text-primary`}></i>
                                                     ) : (
-                                                        <i className="fa-solid fa-sort text-slate-300 dark:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                                        <i className="fa-solid fa-sort text-slate-300 dark:text-dark-text-secondary/50 opacity-0 group-hover:opacity-100 transition-opacity"></i>
                                                     )}
                                                 </div>
                                             </th>
@@ -793,14 +793,14 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                                     })}
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                            <tbody className="divide-y divide-slate-100 dark:divide-dark-border">
                                 {paginatedData.map((item, idx) => (
-                                    <tr key={item.id || idx} className={`hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors group ${selectedIds.has(item.id) ? 'bg-primary/5 dark:bg-primary/10' : ''}`}>
-                                        <td className="px-6 py-4 border-b border-transparent dark:border-slate-800">
-                                            <input type="checkbox" className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-primary focus:ring-primary cursor-pointer accent-primary bg-neutral-white dark:bg-slate-700"
+                                    <tr key={item.id || idx} className={`hover:bg-slate-50/80 dark:hover:bg-dark-border/30 transition-colors group ${selectedIds.has(item.id) ? 'bg-primary/5 dark:bg-primary/10' : ''}`}>
+                                        <td className="px-6 py-4 border-b border-transparent dark:border-dark-border/50">
+                                            <input type="checkbox" className="w-4 h-4 rounded border-slate-300 dark:border-dark-border text-primary focus:ring-primary cursor-pointer accent-primary bg-neutral-white dark:bg-dark-surface"
                                                 checked={selectedIds.has(item.id)} onChange={(e) => toggleSelectOne(String(item.id), e.target.checked)} />
                                         </td>
-                                        <td className="px-4 py-4 whitespace-nowrap border-b border-transparent dark:border-slate-800">
+                                        <td className="px-4 py-4 whitespace-nowrap border-b border-transparent dark:border-dark-border/50">
                                             <div className="flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
                                                 <button onClick={() => handleEdit(item)} className="w-10 h-10 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 flex items-center justify-center transition-colors">
                                                     <i className="fa-solid fa-pen text-sm"></i>
@@ -811,7 +811,7 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                                             </div>
                                         </td>
                                         {headers.map(h => (
-                                            <td key={h} className="px-6 py-4 text-sm font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap md:whitespace-normal max-w-xs md:max-w-md truncate md:overflow-visible border-b border-transparent dark:border-slate-800 group-hover:border-slate-100 dark:group-hover:border-slate-700/50">
+                                            <td key={h} className="px-6 py-4 text-sm font-medium text-slate-600 dark:text-dark-text-primary whitespace-nowrap md:whitespace-normal max-w-xs md:max-w-md truncate md:overflow-visible border-b border-transparent dark:border-dark-border/50 group-hover:border-slate-100 dark:group-hover:border-dark-border">
                                                 {h === 'password' ? '••••••' : renderStatusBadge(h, item[h])}
                                             </td>
                                         ))}
@@ -820,7 +820,7 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                                 {paginatedData.length === 0 && (
                                     <tr>
                                         <td colSpan={headers.length + 2} className="text-center py-20">
-                                            <div className="flex flex-col items-center justify-center text-slate-400 dark:text-slate-600">
+                                            <div className="flex flex-col items-center justify-center text-slate-400 dark:text-dark-text-secondary">
                                                 <i className="fa-regular fa-folder-open text-4xl mb-3 opacity-50"></i>
                                                 <span className="text-sm font-medium">Không tìm thấy dữ liệu</span>
                                             </div>
@@ -831,14 +831,14 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                         </table>
                     </div>
 
-                    <div className="bg-neutral-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 p-4 flex items-center justify-between z-20 transition-colors">
-                         <div className="text-xs text-slate-500 dark:text-slate-400 font-bold px-2 tracking-wide">
-                             Hiển thị <span className="font-extrabold text-neutral-black dark:text-neutral-white">{(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, processedData.length)}</span> trong <span className="font-extrabold text-neutral-black dark:text-neutral-white">{processedData.length}</span> kết quả
+                    <div className="bg-neutral-white dark:bg-dark-surface border-t border-slate-200 dark:border-dark-border p-4 flex items-center justify-between z-20 transition-colors">
+                         <div className="text-xs text-slate-500 dark:text-dark-text-secondary font-bold px-2 tracking-wide">
+                             Hiển thị <span className="font-extrabold text-neutral-black dark:text-dark-text-primary">{(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, processedData.length)}</span> trong <span className="font-extrabold text-neutral-black dark:text-dark-text-primary">{processedData.length}</span> kết quả
                          </div>
                          
                          <div className="flex items-center gap-4">
                              <select 
-                                className="bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg py-2 pl-3 pr-8 outline-none focus:ring-primary cursor-pointer"
+                                className="bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-dark-border text-slate-700 dark:text-dark-text-primary text-xs font-bold rounded-lg py-2 pl-3 pr-8 outline-none focus:ring-primary cursor-pointer"
                                 value={itemsPerPage} onChange={e => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
                              >
                                  <option value={10}>10 / trang</option>
@@ -850,14 +850,14 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                              <div className="flex items-center gap-1">
                                  <button 
                                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
-                                    className="w-10 h-10 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                                    className="w-10 h-10 rounded-lg border border-slate-200 dark:border-dark-border text-slate-500 dark:text-dark-text-secondary hover:bg-slate-50 dark:hover:bg-dark-border/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                                  >
                                      <i className="fa-solid fa-chevron-left text-sm"></i>
                                  </button>
-                                 <span className="px-3 text-xs font-bold text-slate-700 dark:text-slate-300">Trang {currentPage}</span>
+                                 <span className="px-3 text-xs font-bold text-slate-700 dark:text-dark-text-primary">Trang {currentPage}</span>
                                  <button 
                                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages || totalPages === 0}
-                                    className="w-10 h-10 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                                    className="w-10 h-10 rounded-lg border border-slate-200 dark:border-dark-border text-slate-500 dark:text-dark-text-secondary hover:bg-slate-50 dark:hover:bg-dark-border/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                                  >
                                      <i className="fa-solid fa-chevron-right text-sm"></i>
                                  </button>
@@ -869,14 +869,14 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
         </div>
 
         {isModalOpen && (
-            <div className="fixed inset-0 z-50 bg-neutral-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-                <div className="bg-neutral-white dark:bg-slate-800 rounded-[24px] w-full max-w-3xl max-h-[90vh] flex flex-col animate-scale-in shadow-2xl">
-                    <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/30 rounded-t-[24px]">
+            <div className="fixed inset-0 z-50 bg-neutral-black/60 dark:bg-dark-bg/80 backdrop-blur-sm flex items-center justify-center p-4">
+                <div className="bg-neutral-white dark:bg-dark-surface rounded-[24px] w-full max-w-3xl max-h-[90vh] flex flex-col animate-scale-in shadow-2xl">
+                    <div className="px-8 py-6 border-b border-slate-100 dark:border-dark-border flex justify-between items-center bg-slate-50/50 dark:bg-dark-bg/50 rounded-t-[24px]">
                         <div>
-                             <h3 className="text-xl font-black text-neutral-black dark:text-neutral-white tracking-tight">{editingItem ? 'Cập nhật thông tin' : 'Thêm mới bản ghi'}</h3>
-                             <p className="text-xs text-slate-500 dark:text-slate-400 font-bold mt-1 uppercase tracking-wide">{COLLECTIONS.find(c => c.id === selectedCollection)?.name}</p>
+                             <h3 className="text-xl font-black text-neutral-black dark:text-dark-text-primary tracking-tight">{editingItem ? 'Cập nhật thông tin' : 'Thêm mới bản ghi'}</h3>
+                             <p className="text-xs text-slate-500 dark:text-dark-text-secondary font-bold mt-1 uppercase tracking-wide">{COLLECTIONS.find(c => c.id === selectedCollection)?.name}</p>
                         </div>
-                        <button onClick={() => setIsModalOpen(false)} className="w-10 h-10 rounded-full bg-neutral-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-300 hover:text-neutral-black dark:hover:text-neutral-white hover:bg-slate-50 dark:hover:bg-slate-600 flex items-center justify-center transition-colors">
+                        <button onClick={() => setIsModalOpen(false)} className="w-10 h-10 rounded-full bg-neutral-white dark:bg-dark-bg border border-slate-200 dark:border-dark-border text-slate-400 dark:text-dark-text-secondary hover:text-neutral-black dark:hover:text-dark-text-primary hover:bg-slate-50 dark:hover:bg-dark-border/50 flex items-center justify-center transition-colors">
                             <i className="fa-solid fa-xmark"></i>
                         </button>
                     </div>
@@ -885,8 +885,8 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
                         {renderFormFields()}
                     </div>
 
-                    <div className="px-8 py-5 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/30 rounded-b-[24px] flex justify-end gap-3">
-                        <button onClick={() => setIsModalOpen(false)} className="px-8 py-4 rounded-2xl text-base font-bold text-slate-600 dark:text-slate-300 bg-neutral-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all uppercase tracking-wide">
+                    <div className="px-8 py-5 border-t border-slate-100 dark:border-dark-border bg-slate-50/50 dark:bg-dark-bg/50 rounded-b-[24px] flex justify-end gap-3">
+                        <button onClick={() => setIsModalOpen(false)} className="px-8 py-4 rounded-2xl text-base font-bold text-slate-600 dark:text-dark-text-primary bg-neutral-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border hover:bg-slate-50 dark:hover:bg-dark-border/50 transition-all uppercase tracking-wide">
                             Hủy bỏ
                         </button>
                         <button onClick={handleSave} className="px-8 py-4 rounded-2xl text-base font-bold bg-primary text-neutral-white hover:bg-primary/90 transition-all active:scale-95 uppercase tracking-wide shadow-sm">

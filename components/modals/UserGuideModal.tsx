@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useScrollControl } from '../hooks/useScrollControl';
-import { triggerHaptic } from '../utils/helpers';
+import { useScrollControl } from '../../../hooks/useScrollControl';
+import { triggerHaptic } from '../../../utils/helpers';
 
 interface Props {
   isOpen: boolean;
