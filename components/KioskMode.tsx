@@ -215,7 +215,7 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
 
   if (isConfiguring) {
     return (
-        <div className="fixed inset-0 bg-slate-50 dark:bg-neutral-black text-neutral-black dark:text-neutral-white flex items-center justify-center p-6 z-[6000] font-sans transition-colors duration-300">
+        <div className="fixed inset-0 bg-slate-50 dark:bg-slate-900 text-neutral-black dark:text-neutral-white flex items-center justify-center p-6 z-[6000] font-sans transition-colors duration-300">
             <div className="w-full max-w-sm bg-neutral-white dark:bg-neutral-black/80 p-8 rounded-[32px] border border-slate-200 dark:border-slate-700 shadow-xl animate-scale-in">
                 <div className="text-center mb-8">
                     <i className="fa-solid fa-gear text-primary text-4xl mb-3"></i>

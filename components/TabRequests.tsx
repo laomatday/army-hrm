@@ -69,7 +69,7 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
 
   return (
     <>
-        <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-neutral-black font-sans">
+        <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-slate-900 font-sans">
             <div className="pt-28 space-y-4 animate-fade-in pb-28 px-4">
                 
                 <div className="flex justify-center mb-6">

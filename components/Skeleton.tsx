@@ -2,7 +2,7 @@ import React from 'react';
 
 export const DashboardSkeleton = () => {
   return (
-    <div className="h-full w-full bg-slate-50 dark:bg-neutral-black flex flex-col relative overflow-hidden transition-colors">
+    <div className="h-full w-full bg-slate-50 dark:bg-slate-900 flex flex-col relative overflow-hidden transition-colors">
         {/* HEADER SKELETON */}
         <div className="h-16 px-4 flex items-center justify-between mt-2 pt-safe">
             <div className="flex items-center gap-3">

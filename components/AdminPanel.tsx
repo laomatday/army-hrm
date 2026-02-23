@@ -676,7 +676,7 @@ const AdminPanel: React.FC<Props> = ({ user, onLogout, onBackToApp }) => {
   }
 
   return (
-    <div className="flex h-screen w-screen bg-slate-50 dark:bg-neutral-black overflow-hidden font-sans transition-colors duration-300">
+    <div className="flex h-screen w-screen bg-slate-50 dark:bg-slate-900 overflow-hidden font-sans transition-colors duration-300">
         <div className="w-72 bg-neutral-black text-slate-300 flex flex-col flex-shrink-0 border-r border-slate-800 z-20 hidden md:flex">
             <div className="p-6 flex items-center gap-3 mb-2">
                 <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-neutral-white font-black">A</div>

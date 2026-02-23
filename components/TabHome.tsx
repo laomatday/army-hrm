@@ -319,7 +319,7 @@ const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onScan
 
   const getBackgroundClass = () => {
       if (working) return paused ? 'bg-secondary-yellow/5 dark:bg-secondary-yellow/10' : 'bg-primary/5 dark:bg-primary/10';
-      return 'bg-slate-50 dark:bg-neutral-black';
+      return 'bg-slate-50 dark:bg-slate-900';
   };
 
   return (

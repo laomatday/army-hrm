@@ -274,7 +274,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
   };
 
   return (
-    <div className="absolute inset-0 flex flex-col bg-slate-50 dark:bg-neutral-black font-sans transition-colors duration-300">
+    <div className="absolute inset-0 flex flex-col bg-slate-50 dark:bg-slate-900 font-sans transition-colors duration-300">
         
         <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-28">
             

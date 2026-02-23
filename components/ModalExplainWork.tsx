@@ -146,7 +146,7 @@ const ModalExplainWork: React.FC<Props> = ({ isOpen, onClose, onSuccess, onAlert
   return (
     <>
         <div 
-          className="fixed inset-0 z-[80] bg-slate-50 dark:bg-neutral-black flex flex-col animate-slide-up transition-colors duration-300"
+          className="fixed inset-0 z-[80] bg-slate-50 dark:bg-slate-900 flex flex-col animate-slide-up transition-colors duration-300"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}

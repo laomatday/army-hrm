@@ -41,7 +41,7 @@ const Header: React.FC<Props> = ({ user, activeTab, onOpenProfile, onOpenNoti, c
 
   return (
     <>
-        <div className="fixed top-0 left-0 w-full z-40 bg-slate-50 dark:bg-neutral-black pt-safe transition-all border-b border-slate-100 dark:border-slate-800">
+        <div className="fixed top-0 left-0 w-full z-40 bg-slate-50 dark:bg-slate-900 pt-safe transition-all">
             <div className="flex items-center justify-between h-14 px-3 relative">
                 
                 <div className="flex items-center z-20 gap-1">

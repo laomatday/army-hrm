@@ -37,7 +37,7 @@ const LoginView: React.FC<Props> = ({ onLoginSuccess }) => {
   const LOGO_URL = "https://lh3.googleusercontent.com/d/1r_FuqN4QJbch0FYXAwX8efW9s0ucreiO";
 
   return (
-    <div className="w-full h-full bg-slate-50 dark:bg-neutral-black flex flex-col justify-between p-8 relative overflow-hidden font-sans transition-colors duration-300">
+    <div className="w-full h-full bg-slate-50 dark:bg-slate-900 flex flex-col justify-between p-8 relative overflow-hidden font-sans transition-colors duration-300">
 
       <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full z-10 animate-slide-up">
         {/* Brand */}

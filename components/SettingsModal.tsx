@@ -87,7 +87,7 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
 
         <div className="pl-2">
             {type === 'link' && (
-                <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-neutral-black text-slate-300 dark:text-slate-600 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-900 text-slate-300 dark:text-slate-600 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                     <i className="fa-solid fa-chevron-right text-xs"></i>
                 </div>
             )}
@@ -121,7 +121,7 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
                   <input 
                       type="text" 
                       placeholder="Tìm kiếm cài đặt..."
-                      className="w-full h-11 bg-slate-50 dark:bg-neutral-black rounded-2xl pl-11 pr-4 text-base font-bold text-slate-800 dark:text-neutral-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/20 border border-transparent transition-all focus:bg-neutral-white"
+                      className="w-full h-11 bg-slate-50 dark:bg-slate-900 rounded-2xl pl-11 pr-4 text-base font-bold text-slate-800 dark:text-neutral-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/20 border border-transparent transition-all focus:bg-neutral-white"
                   />
               </div>
 
@@ -129,7 +129,7 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
                   <h3 className="text-xs font-black text-primary uppercase ml-2 tracking-widest flex items-center gap-2">
                       <i className="fa-solid fa-sliders text-[10px]"></i> Tùy chọn chung
                   </h3>
-                  <div className="bg-slate-50 dark:bg-neutral-black rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
+                  <div className="bg-slate-50 dark:bg-slate-900 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
                       <SettingItem 
                           icon="fa-moon" 
                           colorClass="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"
@@ -161,7 +161,7 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
                   <h3 className="text-xs font-black text-primary uppercase ml-2 tracking-widest flex items-center gap-2">
                       <i className="fa-solid fa-headset text-[10px]"></i> Trợ giúp & Hỗ trợ
                   </h3>
-                  <div className="bg-slate-50 dark:bg-neutral-black rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
+                  <div className="bg-slate-50 dark:bg-slate-900 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
                       <SettingItem 
                           icon="fa-phone-volume" 
                           colorClass="bg-primary/10 text-primary"
@@ -191,7 +191,7 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
                   <h3 className="text-xs font-black text-primary uppercase ml-2 tracking-widest flex items-center gap-2">
                       <i className="fa-solid fa-circle-info text-[10px]"></i> Thông tin ứng dụng
                   </h3>
-                  <div className="bg-slate-50 dark:bg-neutral-black rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
+                  <div className="bg-slate-50 dark:bg-slate-900 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
                       <div className="p-6 flex flex-col items-center justify-center text-center gap-3 bg-gradient-to-b from-neutral-white/50 dark:from-slate-700/50 to-slate-50 dark:to-slate-800">
                           <div className="w-20 h-20 bg-neutral-white dark:bg-slate-700 rounded-[20px] border border-slate-100 dark:border-slate-600 p-3 mb-1 animate-scale-in">
                                <img src={"https://lh3.googleusercontent.com/d/1r_FuqN4QJbch0FYXAwX8efW9s0ucreiO"} className="w-full h-full object-contain" alt="Logo" />

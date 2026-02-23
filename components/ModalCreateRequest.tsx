@@ -134,7 +134,7 @@ const ModalCreateRequest: React.FC<Props> = ({ user, isOpen, onClose, onSuccess,
 
   return (
     <div 
-        className="fixed inset-0 z-[100] bg-slate-50 dark:bg-neutral-black flex flex-col animate-slide-up transition-colors duration-300"
+        className="fixed inset-0 z-[100] bg-slate-50 dark:bg-slate-900 flex flex-col animate-slide-up transition-colors duration-300"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}

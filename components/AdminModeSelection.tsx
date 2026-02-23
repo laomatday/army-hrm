@@ -7,7 +7,7 @@ interface Props {
 
 const AdminModeSelection: React.FC<Props> = ({ onSelectMode, onLogout }) => {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-neutral-black flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans transition-colors duration-300">
          <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 dark:bg-primary/20 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
          <div className="absolute bottom-0 left-0 w-80 h-80 bg-primary/10 dark:bg-primary/20 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
 

@@ -332,7 +332,7 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
   };
 
   return (
-    <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-neutral-black">
+    <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-slate-900">
         <div className="pt-28 px-4 animate-fade-in flex flex-col h-full pb-20">
             
             <div className="flex justify-center mb-6">

@@ -38,7 +38,7 @@ const NotificationsModal: React.FC<Props> = ({ data, user, activeTab, onClose, o
   };
 
   return (
-    <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-neutral-black font-sans">
+    <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-slate-900 font-sans">
         <div className="pt-28 pb-32 px-4 animate-fade-in">
             
             {pendingCount > 0 && (

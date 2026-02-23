@@ -49,7 +49,7 @@ const BaseModal: React.FC<Props> = ({
 
   return (
     <div 
-        className={`fixed inset-0 z-[60] bg-slate-50 dark:bg-neutral-black flex flex-col font-sans animate-slide-up transition-colors duration-300 ${className}`}
+        className={`fixed inset-0 z-[60] bg-slate-50 dark:bg-slate-900 flex flex-col font-sans animate-slide-up transition-colors duration-300 ${className}`}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}

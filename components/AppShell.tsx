@@ -363,7 +363,7 @@ const AppShell: React.FC<Props> = ({ user, onLogout }) => {
   if (loading) return <DashboardSkeleton />;
 
   return (
-    <div className="h-full w-full bg-slate-50 dark:bg-neutral-black relative flex flex-col font-sans transition-colors duration-300">
+    <div className="h-full w-full bg-slate-50 dark:bg-slate-900 relative flex flex-col font-sans transition-colors duration-300">
        {checkingIn && (
          <div className="fixed inset-0 z-[5000] bg-neutral-black/80 backdrop-blur-sm flex items-center justify-center p-6 text-center animate-fade-in">
            <div className="bg-neutral-white dark:bg-neutral-black/90 rounded-[32px] p-8 max-w-sm w-full shadow-2xl border border-slate-100 dark:border-slate-800 animate-scale-in">
@@ -397,7 +397,7 @@ const AppShell: React.FC<Props> = ({ user, onLogout }) => {
        )}
 
        <div 
-         className="flex-1 relative overflow-hidden bg-slate-50 dark:bg-neutral-black"
+         className="flex-1 relative overflow-hidden bg-slate-50 dark:bg-slate-900"
          onTouchStart={onTouchStart}
          onTouchMove={(e) => { touchEnd.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY }; }}
          onTouchEnd={onTouchEnd}
