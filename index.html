@@ -53,7 +53,7 @@
       }
     </style>
 
-    <script>
+<script>
       tailwind.config = {
         darkMode: 'class',
         theme: {
@@ -74,6 +74,7 @@
               'nav-offset': 'var(--nav-bottom-offset)',
             },
             colors: {
+              // Ánh xạ các biến RGB từ :root để Tailwind có thể xử lý Opacity (ví dụ: bg-primary/10)
               primary: 'rgba(var(--primary-color), <alpha-value>)',
               'secondary-green': 'rgba(var(--secondary-green), <alpha-value>)',
               'secondary-red': 'rgba(var(--secondary-red), <alpha-value>)',
@@ -82,9 +83,16 @@
               'secondary-orange': 'rgba(var(--secondary-orange), <alpha-value>)',
               'neutral-black': 'rgba(var(--neutral-black), <alpha-value>)',
               'neutral-white': 'rgba(var(--neutral-white), <alpha-value>)',
+              
+              // Cải thiện Dark Mode bằng cách phân lớp bề mặt (Surface Layering)
+              dark: {
+                main: 'rgba(var(--dark-bg-main), <alpha-value>)',     /* Nền sâu nhất */
+                card: 'rgba(var(--dark-bg-card), <alpha-value>)',     /* Nền các tấm thẻ */
+                input: 'rgba(var(--dark-bg-input), <alpha-value>)',   /* Nền ô nhập liệu */
+                border: 'rgba(var(--dark-border), <alpha-value>)',    /* Màu viền tối */
+              }
             },
             fontFamily: {
-              // Force Plus Jakarta Sans as the primary and fallback
               sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
               mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
             },
@@ -103,9 +111,6 @@
               wide: '0.02em',
               wider: '0.05em',
               widest: '0.1em',
-            },
-            fontSize: {
-              xxs: ['0.65rem', { lineHeight: '1rem' }],
             },
             keyframes: {
               slideUp: {
