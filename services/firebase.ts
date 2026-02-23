@@ -2,6 +2,7 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 import 'firebase/compat/messaging';
+import 'firebase/compat/functions';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -18,10 +19,11 @@ if (!firebase.apps.length) {
 
 const db = firebase.firestore();
 const messaging = firebase.messaging.isSupported() ? firebase.messaging() : undefined;
+const functions = firebase.functions();
 const app = firebase.app();
 
 // Export the compat firebase object as the default export
 export default firebase;
 
 // Export individual services for convenience
-export { db, messaging, app };
+export { db, messaging, app, functions };
