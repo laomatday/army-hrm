@@ -336,16 +336,16 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
         <div className="pt-28 px-4 animate-fade-in flex flex-col h-full pb-20">
             
             <div className="flex justify-center mb-6">
-                 <div className="bg-slate-200/60 dark:bg-neutral-black/80 p-1 rounded-full flex relative border border-slate-200 dark:border-slate-700">
+                 <div className="bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-full flex relative">
                      <button 
                         onClick={() => switchViewMode('week')}
-                        className={`px-6 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'week' ? 'text-primary dark:text-primary bg-neutral-white dark:bg-neutral-black/80 shadow-sm border border-slate-100 dark:border-slate-600' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                        className={`px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'week' ? 'text-primary bg-neutral-white dark:bg-slate-700' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                      >
                          Tuần
                      </button>
                      <button 
                         onClick={() => switchViewMode('month')}
-                        className={`px-6 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'month' ? 'text-primary dark:text-primary bg-neutral-white dark:bg-neutral-black/80 shadow-sm border border-slate-100 dark:border-slate-600' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                        className={`px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'month' ? 'text-primary bg-neutral-white dark:bg-slate-700' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                      >
                          Tháng
                      </button>

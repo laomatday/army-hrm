@@ -106,7 +106,7 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
 
                 {viewMode === 'leaves' && (
                     <div className="animate-slide-up">
-                        <h3 className="text-xs font-black text-primary uppercase ml-2 mb-3 tracking-widest flex items-center gap-2">
+                        <h3 className="text-xs font-black text-primary dark:text-primary uppercase ml-2 mb-3 tracking-widest flex items-center gap-2">
                             <i className="fa-solid fa-umbrella-beach text-[10px]"></i>
                             Danh sách đơn nghỉ phép
                         </h3>

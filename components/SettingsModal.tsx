@@ -126,7 +126,7 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
               </div>
 
               <div className="space-y-3">
-                  <h3 className="text-xs font-black text-primary uppercase ml-2 tracking-widest flex items-center gap-2">
+                  <h3 className="text-xs font-black text-primary dark:text-primary uppercase ml-2 tracking-widest flex items-center gap-2">
                       <i className="fa-solid fa-sliders text-[10px]"></i> Tùy chọn chung
                   </h3>
                   <div className="bg-slate-50 dark:bg-slate-900 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
@@ -158,7 +158,7 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
               </div>
 
               <div className="space-y-3">
-                  <h3 className="text-xs font-black text-primary uppercase ml-2 tracking-widest flex items-center gap-2">
+                  <h3 className="text-xs font-black text-primary dark:text-primary uppercase ml-2 tracking-widest flex items-center gap-2">
                       <i className="fa-solid fa-headset text-[10px]"></i> Trợ giúp & Hỗ trợ
                   </h3>
                   <div className="bg-slate-50 dark:bg-slate-900 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
@@ -188,7 +188,7 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
               </div>
 
               <div className="space-y-3">
-                  <h3 className="text-xs font-black text-primary uppercase ml-2 tracking-widest flex items-center gap-2">
+                  <h3 className="text-xs font-black text-primary dark:text-primary uppercase ml-2 tracking-widest flex items-center gap-2">
                       <i className="fa-solid fa-circle-info text-[10px]"></i> Thông tin ứng dụng
                   </h3>
                   <div className="bg-slate-50 dark:bg-slate-900 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">

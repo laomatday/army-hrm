@@ -142,7 +142,7 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
         <div className="pt-28 pb-32 px-4 animate-fade-in space-y-8">
             
             <div>
-                 <h3 className="text-xs font-black text-primary uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
+                 <h3 className="text-xs font-black text-primary dark:text-primary uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
                      <i className="fa-solid fa-calendar-days text-[10px]"></i>
                      Lịch nghỉ nhân viên
                  </h3>
@@ -181,7 +181,7 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
             </div>
 
             <div>
-                <h3 className="text-xs font-black text-primary uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
+                <h3 className="text-xs font-black text-primary dark:text-primary uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
                     <i className="fa-solid fa-clipboard-check text-[10px]"></i>
                     Cần duyệt 
                     {totalPending > 0 && (
