@@ -31,26 +31,26 @@ const StatCard = ({
     color: 'primary' | 'blue' | 'red' | 'yellow'
 }) => {
     const theme = {
-        primary: { text: 'text-primary', bg: 'bg-primary/10' },
-        blue: { text: 'text-secondary-green', bg: 'bg-secondary-green/10' },
-        red: { text: 'text-secondary-red', bg: 'bg-secondary-red/10' },
-        yellow: { text: 'text-secondary-yellow', bg: 'bg-secondary-yellow/10' },
+        primary: { text: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/10' },
+        blue: { text: 'text-secondary-green', bg: 'bg-secondary-green/10', border: 'border-secondary-green/10' },
+        red: { text: 'text-secondary-red', bg: 'bg-secondary-red/10', border: 'border-secondary-red/10' },
+        yellow: { text: 'text-secondary-yellow', bg: 'bg-secondary-yellow/10', border: 'border-secondary-yellow/10' },
     };
     
     const t = theme[color];
 
     return (
-        <div className="bg-neutral-white dark:bg-neutral-black p-4 rounded-[24px] border border-slate-100 dark:border-slate-700/50 flex items-center gap-3 active:scale-[0.98] transition-all relative overflow-hidden min-h-[110px]">
-             <div className={`w-12 h-12 rounded-2xl ${t.bg} ${t.text} flex items-center justify-center text-xl flex-shrink-0`}>
+        <div className={`bg-neutral-white dark:bg-neutral-black p-5 rounded-[28px] border ${t.border} dark:border-slate-700/50 flex flex-col gap-3 active:scale-[0.97] transition-all relative overflow-hidden shadow-sm`}>
+             <div className={`w-10 h-10 rounded-xl ${t.bg} ${t.text} flex items-center justify-center text-lg flex-shrink-0`}>
                  <i className={`fa-solid ${icon}`}></i>
              </div>
 
              <div className="flex flex-col flex-1 min-w-0 z-10">
-                 <span className="text-3xl font-black text-neutral-black dark:text-neutral-white tracking-tighter leading-none mb-1 tabular-nums">{value}</span>
-                 <h4 className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-tight whitespace-normal">{title}</h4>
+                 <span className="text-2xl font-extrabold text-neutral-black dark:text-neutral-white tracking-tight tabular-nums">{value}</span>
+                 <h4 className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider leading-tight mt-1">{title}</h4>
              </div>
              
-             <div className={`absolute -right-3 -bottom-5 text-[4.5rem] opacity-5 ${t.text} pointer-events-none`}>
+             <div className={`absolute -right-2 -bottom-2 text-4xl opacity-[0.03] ${t.text} pointer-events-none`}>
                  <i className={`fa-solid ${icon}`}></i>
              </div>
         </div>
@@ -75,6 +75,13 @@ const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onScan
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   
   const [viewDate, setViewDate] = useState<Date>(new Date());
+
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Chào buổi sáng";
+    if (hour < 18) return "Chào buổi chiều";
+    return "Chào buổi tối";
+  }, [timeStr]);
 
   const [holidayConfirm, setHolidayConfirm] = useState<{isOpen: boolean, name: string}>({ isOpen: false, name: '' });
   const [earlyCheckoutConfirm, setEarlyCheckoutConfirm] = useState<{isOpen: boolean, minutes: number}>({ isOpen: false, minutes: 0 });
@@ -325,11 +332,16 @@ const TabHome: React.FC<Props> = ({ data, loading, onCheckIn, onCheckOut, onScan
   return (
     <>
         <PullToRefresh onRefresh={onRefresh} className={`transition-colors duration-1000 ${getBackgroundClass()}`}>
-            <div className={`pt-28 pb-32 px-4 animate-fade-in flex flex-col h-full`}>
+            <div className={`pt-20 pb-32 px-4 animate-fade-in flex flex-col h-full`}>
                 
-                <div className="flex flex-col items-center mb-8 relative z-10">
-                    <h1 className="text-[5.5rem] leading-none font-black text-neutral-black dark:text-neutral-white mb-1 tabular-nums tracking-tighter">{timeStr}</h1>
-                    <p className="text-xs font-extrabold text-slate-400 dark:text-slate-500 uppercase mb-6 mt-2 tracking-widest">{dateStr}</p>
+                <div className="flex flex-col items-center mb-10 relative z-10">
+                    <div className="flex flex-col items-center mb-6">
+                        <span className="text-[10px] font-black text-primary/60 dark:text-primary/40 uppercase tracking-[0.3em] mb-1">{greeting}</span>
+                        <h2 className="text-lg font-black text-neutral-black dark:text-neutral-white tracking-tight">{data?.userProfile?.name?.split(' ').pop()}!</h2>
+                    </div>
+
+                    <h1 className="text-[6.5rem] leading-none font-black text-neutral-black dark:text-neutral-white mb-2 tabular-nums tracking-tighter drop-shadow-sm">{timeStr}</h1>
+                    <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase mb-8 tracking-[0.2em]">{dateStr}</p>
                     
                     <div className="flex flex-col items-center gap-2 w-full max-w-xs transition-all relative z-20">
                         <button 

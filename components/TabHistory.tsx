@@ -335,17 +335,17 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
     <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-slate-900">
         <div className="pt-28 px-4 animate-fade-in flex flex-col h-full pb-20">
             
-            <div className="flex justify-center mb-6">
-                 <div className="bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-full flex relative">
+            <div className="flex justify-center mb-8">
+                 <div className="bg-slate-200/50 dark:bg-slate-800/50 p-1.5 rounded-2xl flex relative w-full max-w-[280px] shadow-inner">
                      <button 
                         onClick={() => switchViewMode('week')}
-                        className={`px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'week' ? 'text-primary bg-neutral-white dark:bg-slate-700' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                        className={`flex-1 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'week' ? 'text-primary bg-neutral-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                      >
                          Tuần
                      </button>
                      <button 
                         onClick={() => switchViewMode('month')}
-                        className={`px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'month' ? 'text-primary bg-neutral-white dark:bg-slate-700' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                        className={`flex-1 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'month' ? 'text-primary bg-neutral-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                      >
                          Tháng
                      </button>
@@ -353,16 +353,16 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
             </div>
 
             <div className="grid grid-cols-3 gap-3 mb-8">
-                <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28">
-                    <span className="text-3xl font-black text-primary dark:text-primary mb-1 tabular-nums tracking-tighter">{stats.workDays}</span>
+                <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28 shadow-sm">
+                    <span className="text-3xl font-black text-primary dark:text-primary mb-1 tabular-nums tracking-tighter drop-shadow-sm">{stats.workDays}</span>
                     <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center leading-tight mt-1">Ngày công</span>
                 </div>
-                <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28">
-                    <span className="text-3xl font-black text-secondary-yellow dark:text-secondary-yellow mb-1 tabular-nums tracking-tighter">{stats.lateMins}</span>
+                <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28 shadow-sm">
+                    <span className="text-3xl font-black text-secondary-yellow dark:text-secondary-yellow mb-1 tabular-nums tracking-tighter drop-shadow-sm">{stats.lateMins}</span>
                     <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center leading-tight mt-1">Phút trễ</span>
                 </div>
-                <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28">
-                    <span className="text-3xl font-black text-secondary-red dark:text-secondary-red mb-1 tabular-nums tracking-tighter">{stats.errors}</span>
+                <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28 shadow-sm">
+                    <span className="text-3xl font-black text-secondary-red dark:text-secondary-red mb-1 tabular-nums tracking-tighter drop-shadow-sm">{stats.errors}</span>
                     <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center leading-tight mt-1">Lỗi chấm</span>
                 </div>
             </div>

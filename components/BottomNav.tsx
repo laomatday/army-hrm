@@ -37,8 +37,8 @@ const BottomNav: React.FC<Props> = ({ activeTab, onChange, isVisible, user, noti
   const isNotiActive = activeTab === 'notifications';
 
   return (
-    <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 ease-out ${isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-[200%] opacity-0 scale-95'}`}>
-      <div className="bg-neutral-white dark:bg-neutral-black rounded-full shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.4)] flex items-center justify-between px-2 py-2 border border-slate-100/80 dark:border-slate-700/80 gap-1.5 backdrop-blur-md bg-opacity-90 dark:bg-opacity-90">
+    <div className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 ease-out ${isVisible ? 'translate-y-0 opacity-100 scale-100' : 'translate-y-[200%] opacity-0 scale-90'}`}>
+      <div className="bg-neutral-white/90 dark:bg-neutral-black/90 rounded-[28px] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] flex items-center justify-between px-2.5 py-2.5 border border-white/20 dark:border-slate-700/50 gap-2 backdrop-blur-2xl">
           
           <NavItem name="home" icon="fa-solid fa-house" activeIcon="fa-solid fa-house" activeTab={activeTab} onChange={onChange} />
           <NavItem name="history" icon="fa-regular fa-calendar" activeIcon="fa-solid fa-calendar-days" activeTab={activeTab} onChange={onChange} />

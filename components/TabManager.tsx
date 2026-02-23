@@ -223,45 +223,53 @@ const TabManager: React.FC<Props> = ({ data, user, onRefresh, onAlert, currentDa
                                                         : formatDateString(item.date?.split('T')[0]);
 
                                                     return (
-                                                        <div key={item.id} className="bg-neutral-white dark:bg-neutral-black p-4 rounded-[20px] border border-slate-100 dark:border-slate-700 relative group active:scale-[0.99] transition-all">
-                                                            <div className="flex justify-between items-start mb-3">
+                                                        <div key={item.id} className="bg-neutral-white dark:bg-neutral-black p-5 rounded-[28px] border border-slate-100 dark:border-slate-700 relative group active:scale-[0.99] transition-all shadow-sm">
+                                                            <div className="flex justify-between items-start mb-4">
                                                                 <div className="flex items-center gap-3">
-                                                                    <Avatar 
-                                                                        src={item.face_ref_url} 
-                                                                        name={item.name} 
-                                                                        className="w-10 h-10 rounded-xl"
-                                                                        textSize="text-xs"
-                                                                    />
+                                                                    <div className="relative">
+                                                                        <Avatar 
+                                                                            src={item.face_ref_url} 
+                                                                            name={item.name} 
+                                                                            className="w-12 h-12 rounded-2xl"
+                                                                            textSize="text-sm"
+                                                                        />
+                                                                        <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-neutral-white dark:border-neutral-black flex items-center justify-center ${isLeave ? 'bg-primary' : 'bg-secondary-yellow'}`}>
+                                                                            <i className={`fa-solid ${isLeave ? 'fa-umbrella-beach' : 'fa-file-signature'} text-[8px] text-white`}></i>
+                                                                        </div>
+                                                                    </div>
                                                                     <div>
-                                                                        <h6 className="font-bold text-slate-800 dark:text-white text-sm">{item.name}</h6>
-                                                                        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border uppercase tracking-widest ${typeColor}`}>
-                                                                            {typeLabel}
-                                                                        </span>
+                                                                        <h6 className="font-black text-slate-800 dark:text-white text-[15px] leading-tight">{item.name}</h6>
+                                                                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{item.emp?.position || 'Nhân viên'}</span>
                                                                     </div>
                                                                 </div>
-                                                                <span className="text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500">{formatDateString(item.created_at?.split('T')[0])}</span>
+                                                                <span className="text-[10px] font-mono font-bold text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-lg">{formatDateString(item.created_at?.split('T')[0])}</span>
                                                             </div>
 
-                                                            <div className="bg-slate-50 dark:bg-neutral-black/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700 mb-3">
-                                                                <div className="flex items-center gap-2 mb-1">
-                                                                    <i className="fa-regular fa-clock text-slate-400 dark:text-slate-500 text-xs"></i>
-                                                                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{dateInfo}</span>
+                                                            <div className="bg-slate-50 dark:bg-neutral-black/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 mb-4">
+                                                                <div className="flex items-center justify-between mb-2">
+                                                                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border uppercase tracking-widest ${typeColor}`}>
+                                                                        {typeLabel}
+                                                                    </span>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <i className="fa-regular fa-clock text-slate-400 dark:text-slate-500 text-xs"></i>
+                                                                        <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{dateInfo}</span>
+                                                                    </div>
                                                                 </div>
-                                                                <p className="text-xs text-slate-600 dark:text-slate-400 italic">"{item.reason}"</p>
+                                                                <p className="text-sm text-slate-600 dark:text-slate-400 italic leading-relaxed">"{item.reason}"</p>
                                                             </div>
 
                                                             <div className="grid grid-cols-2 gap-3">
                                                                 <button 
                                                                     disabled={!!processing}
                                                                     onClick={() => handleAction(item.id, 'Rejected', item.itemType)}
-                                                                    className="py-3 bg-neutral-white dark:bg-neutral-black border border-secondary-red/20 text-secondary-red rounded-xl text-sm font-extrabold hover:bg-secondary-red/10 transition-colors uppercase tracking-widest"
+                                                                    className="py-3.5 bg-slate-50 dark:bg-slate-800 text-secondary-red rounded-2xl text-[13px] font-black hover:bg-secondary-red/10 transition-colors uppercase tracking-widest active:scale-95"
                                                                 >
                                                                     Từ chối
                                                                 </button>
                                                                 <button 
                                                                     disabled={!!processing}
                                                                     onClick={() => handleAction(item.id, 'Approved', item.itemType)}
-                                                                    className="py-3 bg-primary text-neutral-white rounded-xl text-sm font-extrabold hover:bg-primary/90 flex items-center justify-center gap-2 uppercase tracking-widest"
+                                                                    className="py-3.5 bg-primary text-neutral-white rounded-2xl text-[13px] font-black hover:bg-primary/90 flex items-center justify-center gap-2 uppercase tracking-widest active:scale-95 shadow-md shadow-primary/20"
                                                                 >
                                                                     {processing === item.id ? <i className="fa-solid fa-circle-notch fa-spin"></i> : <span>Duyệt ngay</span>}
                                                                 </button>

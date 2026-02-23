@@ -428,23 +428,27 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                     onScroll={handleScroll}
                  >
                       <div className="animate-fade-in mt-4">
-                          <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[32px] p-8 border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors">
-                               <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-t-[32px] transition-colors duration-500"></div>
+                          <div className="bg-neutral-white dark:bg-neutral-black rounded-[32px] p-8 border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-8 transition-colors mt-4 shadow-sm">
+                               <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-t-[32px] transition-colors duration-500 opacity-60"></div>
+                               <div className="absolute top-0 left-0 w-full h-32 overflow-hidden pointer-events-none opacity-10">
+                                   <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full border-[20px] border-primary"></div>
+                                   <div className="absolute -bottom-10 -right-10 w-60 h-60 rounded-full border-[30px] border-primary"></div>
+                               </div>
                                
                                <div className="relative z-10 flex flex-col items-center">
-                                   <div className="w-28 h-28 rounded-full p-1.5 bg-neutral-white dark:bg-neutral-black mb-4 mt-2 relative group transition-colors">
+                                   <div className="w-32 h-32 rounded-full p-1.5 bg-neutral-white dark:bg-neutral-black mb-4 mt-2 relative overflow-hidden transition-colors">
                                        <Avatar 
                                           src={selectedContact.face_ref_url} 
                                           name={selectedContact.name} 
                                           className="w-full h-full"
-                                          textSize="text-3xl"
+                                          textSize="text-4xl"
                                        />
                                    </div>
                                    <h2 className="text-2xl font-black text-neutral-black dark:text-neutral-white tracking-tight leading-tight">{selectedContact.name}</h2>
                                    
                                    <div className="mt-3 flex gap-2 flex-wrap justify-center">
-                                       <span className="px-3 py-1 bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/30 rounded-lg text-[10px] font-extrabold text-primary dark:text-primary uppercase tracking-wide">{selectedContact.department}</span>
-                                       <span className="px-3 py-1 bg-secondary-purple/10 dark:bg-secondary-purple/20 border border-secondary-purple/20 dark:border-secondary-purple/30 rounded-lg text-[10px] font-extrabold text-secondary-purple dark:text-secondary-purple uppercase tracking-wide">{selectedContact.position}</span>
+                                       <span className="px-3 py-1.5 bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/30 rounded-lg text-[10px] font-extrabold text-primary dark:text-primary uppercase tracking-wide">{selectedContact.department}</span>
+                                       <span className="px-3 py-1.5 bg-secondary-purple/10 dark:bg-secondary-purple/20 border border-secondary-purple/20 dark:border-secondary-purple/30 rounded-lg text-[10px] font-extrabold text-secondary-purple dark:text-secondary-purple uppercase tracking-wide">{selectedContact.position}</span>
                                    </div>
                                </div>
                           </div>

@@ -171,20 +171,20 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
   }) => (
       <div 
           onClick={() => { if(onClick) { triggerHaptic('light'); onClick(); } }}
-          className={`flex items-center gap-4 p-4 active:bg-slate-50 dark:active:bg-slate-700/50 transition-colors group ${onClick ? 'cursor-pointer' : ''}`}
+          className={`flex items-center gap-4 p-4 active:bg-slate-50 dark:active:bg-slate-800/50 transition-colors group ${onClick ? 'cursor-pointer' : ''}`}
       >
-          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-base flex-shrink-0 border border-white/50 dark:border-slate-700/50 ${colorClass}`}>
+          <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-base flex-shrink-0 border border-white/50 dark:border-slate-700/50 shadow-sm ${colorClass}`}>
               <i className={`fa-solid ${icon}`}></i>
           </div>
           
           <div className="flex-1 min-w-0">
-              <p className={`text-base font-bold ${isDestructive ? 'text-secondary-red dark:text-secondary-red' : 'text-neutral-black dark:text-neutral-white'} truncate`}>{label}</p>
-              {value && <p className="text-xs text-slate-400 dark:text-slate-500 font-bold mt-0.5 truncate uppercase tracking-wide">{value}</p>}
+              <p className={`text-[15px] font-bold ${isDestructive ? 'text-secondary-red dark:text-secondary-red' : 'text-neutral-black dark:text-neutral-white'} truncate`}>{label}</p>
+              {value && <p className="text-[11px] text-slate-400 dark:text-slate-500 font-bold mt-0.5 truncate uppercase tracking-wider">{value}</p>}
           </div>
 
           {isLink && (
-              <div className="text-slate-300 dark:text-slate-600">
-                  <i className="fa-solid fa-chevron-right text-xs"></i>
+              <div className="text-slate-300 dark:text-slate-600 group-active:translate-x-1 transition-transform">
+                  <i className="fa-solid fa-chevron-right text-[10px]"></i>
               </div>
           )}
       </div>
@@ -208,8 +208,12 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
         <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-14">
             <div className="animate-fade-in">
                 
-                <div className="bg-neutral-white dark:bg-neutral-black rounded-[32px] p-8 border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 transition-colors mt-4">
-                    <div className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-br ${gradientClass} rounded-t-[32px] transition-colors duration-500`}></div>
+                <div className="bg-neutral-white dark:bg-neutral-black rounded-[32px] p-8 border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-8 transition-colors mt-4 shadow-sm">
+                    <div className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-br ${gradientClass} rounded-t-[32px] transition-colors duration-500 opacity-60`}></div>
+                    <div className="absolute top-0 left-0 w-full h-32 overflow-hidden pointer-events-none opacity-10">
+                        <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full border-[20px] border-primary"></div>
+                        <div className="absolute -bottom-10 -right-10 w-60 h-60 rounded-full border-[30px] border-primary"></div>
+                    </div>
                     
                     <div className="relative z-10 flex flex-col items-center">
                         <div className="relative group">

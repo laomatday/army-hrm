@@ -22,9 +22,10 @@
   --radius-button: 18px;
   --radius-input: 16px;
   
-  --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
-  --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  --shadow-nav: 0 -10px 25px -5px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
+  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-nav: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-glow: 0 0 20px rgba(var(--primary-color), 0.3);
 
   /* Spacing */
   --header-height: 56px;
@@ -108,7 +109,7 @@ body {
 h1, .h1 {
   font-size: 2.25rem; /* 36px */
   line-height: 1.1;
-  font-weight: 900; /* Black */
+  font-weight: 800;
   letter-spacing: -0.04em;
   color: #0f172a;
 }
@@ -116,7 +117,7 @@ h1, .h1 {
 h2, .h2 {
   font-size: 1.875rem; /* 30px */
   line-height: 1.2;
-  font-weight: 800; /* ExtraBold */
+  font-weight: 700;
   letter-spacing: -0.03em;
   color: #0f172a;
 }
@@ -197,3 +198,34 @@ input[type="date"] {
 
 .pb-safe { padding-bottom: env(safe-area-inset-bottom, 34px); }
 .pt-safe { padding-top: env(safe-area-inset-top, 44px); }
+
+.glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark .glass {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.animate-pulse-soft {
+    animation: pulse-soft 3s ease-in-out infinite;
+}

@@ -72,17 +72,17 @@ const TabRequests: React.FC<Props> = ({ data, onRefresh, user }) => {
         <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-slate-900 font-sans">
             <div className="pt-28 space-y-4 animate-fade-in pb-28 px-4">
                 
-                <div className="flex justify-center mb-6">
-                     <div className="bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-full flex relative">
+                <div className="flex justify-center mb-8">
+                     <div className="bg-slate-200/50 dark:bg-slate-800/50 p-1.5 rounded-2xl flex relative w-full max-w-[280px] shadow-inner">
                          <button 
                             onClick={() => switchViewMode('leaves')}
-                            className={`px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'leaves' ? 'text-primary bg-neutral-white dark:bg-slate-700' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                            className={`flex-1 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'leaves' ? 'text-primary bg-neutral-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                          >
                              Nghỉ phép
                          </button>
                          <button 
                             onClick={() => switchViewMode('explanations')}
-                            className={`px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'explanations' ? 'text-primary bg-neutral-white dark:bg-slate-700' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                            className={`flex-1 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'explanations' ? 'text-primary bg-neutral-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
                          >
                              Giải trình
                          </button>
