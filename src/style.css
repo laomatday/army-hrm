@@ -3,19 +3,19 @@
 @tailwind utilities;
 
 :root {
-/* PRIMARY: Indigo - Tạo cảm giác công nghệ cao & hiện đại */
-  --primary-color: 99, 102, 241;
-
-  /* SECONDARY: Tinh chỉnh để tươi hơn (Vibrant) */
-  --secondary-green: 16, 185, 129;   /* Emerald */
-  --secondary-red: 244, 63, 94;      /* Rose - Đỡ gắt hơn red thuần */
-  --secondary-yellow: 245, 158, 11;  /* Amber */
-  --secondary-purple: 168, 85, 247;  /* Purple sáng */
-  --secondary-orange: 249, 115, 22;  /* Orange đậm đà */
-
-  /* Màu trung tính (Text/Nền) */
-  --neutral-black: 15, 23, 42;       /* Slate đậm */
-  --neutral-white: 255, 255, 255;
+  --primary-color: 146, 64, 14; /* Amber 800 */
+  --secondary-green: 21, 128, 61;
+  --secondary-red: 185, 28, 28;
+  --secondary-yellow: 217, 119, 6;
+  --secondary-purple: 126, 34, 206;
+  --secondary-orange: 194, 65, 12;
+  --neutral-black: 36, 20, 10;
+  --neutral-white: 255, 250, 240; /* Trắng ngà */
+  --dark-bg: 36, 20, 10;
+  --dark-surface: 69, 26, 3;
+  --dark-border: 120, 53, 15;
+  --dark-text-primary: 254, 243, 199;
+  --dark-text-secondary: 252, 211, 77;
 
   /* Dark Mode: Dùng tông Slate (Xanh than) thay vì Gray (Xám) -> Sang trọng hơn */
   --dark-bg: 2, 6, 23;               /* Slate 950 */
