@@ -215,8 +215,8 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
 
   if (isConfiguring) {
     return (
-        <div className="fixed inset-0 bg-slate-50 dark:bg-slate-900 text-neutral-black dark:text-neutral-white flex items-center justify-center p-6 z-[6000] font-sans transition-colors duration-300">
-            <div className="w-full max-w-sm bg-neutral-white dark:bg-neutral-black/80 p-8 rounded-[32px] border border-slate-200 dark:border-slate-700 shadow-xl animate-scale-in">
+        <div className="fixed inset-0 bg-slate-50 dark:bg-dark-bg text-neutral-black dark:text-dark-text-primary flex items-center justify-center p-6 z-[6000] font-sans transition-colors duration-300">
+            <div className="w-full max-w-sm bg-neutral-white dark:bg-dark-surface p-8 rounded-[32px] border border-slate-200 dark:border-dark-border shadow-xl animate-scale-in">
                 <div className="text-center mb-8">
                     <i className="fa-solid fa-gear text-primary text-4xl mb-3"></i>
                     <h2 className="text-2xl font-black tracking-tight">Cài đặt Kiosk</h2>
@@ -224,12 +224,12 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
                 
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-xs font-extrabold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Mã thiết bị</label>
+                        <label className="block text-xs font-extrabold text-slate-500 dark:text-dark-text-secondary mb-2 uppercase tracking-wide">Mã thiết bị</label>
                         <input 
                           type="text" 
                           value={tempKioskId}
                           onChange={(e) => setTempKioskId(e.target.value)}
-                          className="w-full bg-slate-50 dark:bg-neutral-black/50 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-4 font-bold text-neutral-black dark:text-neutral-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                          className="w-full bg-slate-50 dark:bg-dark-bg/50 border border-slate-200 dark:border-dark-border rounded-2xl px-4 py-4 font-bold text-neutral-black dark:text-dark-text-primary focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                           placeholder="e.g., kioks_01"
                         />
                     </div>
@@ -243,7 +243,7 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
                         </button>
                         <button 
                           onClick={onExit}
-                          className="px-6 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-extrabold rounded-2xl transition-all uppercase tracking-widest"
+                          className="px-6 bg-slate-200 dark:bg-dark-border/50 hover:bg-slate-300 dark:hover:bg-dark-border text-slate-700 dark:text-dark-text-primary font-extrabold rounded-2xl transition-all uppercase tracking-widest"
                         >
                           Thoát
                         </button>
@@ -255,13 +255,13 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
 }
 
   return (
-    <div className="fixed inset-0 bg-slate-50 dark:bg-neutral-black text-neutral-black dark:text-neutral-white font-sans flex flex-col z-[5000] transition-colors duration-300">
-      <header className="h-24 flex items-center justify-between px-8 border-b border-slate-200 dark:border-slate-800 bg-neutral-white/50 dark:bg-neutral-black/50 backdrop-blur-md">
+    <div className="fixed inset-0 bg-slate-50 dark:bg-dark-bg text-neutral-black dark:text-dark-text-primary font-sans flex flex-col z-[5000] transition-colors duration-300">
+      <header className="h-24 flex items-center justify-between px-8 border-b border-slate-200 dark:border-dark-border bg-neutral-white/50 dark:bg-dark-surface/50 backdrop-blur-md">
         <div>
           <h1 className="text-xl font-black tracking-widest text-primary flex items-center gap-3">
               <i className="fa-solid fa-tablet-screen-button"></i> AITENDANCE KIOSK
           </h1>
-          <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wide">{kioskInfo?.name}</p>
+          <p className="text-sm font-bold text-slate-500 dark:text-dark-text-secondary mt-1 uppercase tracking-wide">{kioskInfo?.name}</p>
         </div>
         <div className="text-right flex flex-col items-end">
           <div className="text-3xl font-black tabular-nums tracking-tighter">{currentTime.toLocaleTimeString('vi-VN', { hour12: false })}</div>
@@ -274,24 +274,25 @@ const KioskMode: React.FC<Props> = ({ onExit }) => {
         {!session && (
           <div className="text-center animate-fade-in">
             <h2 className="text-4xl font-black mb-4 tracking-tight">Quét QR để Chấm công</h2>
-            <p className="text-slate-500 dark:text-slate-400 mb-10 font-medium text-lg">
+            <p className="text-slate-500 dark:text-dark-text-secondary mb-10 font-medium text-lg">
               Mở ứng dụng di động Army HRM và chọn Quét Kiosk.
             </p>
 
-            <div className="p-8 bg-neutral-white rounded-[32px] border border-slate-200 dark:border-slate-700 inline-block shadow-2xl">
+            {/* Note: QR Code backgrounds are usually kept white to ensure fast scanning by devices */}
+            <div className="p-8 bg-neutral-white dark:bg-neutral-white rounded-[32px] border border-slate-200 dark:border-dark-border inline-block shadow-2xl">
                 <QRCode value={qrData} size={300} />
             </div>
             
             <div className="mt-10 bg-primary/10 dark:bg-primary/20 inline-block px-8 py-4 rounded-3xl border border-primary/20">
                 <div className="text-3xl font-black font-mono tracking-[0.3em] text-primary">{token}</div>
-                <div className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase mt-1 tracking-widest">Mã phiên hiện tại</div>
+                <div className="text-[10px] font-extrabold text-slate-500 dark:text-dark-text-secondary uppercase mt-1 tracking-widest">Mã phiên hiện tại</div>
             </div>
           </div>
         )}
 
         {session && (
           <div className="w-full h-full flex flex-col items-center justify-center text-center animate-scale-in">
-            <div className="relative w-full max-w-2xl aspect-video bg-neutral-black rounded-[32px] overflow-hidden border-4 border-slate-200 dark:border-slate-800 shadow-2xl">
+            <div className="relative w-full max-w-2xl aspect-video bg-neutral-black rounded-[32px] overflow-hidden border-4 border-slate-200 dark:border-dark-border shadow-2xl">
               <video ref={videoRef} className={`w-full h-full object-cover transform scale-x-[-1] ${isCameraActive ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`} autoPlay playsInline muted></video>
               
               {session.status !== 'camera_ready' && (

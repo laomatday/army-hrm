@@ -111,7 +111,7 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose, setIsNavVisible }) =>
           <ModalHeader 
               title="Cài đặt" 
               onClose={onClose} 
-              bgClass="bg-neutral-white dark:bg-dark-bg border-b border-slate-100 dark:border-dark-border"
+              bgClass="bg-neutral-white dark:bg-dark-bg"
           />
 
           <div className="flex-1 overflow-y-auto px-4 pb-32 space-y-6 pt-4 relative z-0" onScroll={handleScroll}>

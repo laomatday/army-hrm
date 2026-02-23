@@ -95,11 +95,11 @@ const ModalQRScanner: React.FC<Props> = ({ onClose, onScan, onError }) => {
               <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
                   <i className="fa-solid fa-qrcode text-primary text-sm"></i>
               </div>
-              <span className="text-neutral-white font-bold tracking-tight">Quét mã Kiosk</span>
+              <span className="text-neutral-white dark:text-dark-text-primary font-bold tracking-tight">Quét mã Kiosk</span>
           </div>
           <button 
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-neutral-white transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-dark-text-secondary hover:text-neutral-white dark:hover:text-dark-text-primary transition-colors"
           >
             <i className="fa-solid fa-xmark text-lg"></i>
           </button>
@@ -134,25 +134,25 @@ const ModalQRScanner: React.FC<Props> = ({ onClose, onScan, onError }) => {
         )}
       </div>
       
-      <div className="safe-bottom bg-neutral-black/90 backdrop-blur-md border-t border-white/5 p-8 z-50">
+      <div className="safe-bottom bg-neutral-black/90 dark:bg-dark-bg/90 backdrop-blur-md border-t border-white/5 dark:border-dark-border p-8 z-50">
           <div className="max-w-xs mx-auto text-center">
-              <h3 className="text-neutral-white font-bold mb-2">Hướng dẫn</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
+              <h3 className="text-neutral-white dark:text-dark-text-primary font-bold mb-2">Hướng dẫn</h3>
+              <p className="text-slate-400 dark:text-dark-text-secondary text-sm leading-relaxed">
                   Di chuyển camera để mã QR trên màn hình Kiosk nằm gọn trong khung hình vuông.
               </p>
               
               <div className="mt-8 flex justify-center gap-4">
                   <div className="flex flex-col items-center gap-2">
-                      <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-300">
+                      <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 dark:text-dark-text-secondary">
                           <i className="fa-solid fa-lightbulb text-sm"></i>
                       </div>
-                      <span className="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">Đủ sáng</span>
+                      <span className="text-[10px] text-slate-500 dark:text-dark-text-secondary uppercase font-bold tracking-tighter">Đủ sáng</span>
                   </div>
                   <div className="flex flex-col items-center gap-2">
-                      <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-300">
+                      <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 dark:text-dark-text-secondary">
                           <i className="fa-solid fa-hand text-sm"></i>
                       </div>
-                      <span className="text-[10px] text-slate-500 uppercase font-bold tracking-tighter">Giữ chắc tay</span>
+                      <span className="text-[10px] text-slate-500 dark:text-dark-text-secondary uppercase font-bold tracking-tighter">Giữ chắc tay</span>
                   </div>
               </div>
           </div>

@@ -114,7 +114,7 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, userId, onCancel, onCropCompl
   };
 
   return (
-    <div className="fixed inset-0 z-[6000] bg-neutral-black/95 backdrop-blur-md flex flex-col animate-fade-in touch-none">
+    <div className="fixed inset-0 z-[6000] bg-neutral-black/95 dark:bg-dark-bg/95 backdrop-blur-md flex flex-col animate-fade-in touch-none">
       
       <div className="flex-1 flex flex-col items-center justify-center relative w-full">
           
@@ -168,10 +168,10 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, userId, onCancel, onCropCompl
           )}
       </div>
 
-      <div className="bg-neutral-white dark:bg-neutral-black border-t border-slate-200 dark:border-slate-800 pb-safe pt-6 px-6 z-40 w-full rounded-t-[32px]">
+      <div className="bg-neutral-white dark:bg-dark-surface border-t border-slate-200 dark:border-dark-border pb-safe pt-6 px-6 z-40 w-full rounded-t-[32px]">
           
           <div className="flex items-center gap-4 justify-center mb-6 px-2">
-              <i className="fa-solid fa-image text-slate-400 dark:text-slate-500 text-sm"></i>
+              <i className="fa-solid fa-image text-slate-400 dark:text-dark-text-secondary text-sm"></i>
               <input 
                 type="range" 
                 min="1" 
@@ -180,16 +180,16 @@ const ImageCropper: React.FC<Props> = ({ imageSrc, userId, onCancel, onCropCompl
                 value={zoom}
                 onChange={(e) => setZoom(parseFloat(e.target.value))}
                 disabled={isUploading}
-                className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary disabled:opacity-50"
+                className="w-full h-1.5 bg-slate-200 dark:bg-dark-border rounded-lg appearance-none cursor-pointer accent-primary disabled:opacity-50"
               />
-              <i className="fa-solid fa-image text-neutral-black dark:text-neutral-white text-lg"></i>
+              <i className="fa-solid fa-image text-neutral-black dark:text-dark-text-primary text-lg"></i>
           </div>
 
           <div className="flex gap-4 mb-4">
                <button 
                   onClick={onCancel} 
                   disabled={isUploading}
-                  className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl font-extrabold text-base active:scale-95 transition-all disabled:opacity-50 uppercase tracking-widest"
+                  className="flex-1 py-4 bg-slate-100 dark:bg-dark-border/50 hover:dark:bg-dark-border text-slate-600 dark:text-dark-text-primary rounded-2xl font-extrabold text-base active:scale-95 transition-all disabled:opacity-50 uppercase tracking-widest"
                >
                    Hủy
                </button>

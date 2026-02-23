@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Employee } from '../types';
 import Avatar from './Avatar';
@@ -41,20 +40,20 @@ const Header: React.FC<Props> = ({ user, activeTab, onOpenProfile, onOpenNoti, c
 
   return (
     <>
-        <div className="fixed top-0 left-0 w-full z-40 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xl pt-safe transition-all border-b border-slate-200/30 dark:border-slate-700/30">
+        <div className="fixed top-0 left-0 w-full z-40 bg-slate-50/80 dark:bg-dark-bg/80 backdrop-blur-xl pt-safe transition-all">
             <div className="flex items-center justify-between h-16 px-4 relative">
                 
                 <div className="flex items-center z-20 gap-1">
                     <button 
                         onClick={() => setIsSettingsOpen(true)}
-                        className="w-10 h-10 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all active:scale-90"
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-slate-600 dark:text-dark-text-secondary hover:dark:text-dark-text-primary transition-all active:scale-90"
                     >
                         <i className="fa-solid fa-bars text-lg"></i>
                     </button>
 
                     <div className="flex items-center gap-2 pl-1">
                         {title && (
-                            <span className="text-xl font-extrabold text-slate-800 dark:text-white tracking-tight animate-fade-in">
+                            <span className="text-xl font-extrabold text-slate-800 dark:text-dark-text-primary tracking-tight animate-fade-in">
                                 {title}
                             </span>
                         )}
@@ -69,7 +68,7 @@ const Header: React.FC<Props> = ({ user, activeTab, onOpenProfile, onOpenNoti, c
                     {activeTab === 'contacts' && onContactSearch && (
                         <button 
                             onClick={onContactSearch}
-                            className="w-10 h-10 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 transition-all active:scale-90"
+                            className="w-10 h-10 rounded-full flex items-center justify-center text-slate-600 dark:text-dark-text-secondary hover:dark:text-dark-text-primary transition-all active:scale-90"
                         >
                             <i className="fa-solid fa-magnifying-glass text-lg"></i>
                         </button>
@@ -85,7 +84,7 @@ const Header: React.FC<Props> = ({ user, activeTab, onOpenProfile, onOpenNoti, c
                     )}
 
                     {onOpenNoti ? (
-                        <button onClick={onOpenNoti} className="w-10 h-10 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 transition-colors active:scale-95">
+                        <button onClick={onOpenNoti} className="w-10 h-10 rounded-full flex items-center justify-center text-slate-600 dark:text-dark-text-secondary hover:dark:text-dark-text-primary transition-colors active:scale-95">
                             <i className="fa-solid fa-xmark text-xl"></i>
                         </button>
                     ) : (
@@ -96,7 +95,7 @@ const Header: React.FC<Props> = ({ user, activeTab, onOpenProfile, onOpenNoti, c
                                 className="w-9 h-9" 
                                 textSize="text-xs"
                             />
-                            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-primary ring-2 ring-white dark:ring-slate-900 rounded-full"></div>
+                            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-primary ring-2 ring-white dark:ring-dark-bg rounded-full"></div>
                         </div>
                     )}
                 </div>
