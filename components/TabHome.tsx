@@ -41,13 +41,15 @@ const StatCard = ({
 
     return (
         <div className={`bg-neutral-white dark:bg-dark-surface p-5 rounded-[28px] border ${t.border} dark:border-dark-border flex flex-col gap-3 active:scale-[0.97] transition-all relative overflow-hidden shadow-sm`}>
-             <div className={`w-10 h-10 rounded-xl ${t.bg} ${t.text} flex items-center justify-center text-lg flex-shrink-0`}>
-                 <i className={`fa-solid ${icon}`}></i>
+             <div className="flex items-center justify-between z-10">
+                 <div className={`w-10 h-10 rounded-xl ${t.bg} ${t.text} flex items-center justify-center text-lg flex-shrink-0`}>
+                     <i className={`fa-solid ${icon}`}></i>
+                 </div>
+                 <span className="text-2xl font-extrabold text-neutral-black dark:text-dark-text-primary tracking-tight tabular-nums">{value}</span>
              </div>
 
              <div className="flex flex-col flex-1 min-w-0 z-10">
-                 <span className="text-2xl font-extrabold text-neutral-black dark:text-dark-text-primary tracking-tight tabular-nums">{value}</span>
-                 <h4 className="text-[11px] font-bold text-slate-400 dark:text-dark-text-secondary uppercase tracking-wider leading-tight mt-1">{title}</h4>
+                 <h4 className="text-[11px] font-bold text-slate-400 dark:text-dark-text-secondary uppercase tracking-wider leading-tight">{title}</h4>
              </div>
              
              <div className={`absolute -right-2 -bottom-2 text-4xl opacity-[0.03] ${t.text} pointer-events-none`}>
