@@ -3,22 +3,25 @@
 @tailwind utilities;
 
 :root {
-  --primary-color: 26, 115, 232;
-  --secondary-green: 52, 168, 83;
-  --secondary-red: 234, 67, 53;
-  --secondary-yellow: 251, 188, 4;
-  --secondary-purple: 161, 66, 244;
-  --secondary-orange: 250, 123, 23;
+/* PRIMARY: Indigo - Tạo cảm giác công nghệ cao & hiện đại */
+  --primary-color: 99, 102, 241;
+
+  /* SECONDARY: Tinh chỉnh để tươi hơn (Vibrant) */
+  --secondary-green: 16, 185, 129;   /* Emerald */
+  --secondary-red: 244, 63, 94;      /* Rose - Đỡ gắt hơn red thuần */
+  --secondary-yellow: 245, 158, 11;  /* Amber */
+  --secondary-purple: 168, 85, 247;  /* Purple sáng */
+  --secondary-orange: 249, 115, 22;  /* Orange đậm đà */
 
   /* Màu trung tính (Text/Nền) */
-  --neutral-black: 30, 41, 59;
+  --neutral-black: 15, 23, 42;       /* Slate đậm */
   --neutral-white: 255, 255, 255;
 
-  /* Dark Mode Specific Overrides */
-  --dark-bg: 3, 7, 18;
-  --dark-surface: 17, 24, 39;
-  --dark-border: 31, 41, 55;
-  --dark-text-primary: 248, 250, 252;
+  /* Dark Mode: Dùng tông Slate (Xanh than) thay vì Gray (Xám) -> Sang trọng hơn */
+  --dark-bg: 2, 6, 23;               /* Slate 950 */
+  --dark-surface: 15, 23, 42;        /* Slate 900 */
+  --dark-border: 30, 41, 59;         /* Slate 800 */
+  --dark-text-primary: 241, 245, 249;
   --dark-text-secondary: 148, 163, 184;
 
   /* Structural Variables */
