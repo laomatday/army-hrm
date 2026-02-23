@@ -12,10 +12,10 @@ const AdminModeSelection: React.FC<Props> = ({ onSelectMode, onLogout }) => {
          <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-primary/5 dark:bg-primary/10 rounded-full blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
          <div className="absolute bottom-0 left-0 w-[25rem] h-[25rem] bg-secondary-purple/5 dark:bg-secondary-purple/10 rounded-full blur-[80px] pointer-events-none translate-y-1/3 -translate-x-1/4"></div>
 
-         <div className="relative z-10 w-full max-w-md animate-slide-up flex flex-col h-full py-10">
+         <div className="relative z-10 w-full max-w-md animate-slide-up flex flex-col">
              
              {/* Header Section */}
-             <div className="text-center mb-10 mt-10">
+             <div className="text-center mb-10">
                  <div className="w-20 h-20 mx-auto bg-neutral-white dark:bg-dark-surface rounded-[24px] border border-slate-200 dark:border-dark-border shadow-sm flex items-center justify-center mb-6 rotate-3 hover:rotate-0 transition-transform duration-300">
                      <div className="w-14 h-14 bg-primary/10 dark:bg-primary/20 rounded-xl flex items-center justify-center text-primary text-3xl -rotate-3">
                         <i className="fa-solid fa-shield-halved"></i>
@@ -26,7 +26,7 @@ const AdminModeSelection: React.FC<Props> = ({ onSelectMode, onLogout }) => {
              </div>
 
              {/* Cards Section */}
-             <div className="space-y-4 flex-1">
+             <div className="space-y-4">
                  <button 
                     onClick={() => onSelectMode('app')}
                     className="relative w-full bg-neutral-white dark:bg-dark-surface p-5 rounded-[28px] border border-slate-200 dark:border-dark-border flex items-center gap-5 group hover:border-primary/30 dark:hover:border-primary/50 transition-all duration-300 active:scale-[0.98] shadow-sm hover:shadow-xl overflow-hidden text-left"
@@ -80,7 +80,7 @@ const AdminModeSelection: React.FC<Props> = ({ onSelectMode, onLogout }) => {
              </div>
              
              {/* Footer Logout */}
-             <div className="mt-8 flex justify-center pb-8">
+             <div className="mt-8 flex justify-center">
                  <button 
                     onClick={onLogout} 
                     className="px-6 py-3.5 rounded-full bg-slate-200/50 dark:bg-dark-surface border border-slate-200 dark:border-dark-border text-slate-500 dark:text-dark-text-secondary text-[11px] font-extrabold hover:text-secondary-red hover:bg-secondary-red/10 dark:hover:text-secondary-red dark:hover:bg-secondary-red/10 transition-colors uppercase tracking-widest flex items-center gap-2 group"
