@@ -178,8 +178,8 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
           </div>
           
           <div className="flex-1 min-w-0">
-              <p className={`text-[15px] font-bold ${isDestructive ? 'text-secondary-red dark:text-secondary-red' : 'text-neutral-black dark:text-neutral-white'} truncate`}>{label}</p>
-              {value && <p className="text-[11px] text-slate-400 dark:text-slate-500 font-bold mt-0.5 truncate uppercase tracking-wider">{value}</p>}
+              {value && <p className="text-[11px] text-slate-400 dark:text-slate-500 font-bold truncate uppercase tracking-wider">{label}</p>}
+              <p className={`text-[15px] font-bold ${isDestructive ? 'text-secondary-red dark:text-secondary-red' : 'text-neutral-black dark:text-neutral-white'} truncate ${value ? 'mt-0.5' : ''}`}>{value || label}</p>
           </div>
 
           {isLink && (
@@ -246,8 +246,8 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                         <h2 className="text-2xl font-black text-neutral-black dark:text-neutral-white tracking-tight leading-tight">{user.name}</h2>
                         
                         <div className="flex gap-2 flex-wrap justify-center mt-3">
-                            <span className="px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-lg text-[10px] font-extrabold text-primary dark:text-primary uppercase tracking-wide">{user.department}</span>
-                            <span className="px-3 py-1.5 bg-secondary-purple/10 border border-secondary-purple/20 rounded-lg text-[10px] font-extrabold text-secondary-purple dark:text-secondary-purple uppercase tracking-wide">{user.position}</span>                            
+                            <span className="px-3 py-1.5 bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/30 rounded-lg text-[10px] font-extrabold text-primary dark:text-primary uppercase tracking-wide">{user.department}</span>
+                            <span className="px-3 py-1.5 bg-secondary-purple/10 dark:bg-secondary-purple/20 border border-secondary-purple/20 dark:border-secondary-purple/30 rounded-lg text-[10px] font-extrabold text-secondary-purple dark:text-secondary-purple uppercase tracking-wide">{user.position}</span>                            
                         </div>
                     </div>
                 </div>
