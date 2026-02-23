@@ -241,8 +241,8 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
                           dayItem.status = 'Weekend';
                           dayItem.shiftInfo = "Nghỉ toàn hệ thống";
                           dayItem.icon = 'fa-mug-hot';
-                          dayItem.iconClass = 'bg-slate-50 dark:bg-neutral-black/50 text-slate-400 dark:text-slate-500';
-                          dayItem.dotClass = 'bg-slate-300 dark:bg-slate-600';
+                          dayItem.iconClass = 'bg-slate-50 dark:bg-dark-surface/50 text-slate-400 dark:text-dark-text-secondary';
+                          dayItem.dotClass = 'bg-slate-300 dark:bg-dark-border';
                        } else if (loopPtr <= today) {
                           dayItem.status = 'Absent';
                           dayItem.shiftInfo = "Vắng mặt"; 
@@ -260,7 +260,7 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
                            dayItem.status = 'Future';
                            dayItem.shiftInfo = "-";
                            dayItem.dotClass = 'bg-transparent';
-                           dayItem.iconClass = 'bg-slate-50 dark:bg-neutral-black/50 text-slate-300 dark:text-slate-600';
+                           dayItem.iconClass = 'bg-slate-50 dark:bg-dark-surface/50 text-slate-300 dark:text-dark-text-secondary/50';
                        }
                   }
               }
@@ -332,20 +332,20 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
   };
 
   return (
-    <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-slate-900">
+    <PullToRefresh onRefresh={onRefresh} className="bg-slate-50 dark:bg-dark-bg">
         <div className="pt-28 px-4 animate-fade-in flex flex-col h-full pb-20">
             
             <div className="flex justify-center mb-8">
-                 <div className="bg-slate-200/50 dark:bg-slate-800/50 p-1.5 rounded-2xl flex relative w-full max-w-[280px] shadow-inner">
+                 <div className="bg-slate-200/50 dark:bg-dark-surface p-1.5 rounded-2xl flex relative w-full max-w-[280px] shadow-inner border border-transparent dark:border-dark-border">
                      <button 
                         onClick={() => switchViewMode('week')}
-                        className={`flex-1 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'week' ? 'text-primary bg-neutral-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                        className={`flex-1 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'week' ? 'text-primary bg-neutral-white dark:bg-dark-border shadow-sm' : 'text-slate-500 dark:text-dark-text-secondary hover:text-slate-700 dark:hover:text-dark-text-primary'}`}
                      >
                          Tuần
                      </button>
                      <button 
                         onClick={() => switchViewMode('month')}
-                        className={`flex-1 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'month' ? 'text-primary bg-neutral-white dark:bg-slate-700 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                        className={`flex-1 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 relative z-10 ${viewMode === 'month' ? 'text-primary bg-neutral-white dark:bg-dark-border shadow-sm' : 'text-slate-500 dark:text-dark-text-secondary hover:text-slate-700 dark:hover:text-dark-text-primary'}`}
                      >
                          Tháng
                      </button>
@@ -353,17 +353,17 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
             </div>
 
             <div className="grid grid-cols-3 gap-3 mb-8">
-                <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28 shadow-sm">
+                <div className="bg-neutral-white dark:bg-dark-surface rounded-[24px] border border-slate-100 dark:border-dark-border p-4 flex flex-col items-center justify-center h-28 shadow-sm">
                     <span className="text-3xl font-black text-primary dark:text-primary mb-1 tabular-nums tracking-tighter drop-shadow-sm">{stats.workDays}</span>
-                    <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center leading-tight mt-1">Ngày công</span>
+                    <span className="text-[10px] font-extrabold text-slate-400 dark:text-dark-text-secondary uppercase tracking-widest text-center leading-tight mt-1">Ngày công</span>
                 </div>
-                <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28 shadow-sm">
+                <div className="bg-neutral-white dark:bg-dark-surface rounded-[24px] border border-slate-100 dark:border-dark-border p-4 flex flex-col items-center justify-center h-28 shadow-sm">
                     <span className="text-3xl font-black text-secondary-yellow dark:text-secondary-yellow mb-1 tabular-nums tracking-tighter drop-shadow-sm">{stats.lateMins}</span>
-                    <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center leading-tight mt-1">Phút trễ</span>
+                    <span className="text-[10px] font-extrabold text-slate-400 dark:text-dark-text-secondary uppercase tracking-widest text-center leading-tight mt-1">Phút trễ</span>
                 </div>
-                <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] border border-slate-100 dark:border-slate-700 p-4 flex flex-col items-center justify-center h-28 shadow-sm">
+                <div className="bg-neutral-white dark:bg-dark-surface rounded-[24px] border border-slate-100 dark:border-dark-border p-4 flex flex-col items-center justify-center h-28 shadow-sm">
                     <span className="text-3xl font-black text-secondary-red dark:text-secondary-red mb-1 tabular-nums tracking-tighter drop-shadow-sm">{stats.errors}</span>
-                    <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center leading-tight mt-1">Lỗi chấm</span>
+                    <span className="text-[10px] font-extrabold text-slate-400 dark:text-dark-text-secondary uppercase tracking-widest text-center leading-tight mt-1">Lỗi chấm</span>
                 </div>
             </div>
 
@@ -373,17 +373,17 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
                     {viewMode === 'month' ? 'Nhật ký tháng' : 'Nhật ký tuần'}
                 </h3>
                 
-                <div className="flex items-center bg-neutral-white dark:bg-neutral-black/50 rounded-full border border-slate-100 dark:border-slate-700 pl-1 pr-1 py-1">
-                    <button onClick={() => changeDate(-1)} className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 active:bg-slate-100 dark:active:bg-slate-600 transition-colors">
+                <div className="flex items-center bg-neutral-white dark:bg-dark-surface rounded-full border border-slate-100 dark:border-dark-border pl-1 pr-1 py-1">
+                    <button onClick={() => changeDate(-1)} className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 dark:text-dark-text-secondary hover:bg-slate-50 dark:hover:bg-dark-border/50 active:bg-slate-100 dark:active:bg-dark-border transition-colors">
                         <i className="fa-solid fa-chevron-left text-[10px]"></i>
                     </button>
-                    <span className="text-xs font-black text-neutral-black dark:text-neutral-white uppercase px-3 min-w-[90px] text-center tabular-nums tracking-wide">
+                    <span className="text-xs font-black text-neutral-black dark:text-dark-text-primary uppercase px-3 min-w-[90px] text-center tabular-nums tracking-wide">
                         {title}
                     </span>
                     <button 
                         disabled={isCurrentView}
                         onClick={() => changeDate(1)} 
-                        className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${isCurrentView ? 'text-slate-200 dark:text-slate-700/50 cursor-not-allowed' : 'text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 active:bg-slate-100 dark:active:bg-slate-600'}`}
+                        className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${isCurrentView ? 'text-slate-200 dark:text-dark-border cursor-not-allowed' : 'text-slate-400 dark:text-dark-text-secondary hover:bg-slate-50 dark:hover:bg-dark-border/50 active:bg-slate-100 dark:active:bg-dark-border'}`}
                     >
                         <i className="fa-solid fa-chevron-right text-[10px]"></i>
                     </button>
@@ -391,10 +391,10 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
             </div>
 
             {viewMode === 'month' && (
-                <div className="mb-8 bg-neutral-white dark:bg-neutral-black/50 p-5 rounded-[24px] border border-slate-100 dark:border-slate-700 animate-scale-in">
+                <div className="mb-8 bg-neutral-white dark:bg-dark-surface p-5 rounded-[24px] border border-slate-100 dark:border-dark-border animate-scale-in">
                     <div className="grid grid-cols-7 mb-4">
                         {["CN", "T2", "T3", "T4", "T5", "T6", "T7"].map((d, i) => (
-                            <div key={i} className="text-center text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{d}</div>
+                            <div key={i} className="text-center text-[10px] font-extrabold text-slate-400 dark:text-dark-text-secondary uppercase tracking-wider">{d}</div>
                         ))}
                     </div>
                     <div className="grid grid-cols-7 gap-y-3 gap-x-1">
@@ -405,7 +405,7 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
                                 <div 
                                     key={idx} 
                                     onClick={() => { triggerHaptic('light'); setSelectedDate(day.date); }}
-                                    className={`h-10 flex flex-col items-center justify-center relative cursor-pointer rounded-xl transition-all ${isSelected ? 'bg-primary/10 dark:bg-primary/20 ring-2 ring-primary/50 dark:ring-primary/40 text-primary dark:text-primary' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300'}`}
+                                    className={`h-10 flex flex-col items-center justify-center relative cursor-pointer rounded-xl transition-all ${isSelected ? 'bg-primary/10 dark:bg-primary/20 ring-2 ring-primary/50 dark:ring-primary/40 text-primary dark:text-primary' : 'hover:bg-slate-50 dark:hover:bg-dark-border/50 text-slate-700 dark:text-dark-text-primary'}`}
                                 >
                                     <span className={`text-base font-black tabular-nums tracking-tight ${day.dayOfWeek === 0 && !isSelected ? 'text-secondary-red dark:text-secondary-red' : ''}`}>{day.dayNum}</span>
                                     {day.status !== 'Future' && (
@@ -419,27 +419,27 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
             )}
             
             {displayList.length === 0 ? (
-                <div className="w-full text-center py-12 text-sm font-bold text-slate-400 dark:text-slate-600 bg-neutral-white dark:bg-neutral-black/50 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700 mb-12">
+                <div className="w-full text-center py-12 text-sm font-bold text-slate-400 dark:text-dark-text-secondary bg-neutral-white dark:bg-dark-surface rounded-3xl border border-dashed border-slate-200 dark:border-dark-border mb-12">
                     {viewMode === 'month' ? 'Chọn ngày để xem chi tiết' : 'Không có dữ liệu'}
                 </div>
             ) : (
-                <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-12 shadow-sm animate-slide-up">
+                <div className="bg-neutral-white dark:bg-dark-surface rounded-[24px] overflow-hidden border border-slate-100 dark:border-dark-border divide-y divide-slate-50 dark:divide-dark-border mb-12 shadow-sm animate-slide-up">
                     {displayList.map((item, idx) => {
                         const isExpanded = expandedDate === item.date;
                         
                         return (
                         <div key={idx} 
                             onClick={() => { triggerHaptic('light'); setExpandedDate(isExpanded ? null : item.date); }}
-                            className="w-full bg-neutral-white dark:bg-neutral-black/50 overflow-hidden transition-colors active:bg-slate-50 dark:active:bg-neutral-black/80"
+                            className="w-full bg-neutral-white dark:bg-dark-surface overflow-hidden transition-colors active:bg-slate-50 dark:active:bg-dark-border/50"
                         >
                             <div className="p-5 flex items-center justify-between">
-                                <div className="flex flex-col items-center justify-center w-14 border-r border-slate-100 dark:border-slate-700 pr-4 mr-1">
-                                    <span className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase leading-none mb-1.5 tracking-wide">{getDayName(item.dayOfWeek)}</span>
-                                    <span className={`text-2xl font-black leading-none tabular-nums tracking-tighter ${item.dayOfWeek === 0 ? 'text-secondary-red dark:text-secondary-red' : 'text-neutral-black dark:text-neutral-white'}`}>{item.dayNum}</span>
+                                <div className="flex flex-col items-center justify-center w-14 border-r border-slate-100 dark:border-dark-border pr-4 mr-1">
+                                    <span className="text-[10px] font-extrabold text-slate-400 dark:text-dark-text-secondary uppercase leading-none mb-1.5 tracking-wide">{getDayName(item.dayOfWeek)}</span>
+                                    <span className={`text-2xl font-black leading-none tabular-nums tracking-tighter ${item.dayOfWeek === 0 ? 'text-secondary-red dark:text-secondary-red' : 'text-neutral-black dark:text-dark-text-primary'}`}>{item.dayNum}</span>
                                 </div>
 
                                 <div className="flex-1 pl-3">
-                                    <h4 className="text-base font-bold text-neutral-black dark:text-neutral-white mb-1.5 leading-tight">{item.shiftInfo}</h4>
+                                    <h4 className="text-base font-bold text-neutral-black dark:text-dark-text-primary mb-1.5 leading-tight">{item.shiftInfo}</h4>
                                     
                                     <div className="flex flex-wrap gap-1.5 items-center">
                                         {item.status !== 'Future' && item.status !== 'Absent' && item.status !== 'Weekend' && (
@@ -480,7 +480,7 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
                                         
                                         {item.showExplain && (
                                             item.isExplained ? (
-                                                <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/50 text-slate-400 dark:text-slate-500 text-[10px] font-extrabold border border-slate-200 dark:border-slate-600 uppercase tracking-wider">
+                                                <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-dark-border/50 text-slate-400 dark:text-dark-text-secondary text-[10px] font-extrabold border border-slate-200 dark:border-dark-border uppercase tracking-wider">
                                                     <i className="fa-solid fa-check text-[10px] mr-1"></i> Đã giải trình
                                                 </span>
                                             ) : (
@@ -496,27 +496,27 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
                                 </div>
 
                                 <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ml-2 transition-transform duration-300 ${item.iconClass} ${isExpanded ? 'rotate-180' : ''}`}>
-                                    {isExpanded ? <i className="fa-solid fa-chevron-down text-lg"></i> : <i className={`fa-solid ${item.icon} text-lg`}></i>}
+                                    {isExpanded ? <i className="fa-solid fa-chevron-down text-lg text-slate-400 dark:text-dark-text-secondary"></i> : <i className={`fa-solid ${item.icon} text-lg`}></i>}
                                 </div>
                             </div>
 
                             {isExpanded && item.raw && (
-                                <div className="bg-slate-50/50 dark:bg-neutral-black/80 border-t border-slate-100 dark:border-slate-700 p-5 animate-fade-in text-sm text-slate-600 dark:text-slate-400 space-y-3">
+                                <div className="bg-slate-50/50 dark:bg-dark-bg/50 border-t border-slate-100 dark:border-dark-border p-5 animate-fade-in text-sm text-slate-600 dark:text-dark-text-secondary space-y-3">
                                      <div className="grid grid-cols-2 gap-4">
                                          <div>
-                                             <p className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase mb-1 tracking-wide">Giờ vào</p>
-                                             <p className="font-bold text-neutral-black dark:text-neutral-white text-base font-mono">{item.raw.time_in}</p>
+                                             <p className="text-[10px] font-extrabold text-slate-400 dark:text-dark-text-secondary uppercase mb-1 tracking-wide">Giờ vào</p>
+                                             <p className="font-bold text-neutral-black dark:text-dark-text-primary text-base font-mono">{item.raw.time_in}</p>
                                          </div>
                                          <div>
-                                             <p className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase mb-1 tracking-wide">Giờ ra</p>
-                                             <p className="font-bold text-neutral-black dark:text-neutral-white text-base font-mono">{item.raw.time_out || "--:--"}</p>
+                                             <p className="text-[10px] font-extrabold text-slate-400 dark:text-dark-text-secondary uppercase mb-1 tracking-wide">Giờ ra</p>
+                                             <p className="font-bold text-neutral-black dark:text-dark-text-primary text-base font-mono">{item.raw.time_out || "--:--"}</p>
                                          </div>
                                      </div>
                                      
                                      {(item.raw.checkin_lat || item.raw.checkout_lat) && (
                                          <div>
-                                             <p className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase mb-1 tracking-wide">Vị trí check-in</p>
-                                             <p className="font-medium text-slate-700 dark:text-slate-300 text-xs truncate font-mono">
+                                             <p className="text-[10px] font-extrabold text-slate-400 dark:text-dark-text-secondary uppercase mb-1 tracking-wide">Vị trí check-in</p>
+                                             <p className="font-medium text-slate-700 dark:text-dark-text-secondary text-xs truncate font-mono">
                                                  {item.raw.checkin_lat}, {item.raw.checkin_lng}
                                              </p>
                                          </div>
@@ -524,7 +524,7 @@ const TabHistory: React.FC<Props> = ({ data, user, onRefresh, onAlert, onExplain
 
                                      {item.raw.selfie_url && (
                                          <div className="pt-2">
-                                              <a href={item.raw.selfie_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary dark:text-primary font-bold text-xs uppercase bg-neutral-white dark:bg-neutral-black/50 border border-primary/20 dark:border-primary/30 px-4 py-2.5 rounded-xl tracking-wide hover:bg-primary/5 transition-colors">
+                                              <a href={item.raw.selfie_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary dark:text-primary font-bold text-xs uppercase bg-neutral-white dark:bg-dark-surface border border-primary/20 dark:border-primary/30 px-4 py-2.5 rounded-xl tracking-wide hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors">
                                                   <i className="fa-solid fa-image"></i> Xem ảnh Check-in
                                               </a>
                                          </div>

@@ -60,15 +60,15 @@ const ModalContactDetail: React.FC<Props> = ({ contact, isOpen, onClose, locatio
   }) => {
       const Content = (
           <>
-            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-base flex-shrink-0 border border-white/50 dark:border-slate-700/50 shadow-sm ${colorClass}`}>
+            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-base flex-shrink-0 border border-white/50 dark:border-dark-border/50 shadow-sm ${colorClass}`}>
                 <i className={`fa-solid ${icon}`}></i>
             </div>
             <div className="flex-1 min-w-0">
-                <p className="text-[11px] text-slate-400 dark:text-slate-500 font-bold truncate uppercase tracking-wider">{label}</p>
-                <p className="text-[15px] font-bold text-neutral-black dark:text-neutral-white truncate mt-0.5">{value || label}</p>
+                <p className="text-[11px] text-slate-400 dark:text-dark-text-secondary font-bold truncate uppercase tracking-wider">{label}</p>
+                <p className="text-[15px] font-bold text-neutral-black dark:text-dark-text-primary truncate mt-0.5">{value || label}</p>
             </div>
             {isLink && (
-                <div className="text-slate-300 dark:text-slate-600">
+                <div className="text-slate-300 dark:text-dark-text-secondary">
                     <i className="fa-solid fa-chevron-right text-xs"></i>
                 </div>
             )}
@@ -76,7 +76,7 @@ const ModalContactDetail: React.FC<Props> = ({ contact, isOpen, onClose, locatio
       );
 
       if (isLink && href) {
-          return <a href={href} className="flex items-center gap-4 p-4 active:bg-slate-50 dark:active:bg-slate-800/50 transition-colors no-underline group">{Content}</a>;
+          return <a href={href} className="flex items-center gap-4 p-4 active:bg-slate-50 dark:active:bg-dark-border/50 transition-colors no-underline group">{Content}</a>;
       }
       
       return <div className="flex items-center gap-4 p-4">{Content}</div>;
@@ -84,7 +84,7 @@ const ModalContactDetail: React.FC<Props> = ({ contact, isOpen, onClose, locatio
 
   return (
     <div 
-        className="fixed inset-0 z-[1000] bg-slate-50 dark:bg-slate-900 flex flex-col animate-slide-up transition-colors duration-300"
+        className="fixed inset-0 z-[1000] bg-slate-50 dark:bg-dark-bg flex flex-col animate-slide-up transition-colors duration-300"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -98,7 +98,7 @@ const ModalContactDetail: React.FC<Props> = ({ contact, isOpen, onClose, locatio
 
          <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-14">
               <div className="animate-fade-in mt-4">
-                  <div className="bg-neutral-white dark:bg-neutral-black rounded-[32px] p-8 border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-8 transition-colors mt-4 shadow-sm">
+                  <div className="bg-neutral-white dark:bg-dark-surface rounded-[32px] p-8 border border-slate-100 dark:border-dark-border text-center relative overflow-hidden mb-8 transition-colors mt-4 shadow-sm">
                        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-t-[32px] transition-colors duration-500 opacity-60"></div>
                        <div className="absolute top-0 left-0 w-full h-32 overflow-hidden pointer-events-none opacity-10">
                            <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full border-[20px] border-primary"></div>
@@ -106,7 +106,7 @@ const ModalContactDetail: React.FC<Props> = ({ contact, isOpen, onClose, locatio
                        </div>
                        
                        <div className="relative z-10 flex flex-col items-center">
-                           <div className="w-32 h-32 rounded-full p-1.5 bg-neutral-white dark:bg-neutral-black mb-4 mt-2 relative overflow-hidden transition-colors">
+                           <div className="w-32 h-32 rounded-full p-1.5 bg-neutral-white dark:bg-dark-surface mb-4 mt-2 relative overflow-hidden transition-colors">
                                <Avatar 
                                   src={contact.face_ref_url} 
                                   name={contact.name} 
@@ -114,7 +114,7 @@ const ModalContactDetail: React.FC<Props> = ({ contact, isOpen, onClose, locatio
                                   textSize="text-4xl"
                                />
                            </div>
-                           <h2 className="text-2xl font-black text-neutral-black dark:text-neutral-white tracking-tight leading-tight">{contact.name}</h2>
+                           <h2 className="text-2xl font-black text-neutral-black dark:text-dark-text-primary tracking-tight leading-tight">{contact.name}</h2>
                            
                            <div className="mt-3 flex gap-2 flex-wrap justify-center">
                                <span className="px-3 py-1.5 bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/30 rounded-lg text-[10px] font-extrabold text-primary dark:text-primary uppercase tracking-wide">{contact.department}</span>
@@ -126,7 +126,7 @@ const ModalContactDetail: React.FC<Props> = ({ contact, isOpen, onClose, locatio
                   <h3 className="text-xs font-black text-primary dark:text-primary uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
                       <i className="fa-solid fa-briefcase text-[10px]"></i> Thông tin công việc
                   </h3>
-                  <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-6">
+                  <div className="bg-neutral-white dark:bg-dark-surface rounded-[24px] overflow-hidden border border-slate-100 dark:border-dark-border divide-y divide-slate-50 dark:divide-dark-border mb-6">
                       <ContactDetailRow 
                           icon="fa-location-dot" 
                           colorClass="bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary"
@@ -146,7 +146,7 @@ const ModalContactDetail: React.FC<Props> = ({ contact, isOpen, onClose, locatio
                   <h3 className="text-xs font-black text-primary dark:text-primary uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
                       <i className="fa-solid fa-address-book text-[10px]"></i> Thông tin liên hệ
                   </h3>
-                  <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
+                  <div className="bg-neutral-white dark:bg-dark-surface rounded-[24px] overflow-hidden border border-slate-100 dark:border-dark-border divide-y divide-slate-50 dark:divide-dark-border mb-8">
                       <ContactDetailRow 
                           icon="fa-envelope" 
                           colorClass="bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary"

@@ -205,35 +205,35 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
   };
 
   return (
-    <div className="absolute inset-0 flex flex-col bg-slate-50 dark:bg-slate-900 font-sans transition-colors duration-300">
+    <div className="absolute inset-0 flex flex-col bg-slate-50 dark:bg-dark-bg font-sans transition-colors duration-300">
         
-        <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-28">
+        <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-28" onScroll={handleScroll}>
             
             {isSearching && (
                 <div className="mb-4 animate-fade-in z-20">
                     <div className="flex items-center gap-3">
                         <div className="relative group flex-1">
-                            <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-lg"></i>
+                            <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-dark-text-secondary text-lg"></i>
                             <input 
                                 ref={inputRef}
                                 autoFocus={true}
                                 type="text"
                                 inputMode="search"
                                 enterKeyHint="search"
-                                className="w-full h-12 bg-neutral-white dark:bg-neutral-black/50 rounded-2xl pl-12 pr-10 text-base font-bold text-neutral-black dark:text-neutral-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20 border border-slate-200 dark:border-slate-700 transition-all"
+                                className="w-full h-12 bg-neutral-white dark:bg-dark-surface rounded-2xl pl-12 pr-10 text-base font-bold text-neutral-black dark:text-dark-text-primary placeholder:text-slate-400 dark:placeholder:text-dark-text-secondary outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/20 border border-slate-200 dark:border-dark-border transition-all"
                                 placeholder="Tìm kiếm..."
                                 value={term}
                                 onChange={e => setTerm(e.target.value)}
                             />
                             {term && (
-                            <button onClick={() => setTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 text-[10px] active:bg-slate-300 dark:active:bg-slate-600">
+                            <button onClick={() => setTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-slate-200 dark:bg-dark-border/50 rounded-full flex items-center justify-center text-slate-500 dark:text-dark-text-secondary text-[10px] active:bg-slate-300 dark:active:bg-dark-border">
                                 <i className="fa-solid fa-xmark"></i>
                             </button>
                             )}
                         </div>
                         <button 
                             onClick={handleCancelSearch}
-                            className="text-sm font-bold text-slate-500 dark:text-slate-400 active:text-neutral-black dark:active:text-neutral-white px-2 py-2"
+                            className="text-sm font-bold text-slate-500 dark:text-dark-text-secondary active:text-neutral-black dark:active:text-dark-text-primary px-2 py-2"
                         >
                             Hủy
                         </button>
@@ -243,14 +243,14 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
             
             {isSearching && term ? (
                 <div className="mt-2 animate-fade-in">
-                    <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700">
+                    <div className="bg-neutral-white dark:bg-dark-surface rounded-[24px] overflow-hidden border border-slate-100 dark:border-dark-border divide-y divide-slate-50 dark:divide-dark-border">
                         {term !== debouncedTerm ? (
-                            <div className="flex flex-col items-center justify-center py-10 text-slate-400 dark:text-slate-600 opacity-60">
+                            <div className="flex flex-col items-center justify-center py-10 text-slate-400 dark:text-dark-text-secondary opacity-60">
                                 <i className="fa-solid fa-circle-notch fa-spin text-2xl mb-3"></i>
                                 <p className="text-sm font-semibold">Đang tìm kiếm...</p>
                             </div>
                         ) : filtered.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-10 text-slate-400 dark:text-slate-600 opacity-60">
+                            <div className="flex flex-col items-center justify-center py-10 text-slate-400 dark:text-dark-text-secondary opacity-60">
                                 <i className="fa-solid fa-magnifying-glass-minus text-4xl mb-3"></i>
                                 <p className="text-sm font-semibold">Không tìm thấy kết quả</p>
                             </div>
@@ -258,7 +258,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                             filtered.map(c => (
                                 <div key={c.employee_id} 
                                     onClick={() => handleOpenContact(c)}
-                                    className="flex items-center gap-4 p-4 active:bg-slate-50 dark:active:bg-slate-700/50 transition-colors cursor-pointer group"
+                                    className="flex items-center gap-4 p-4 active:bg-slate-50 dark:active:bg-dark-border/50 transition-colors cursor-pointer group"
                                 >
                                     <Avatar 
                                         src={c.face_ref_url} 
@@ -267,7 +267,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                                         textSize="text-xs"
                                     />
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="text-sm font-bold text-neutral-black dark:text-neutral-white truncate">{c.name}</h4>
+                                        <h4 className="text-sm font-bold text-neutral-black dark:text-dark-text-primary truncate">{c.name}</h4>
                                         <div className="flex flex-wrap gap-1 mt-1">
                                             {c.department && (
                                                 <span className="px-2 py-0.5 rounded-md bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary text-[10px] font-extrabold border border-primary/20 dark:border-primary/30 uppercase tracking-wide truncate max-w-[100px]">
@@ -281,7 +281,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                                             )}
                                         </div>
                                     </div>
-                                    <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600 flex items-center justify-center group-hover:bg-primary/10 dark:group-hover:bg-primary/20 group-hover:text-primary dark:group-hover:text-primary transition-colors">
+                                    <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-dark-bg text-slate-300 dark:text-dark-text-secondary flex items-center justify-center group-hover:bg-primary/10 dark:group-hover:bg-primary/20 group-hover:text-primary dark:group-hover:text-primary transition-colors">
                                         <i className="fa-solid fa-chevron-right text-xs"></i>
                                     </div>
                                 </div>
@@ -298,14 +298,14 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                                     <i className="fa-solid fa-user-group text-[10px]"></i>
                                     <span>{groupKey}</span>
                                 </div>
-                                <span className="bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded text-[10px] tabular-nums">{groupedContacts[groupKey].length}</span>
+                                <span className="bg-slate-200 dark:bg-dark-border/50 text-slate-500 dark:text-dark-text-secondary px-1.5 py-0.5 rounded text-[10px] tabular-nums">{groupedContacts[groupKey].length}</span>
                             </h3>
                             
-                            <div className="bg-neutral-white dark:bg-neutral-black/50 rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700">
+                            <div className="bg-neutral-white dark:bg-dark-surface rounded-[24px] overflow-hidden border border-slate-100 dark:border-dark-border divide-y divide-slate-50 dark:divide-dark-border">
                                 {groupedContacts[groupKey].map(c => (
                                     <div key={c.employee_id} 
                                         onClick={() => handleOpenContact(c)}
-                                        className="flex items-center gap-4 p-4 active:bg-slate-50 dark:active:bg-slate-700/50 transition-colors cursor-pointer group"
+                                        className="flex items-center gap-4 p-4 active:bg-slate-50 dark:active:bg-dark-border/50 transition-colors cursor-pointer group"
                                     >
                                         <Avatar 
                                             src={c.face_ref_url} 
@@ -314,7 +314,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                                             textSize="text-xs"
                                         />
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="text-base font-bold text-neutral-black dark:text-neutral-white truncate leading-tight group-hover:text-primary dark:group-hover:text-primary transition-colors">{c.name}</h4>
+                                            <h4 className="text-base font-bold text-neutral-black dark:text-dark-text-primary truncate leading-tight group-hover:text-primary dark:group-hover:text-primary transition-colors">{c.name}</h4>
                                             <div className="flex flex-wrap gap-1 mt-1">
                                                 {c.department && (
                                                     <span className="px-2 py-0.5 rounded-md bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary text-[10px] font-extrabold border border-primary/20 dark:border-primary/30 uppercase tracking-wide truncate max-w-[120px]">
@@ -328,7 +328,7 @@ const TabContacts: React.FC<Props> = ({ data, resetTrigger = 0, searchTrigger = 
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600 flex items-center justify-center group-hover:bg-primary/10 dark:group-hover:bg-primary/20 group-hover:text-primary dark:group-hover:text-primary transition-colors">
+                                        <div className="w-8 h-8 rounded-full bg-slate-50 dark:bg-dark-bg text-slate-300 dark:text-dark-text-secondary flex items-center justify-center group-hover:bg-primary/10 dark:group-hover:bg-primary/20 group-hover:text-primary dark:group-hover:text-primary transition-colors">
                                             <i className="fa-solid fa-chevron-right text-xs"></i>
                                         </div>
                                     </div>

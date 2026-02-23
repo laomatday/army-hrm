@@ -39,7 +39,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
 
   // Cập nhật background chuẩn Google Blue Theme
   const bgClass = 'bg-primary';
-  const gradientClass = 'from-primary/10 to-primary/5';
+  const gradientClass = 'from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10';
 
   const managerName = useMemo(() => {
       if(!user.direct_manager_id) return null;
@@ -171,19 +171,19 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
   }) => (
       <div 
           onClick={() => { if(onClick) { triggerHaptic('light'); onClick(); } }}
-          className={`flex items-center gap-4 p-4 active:bg-slate-50 dark:active:bg-slate-800/50 transition-colors group ${onClick ? 'cursor-pointer' : ''}`}
+          className={`flex items-center gap-4 p-4 active:bg-slate-50 dark:active:bg-dark-border/50 transition-colors group ${onClick ? 'cursor-pointer' : ''}`}
       >
-          <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-base flex-shrink-0 border border-white/50 dark:border-slate-700/50 shadow-sm ${colorClass}`}>
+          <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-base flex-shrink-0 border border-white/50 dark:border-dark-border/50 shadow-sm ${colorClass}`}>
               <i className={`fa-solid ${icon}`}></i>
           </div>
           
           <div className="flex-1 min-w-0">
-              {value && <p className="text-[11px] text-slate-400 dark:text-slate-500 font-bold truncate uppercase tracking-wider">{label}</p>}
-              <p className={`text-[15px] font-bold ${isDestructive ? 'text-secondary-red dark:text-secondary-red' : 'text-neutral-black dark:text-neutral-white'} truncate ${value ? 'mt-0.5' : ''}`}>{value || label}</p>
+              {value && <p className="text-[11px] text-slate-400 dark:text-dark-text-secondary font-bold truncate uppercase tracking-wider">{label}</p>}
+              <p className={`text-[15px] font-bold ${isDestructive ? 'text-secondary-red dark:text-secondary-red' : 'text-neutral-black dark:text-dark-text-primary'} truncate ${value ? 'mt-0.5' : ''}`}>{value || label}</p>
           </div>
 
           {isLink && (
-              <div className="text-slate-300 dark:text-slate-600 group-active:translate-x-1 transition-transform">
+              <div className="text-slate-300 dark:text-dark-text-secondary group-active:translate-x-1 transition-transform">
                   <i className="fa-solid fa-chevron-right text-[10px]"></i>
               </div>
           )}
@@ -192,7 +192,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
 
   return (
     <div 
-        className="fixed inset-0 z-[30] bg-slate-50 dark:bg-slate-900 flex flex-col animate-slide-up transition-colors duration-300"
+        className="fixed inset-0 z-[30] bg-slate-50 dark:bg-dark-bg flex flex-col animate-slide-up transition-colors duration-300"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -208,7 +208,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
         <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-32 pt-14">
             <div className="animate-fade-in">
                 
-                <div className="bg-neutral-white dark:bg-neutral-black rounded-[32px] p-8 border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-8 transition-colors mt-4 shadow-sm">
+                <div className="bg-neutral-white dark:bg-dark-surface rounded-[32px] p-8 border border-slate-100 dark:border-dark-border text-center relative overflow-hidden mb-8 transition-colors mt-4 shadow-sm">
                     <div className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-br ${gradientClass} rounded-t-[32px] transition-colors duration-500 opacity-60`}></div>
                     <div className="absolute top-0 left-0 w-full h-32 overflow-hidden pointer-events-none opacity-10">
                         <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full border-[20px] border-primary"></div>
@@ -217,7 +217,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                     
                     <div className="relative z-10 flex flex-col items-center">
                         <div className="relative group">
-                            <div className="w-32 h-32 rounded-full p-1.5 bg-neutral-white dark:bg-neutral-black mb-4 mt-2 relative overflow-hidden transition-colors">
+                            <div className="w-32 h-32 rounded-full p-1.5 bg-neutral-white dark:bg-dark-surface mb-4 mt-2 relative overflow-hidden transition-colors">
                                 <Avatar 
                                     src={user.face_ref_url} 
                                     name={user.name} 
@@ -243,7 +243,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                             )}
                         </div>
 
-                        <h2 className="text-2xl font-black text-neutral-black dark:text-neutral-white tracking-tight leading-tight">{user.name}</h2>
+                        <h2 className="text-2xl font-black text-neutral-black dark:text-dark-text-primary tracking-tight leading-tight">{user.name}</h2>
                         
                         <div className="flex gap-2 flex-wrap justify-center mt-3">
                             <span className="px-3 py-1.5 bg-primary/10 dark:bg-primary/20 border border-primary/20 dark:border-primary/30 rounded-lg text-[10px] font-extrabold text-primary dark:text-primary uppercase tracking-wide">{user.department}</span>
@@ -254,9 +254,9 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
 
                 <h3 className="text-xs font-black text-primary dark:text-primary uppercase mb-3 ml-2 tracking-widest flex items-center gap-2">
                     <i className="fa-solid fa-briefcase text-[10px]"></i>
-                    Thông tin công việc
+                    Thông-tin công-việc
                 </h3>
-                <div className="bg-neutral-white dark:bg-neutral-black rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
+                <div className="bg-neutral-white dark:bg-dark-surface rounded-[24px] overflow-hidden border border-slate-100 dark:border-dark-border divide-y divide-slate-50 dark:divide-dark-border mb-8">
                     <ProfileRow 
                         icon="fa-location-dot" 
                         colorClass="bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary"
@@ -281,7 +281,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                     <i className="fa-solid fa-address-card text-[10px]"></i>
                     Thông tin cá nhân
                 </h3>
-                <div className="bg-neutral-white dark:bg-neutral-black rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
+                <div className="bg-neutral-white dark:bg-dark-surface rounded-[24px] overflow-hidden border border-slate-100 dark:border-dark-border divide-y divide-slate-50 dark:divide-dark-border mb-8">
                     <ProfileRow 
                         icon="fa-envelope" 
                         colorClass="bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary"
@@ -296,7 +296,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                     />
                     <ProfileRow 
                         icon="fa-fingerprint" 
-                        colorClass="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+                        colorClass="bg-slate-100 dark:bg-dark-border/50 text-slate-500 dark:text-dark-text-secondary"
                         label="Thiết bị tin cậy"
                         value={user.trusted_device_id ? "Đã kích hoạt" : "Chưa kích hoạt"}
                     />
@@ -306,7 +306,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                     <i className="fa-solid fa-user-shield text-[10px]"></i>
                     Tài khoản
                 </h3>
-                <div className="bg-neutral-white dark:bg-neutral-black rounded-[24px] overflow-hidden border border-slate-100 dark:border-slate-700 divide-y divide-slate-50 dark:divide-slate-700 mb-8">
+                <div className="bg-neutral-white dark:bg-dark-surface rounded-[24px] overflow-hidden border border-slate-100 dark:border-dark-border divide-y divide-slate-50 dark:divide-dark-border mb-8">
                     <ProfileRow 
                         icon="fa-key" 
                         colorClass="bg-secondary-yellow/10 dark:bg-secondary-yellow/20 text-secondary-yellow dark:text-secondary-yellow"
@@ -328,48 +328,48 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                 </div>
                 
                 <div className="text-center pb-8">
-                    <p className="text-[10px] font-extrabold text-slate-300 dark:text-slate-600 uppercase tracking-widest">Army HRM v2026.2.0</p>
+                    <p className="text-[10px] font-extrabold text-slate-300 dark:text-dark-text-secondary/50 uppercase tracking-widest">Army HRM v2026.2.0</p>
                 </div>
             </div>
         </div>
 
         {showPwdModal && (
-            <div className="fixed inset-0 z-[100] bg-neutral-black/50 backdrop-blur-sm flex items-center justify-center p-6 animate-fade-in">
-                <div className="bg-neutral-white dark:bg-neutral-black w-full max-w-sm rounded-[32px] p-6 animate-scale-in">
+            <div className="fixed inset-0 z-[100] bg-neutral-black/50 dark:bg-dark-bg/80 backdrop-blur-sm flex items-center justify-center p-6 animate-fade-in">
+                <div className="bg-neutral-white dark:bg-dark-surface w-full max-w-sm rounded-[32px] p-6 animate-scale-in">
                     <div className="text-center mb-6">
                         <div className="w-16 h-16 bg-secondary-yellow/10 dark:bg-secondary-yellow/20 text-secondary-yellow border border-secondary-yellow/20 dark:border-secondary-yellow/30 rounded-full flex items-center justify-center mx-auto mb-4">
                             <i className="fa-solid fa-lock text-2xl"></i>
                         </div>
-                        <h3 className="text-xl font-black text-neutral-black dark:text-neutral-white tracking-tight">Đổi mật khẩu</h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-bold mt-1 uppercase tracking-wide">Cập nhật mật khẩu bảo vệ tài khoản</p>
+                        <h3 className="text-xl font-black text-neutral-black dark:text-dark-text-primary tracking-tight">Đổi mật khẩu</h3>
+                        <p className="text-xs text-slate-500 dark:text-dark-text-secondary font-bold mt-1 uppercase tracking-wide">Cập nhật mật khẩu bảo vệ tài khoản</p>
                     </div>
                     
                     <div className="space-y-4">
                         <div className="space-y-1">
-                            <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1">Mật khẩu hiện tại</label>
+                            <label className="text-[10px] font-extrabold text-slate-400 dark:text-dark-text-secondary uppercase tracking-wide ml-1">Mật khẩu hiện tại</label>
                             <input 
                                 type="password" 
-                                className="w-full h-12 px-4 bg-slate-50 dark:bg-neutral-black/50 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-neutral-black dark:text-neutral-white outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 placeholder:font-semibold"
+                                className="w-full h-12 px-4 bg-slate-50 dark:bg-dark-bg/50 border border-slate-200 dark:border-dark-border rounded-xl text-sm font-bold text-neutral-black dark:text-dark-text-primary outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-300 dark:placeholder:text-dark-text-secondary/50 placeholder:font-semibold"
                                 placeholder="••••••••"
                                 value={passData.old}
                                 onChange={e => setPassData({...passData, old: e.target.value})}
                             />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1">Mật khẩu mới</label>
+                            <label className="text-[10px] font-extrabold text-slate-400 dark:text-dark-text-secondary uppercase tracking-wide ml-1">Mật khẩu mới</label>
                             <input 
                                 type="password" 
-                                className="w-full h-12 px-4 bg-slate-50 dark:bg-neutral-black/50 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-neutral-black dark:text-neutral-white outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 placeholder:font-semibold"
+                                className="w-full h-12 px-4 bg-slate-50 dark:bg-dark-bg/50 border border-slate-200 dark:border-dark-border rounded-xl text-sm font-bold text-neutral-black dark:text-dark-text-primary outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-300 dark:placeholder:text-dark-text-secondary/50 placeholder:font-semibold"
                                 placeholder="••••••••"
                                 value={passData.new}
                                 onChange={e => setPassData({...passData, new: e.target.value})}
                             />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wide ml-1">Xác nhận mật khẩu</label>
+                            <label className="text-[10px] font-extrabold text-slate-400 dark:text-dark-text-secondary uppercase tracking-wide ml-1">Xác nhận mật khẩu</label>
                             <input 
                                 type="password" 
-                                className="w-full h-12 px-4 bg-slate-50 dark:bg-neutral-black/50 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-neutral-black dark:text-neutral-white outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 placeholder:font-semibold"
+                                className="w-full h-12 px-4 bg-slate-50 dark:bg-dark-bg/50 border border-slate-200 dark:border-dark-border rounded-xl text-sm font-bold text-neutral-black dark:text-dark-text-primary outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-300 dark:placeholder:text-dark-text-secondary/50 placeholder:font-semibold"
                                 placeholder="••••••••"
                                 value={passData.confirm}
                                 onChange={e => setPassData({...passData, confirm: e.target.value})}
@@ -380,7 +380,7 @@ const TabProfile: React.FC<Props> = ({ user, locations, contacts, onLogout, onUp
                     <div className="flex gap-3 mt-8">
                         <button 
                             onClick={() => setShowPwdModal(false)}
-                            className="flex-1 py-3.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors uppercase tracking-wide"
+                            className="flex-1 py-3.5 bg-slate-100 dark:bg-dark-border/50 text-slate-600 dark:text-dark-text-primary font-bold text-sm rounded-2xl hover:bg-slate-200 dark:hover:bg-dark-border transition-colors uppercase tracking-wide"
                         >
                             Hủy
                         </button>
