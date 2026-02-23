@@ -150,7 +150,7 @@ function AppContent() {
                       if (document.hidden && Notification.permission === 'granted') {
                            new Notification(data.title, {
                                body: data.body,
-                               icon: "https://firebasestorage.googleapis.com/v0/b/army-hrm-70615.firebasestorage.app/o/logo%2Flogo.png?alt=media"
+                               icon: "https://lh3.googleusercontent.com/d/1r_FuqN4QJbch0FYXAwX8efW9s0ucreiO=w500"
                            });
                       }
 
