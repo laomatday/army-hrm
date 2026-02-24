@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import UserGuideModal from './UserGuideModal';
 import ModalHeader from './ModalHeader';
 import ConfirmDialog from './ConfirmDialog';
-//import { LOGO_URL } from '../services/api';
+//import { LOGO_URL } from '../../services/api';
 
 interface Props {
   isOpen: boolean;

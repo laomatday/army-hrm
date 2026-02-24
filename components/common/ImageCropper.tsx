@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { uploadToGoogleDrive } from '../services/googleDrive';
+import { uploadToGoogleDrive } from '../../services/googleDrive';
 import Spinner from './Spinner';
 
 interface Props {

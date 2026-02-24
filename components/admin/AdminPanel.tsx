@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Employee } from '../types';
-import { adminGetCollection, adminDeleteDoc, adminUpdateDoc, adminCreateDoc } from '../services/api';
+import { Employee } from '../../types';
+import { adminGetCollection, adminDeleteDoc, adminUpdateDoc, adminCreateDoc } from '../../services/api';
 import * as XLSX from 'xlsx';
-import { hashPassword, formatDateString } from '../utils/helpers';
-import ConfirmDialog from './ConfirmDialog';
-import { useToast } from '../contexts/ToastContext';
+import { hashPassword, formatDateString } from '../../utils/helpers';
+import ConfirmDialog from '../modals/ConfirmDialog';
+import { useToast } from '../../contexts/ToastContext';
 
 interface Props {
   user: Employee;

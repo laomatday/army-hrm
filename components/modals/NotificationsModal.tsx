@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { DashboardData, Employee } from '../types';
-import { formatDateString } from '../utils/helpers';
-import { TabType } from './BottomNav';
-import PullToRefresh from './PullToRefresh';
+import { DashboardData, Employee } from '../../types';
+import { formatDateString } from '../../utils/helpers';
+import { TabType } from '../layout/BottomNav';
+import PullToRefresh from '../layout/PullToRefresh';
 
 interface Props {
   data: DashboardData | null;

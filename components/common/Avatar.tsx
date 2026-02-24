@@ -1,5 +1,5 @@
 import React from 'react';
-import { getAvatarHtml } from '../utils/helpers';
+import { getAvatarHtml } from '../../utils/helpers';
 
 interface Props {
   src?: string;

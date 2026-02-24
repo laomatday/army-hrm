@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import LoginView from './components/LoginView';
-import AppShell from './components/AppShell';
-import AdminPanel from './components/AdminPanel';
-import AdminModeSelection from './components/AdminModeSelection';
-import KioskMode from './components/KioskMode';
+import LoginView from './components/ui/LoginView';
+import AppShell from './components/ui/AppShell';
+import AdminPanel from './components/admin/AdminPanel';
+import AdminModeSelection from './components/admin/AdminModeSelection';
+import KioskMode from './components/ui/KioskMode';
 import { Employee } from './types';
 import { messaging, db } from './services/firebase';
 import { saveDeviceToken } from './services/api';
